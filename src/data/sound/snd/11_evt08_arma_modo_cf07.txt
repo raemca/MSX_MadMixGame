@@ -1,0 +1,34 @@
+; !!! AVISO -- LEE ESTO ANTES DE EDITAR !!!
+; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+; Este fichero se compila con INCBIN a una direccion FIJA, calcada del
+; binario original de 1987. Puedes cambiar valores de una instruccion ya
+; existente (otra nota, duracion, instrumento...) sin ningun problema.
+; NO añadas ni quites lineas, y NO cambies la cuenta de un
+; SET_DURATION_MULTI: si el numero de bytes total cambia al reensamblar,
+; TODO lo que va detras en madmix1.asm se desplaza de direccion, y
+; LEVELCYCLE_RESOURCE_TABLE (madmix_scr.asm) sigue apuntando a la
+; direccion VIEJA -- el juego compilaria sin error pero saltaria a sitios
+; incorrectos en tiempo de ejecucion. Ver FINDINGS.md / README.md.
+; 11_evt08_arma_modo_cf07.snd (32 bytes)
+SET_TEMPO 0x64
+SET_MIXER 0x01
+SET_VOLUME 0x0D
+SET_INSTRUMENT 0x00
+SET_DURATION 0x08
+SET_CHANNEL_STATE 0x30
+NOTE 0x07
+SET_DURATION 0x04
+NOTE 0x04
+NOTE 0x09
+SET_DURATION 0x08
+NOTE 0x07
+NOTE 0x04
+SET_DURATION 0x04
+NOTE 0x07
+NOTE 0x07
+NOTE 0x04
+NOTE 0x09
+SET_DURATION 0x08
+NOTE 0x07
+NOTE 0x04
+RESET_SHARED_ENVELOPE

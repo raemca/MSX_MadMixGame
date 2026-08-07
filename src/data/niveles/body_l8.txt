@@ -1,0 +1,28 @@
+; !!! AVISO -- LEE ESTO ANTES DE EDITAR !!!
+; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+; Rejilla de losetas de body_l8.bin -- 15 filas x 32 columnas.
+; Cada celda es el byte crudo en hex (2 digitos): bits 0-6 = indice de
+; loseta (ver data/tiles/*.til, 00-90), bit 7 = flag sin confirmar en
+; tiempo de ejecucion (LEVEL_LOADER lo borra al cargar el nivel, ver
+; FINDINGS.md) pero presente de verdad en el binario original.
+; NO añadas ni quites filas ni columnas: el tamaño es FIJO. Si cambia,
+; todo lo que va detras en madmix_scr.asm/madmix1.asm se desplaza de
+; direccion -- el juego compilaria sin error pero cargaria niveles o
+; datos incorrectos en tiempo de ejecucion. Ver FINDINGS.md/README.md.
+; filas=15 columnas=32
+
+1B 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15
+12 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 3D 3F 3E BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D
+12 BF 14 16 BF 11 BF 14 16 BF 11 BF 14 16 BF 11 BF 14 16 BF 11 BF 14 16 BF 11 BF 14 16 BF 11 BF
+12 2D BF 2D BF 12 2D BF 2D BF 12 2D BF 2D BF 12 2D BF 2D BF 12 2D BF 2D BF 12 2D BF 2D BF 12 2D
+12 BF 14 15 15 18 BF 14 15 15 18 BF 14 15 15 18 BF 14 15 15 18 BF 14 15 15 18 BF 14 15 15 18 BF
+12 3D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 3D
+1F 15 15 15 15 15 15 15 15 15 15 15 15 15 15 16 BF 14 15 15 15 15 15 15 15 15 15 15 15 15 15 15
+12 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D
+12 BF 14 16 BF 11 BF 11 3F 14 16 BF 14 16 BF 11 BF 11 BF 14 16 BF 14 16 BF 11 BF 11 BF 14 16 BF
+12 3C 2D BF 2D 12 2D 12 2D BF 2D BF 2D BF 2D 12 BF 12 2D BF 2D BF 2D BF 2D 12 2D 12 2D BF 2D 3C
+12 2D 14 15 15 18 BF 17 15 15 16 2D 14 15 15 18 BF 17 15 15 16 BF 14 15 15 18 BF 17 15 15 16 BF
+12 BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF BF BF 2D BF 2D BF 2D BF 2D BF 2D 3F 2D BF 2D BF
+1C 15 15 15 15 15 15 15 15 15 16 2D 24 47 48 50 38 51 4A 4B 26 2D 14 15 15 15 15 15 15 15 15 15
+3A 3A 3A 3A 3A 3A 3A 3A 3A 53 3F BF 3F 49 45 BF 2D BF 43 44 BF BF BF 52 3A 3A 3A 3A 3A 3A 3A 3A
+15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15

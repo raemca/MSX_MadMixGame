@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<!-- Ingeniería inversa, herramientas y documentación: Rafael Eduardo Martín Candial -->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Mad Mix Game — mapa de memoria de LOGOTOPO.CM</title>
+<style>
+  :root {
+    --bg: #f5f3ef;
+    --fg: #2a2621;
+    --panel: #ffffff;
+    --border: #ddd6cc;
+    --muted: #7a7266;
+    --c-codigo: #6a86ae;
+    --c-recursos: #8a6ab0;
+    --c-graficos: #7fae6a;
+    --c-nivel: #d69a3a;
+    --c-variables: #4aa89a;
+    --c-sinexplorar: #cbc3b6;
+    --c-sistema: #e4dfd4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1a17;
+      --fg: #ece6da;
+      --panel: #262320;
+      --border: #3a352e;
+      --muted: #a39a8a;
+      --c-codigo: #7f9bc4;
+      --c-recursos: #a17fd0;
+      --c-graficos: #8fc27a;
+      --c-nivel: #e6b25a;
+      --c-variables: #5ec2b2;
+      --c-sinexplorar: #4a453c;
+      --c-sistema: #322e28;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 2rem clamp(1rem, 4vw, 3rem);
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; margin-bottom: 0.2rem; }
+  h2 { font-size: 1.15rem; margin: 2.5rem 0 0.6rem 0; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+  .subtitle { color: var(--muted); margin-top: 0; }
+  .note {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--c-recursos);
+    border-radius: 6px;
+    padding: 0.8rem 1rem;
+    margin: 1rem 0 2rem 0;
+    font-size: 0.92rem;
+  }
+  .note code { font-family: "SFMono-Regular", Consolas, monospace; }
+  code { font-family: "SFMono-Regular", Consolas, monospace; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem 1.4rem;
+    margin: 0.6rem 0 1.6rem 0;
+    font-size: 0.85rem;
+  }
+  .legend span.swatch {
+    display: inline-block;
+    width: 0.8em;
+    height: 0.8em;
+    border-radius: 3px;
+    margin-right: 0.4em;
+    vertical-align: middle;
+  }
+
+  /* --- barra principal de memoria --- */
+  .mem-outer {
+    position: relative;
+    margin-top: 2.5rem;
+  }
+  /* --- llaves encima de la barra: que fichero ocupa cada bloque
+     en su posicion FINAL/permanente (no la de carga temporal) --- */
+  .file-brackets {
+    position: relative;
+    height: 34px;
+    margin-bottom: 4px;
+  }
+  .file-bracket {
+    position: absolute;
+    top: 14px;
+    bottom: 6px;
+    border-left: 1.5px solid var(--muted);
+    border-right: 1.5px solid var(--muted);
+    border-top: 1.5px solid var(--muted);
+    border-radius: 3px 3px 0 0;
+  }
+  .file-bracket-label {
+    position: absolute;
+    top: -2px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--fg);
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .mem-bar {
+    position: relative;
+    height: 64px;
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--c-sistema);
+  }
+  .mem-seg {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-right: 1px solid rgba(0,0,0,0.15);
+    overflow: hidden;
+    cursor: default;
+  }
+  .mem-seg-label {
+    position: absolute;
+    top: 0; bottom: 0; left: 2px; right: 2px;
+    display: flex;
+    align-items: center;
+    font-size: 0.65rem;
+    color: #14110d;
+    overflow: hidden;
+    white-space: nowrap;
+    pointer-events: none;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.35);
+  }
+
+  /* --- regla simple bajo la barra: solo direcciones redondas --- */
+  .mem-ticks {
+    position: relative;
+    height: 22px;
+    margin-top: 2px;
+  }
+  .tick {
+    position: absolute;
+    top: 0;
+    width: 1px;
+    height: 6px;
+    background: var(--muted);
+  }
+  .tick-label {
+    position: absolute;
+    top: 8px;
+    font-size: 0.68rem;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    color: var(--muted);
+    white-space: nowrap;
+    transform: translateX(-2px);
+  }
+
+  /* --- tabla de detalle (segmentos / ficheros) -- reemplaza las
+     etiquetas amontonadas: una fila por entrada, sin limite de
+     ancho, así que nunca se solapa nada --- */
+  .detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-size: 0.85rem;
+  }
+  .detail-table th, .detail-table td {
+    text-align: left;
+    padding: 0.45rem 0.6rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .detail-table th {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  .detail-table td.addr {
+    font-family: "SFMono-Regular", Consolas, monospace;
+    white-space: nowrap;
+    color: var(--muted);
+  }
+  .detail-table td.cat {
+    white-space: nowrap;
+  }
+  .detail-table tr:hover td {
+    background: var(--panel);
+  }
+  .row-swatch {
+    display: inline-block;
+    width: 0.8em;
+    height: 0.8em;
+    border-radius: 3px;
+    margin-right: 0.4em;
+    vertical-align: middle;
+  }
+
+  /* --- seccion de ficheros --- */
+  .files-outer {
+    position: relative;
+    margin-top: 3rem;
+  }
+  .files-scale {
+    position: relative;
+    height: 1px;
+    background: var(--border);
+    margin-bottom: 0.6rem;
+  }
+  .file-row {
+    position: relative;
+    height: 40px;
+    margin-bottom: 2.6rem;
+  }
+  .file-block {
+    position: absolute;
+    top: 0;
+    height: 32px;
+    border-radius: 4px;
+    border: 1px solid rgba(0,0,0,0.25);
+    display: flex;
+    align-items: center;
+    padding: 0 6px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    overflow: hidden;
+    color: #14110d;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.35);
+  }
+  .file-block.temp { opacity: 0.55; border-style: dashed; }
+  .file-tag {
+    position: absolute;
+    top: 34px;
+    font-size: 0.72rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .file-arrow-svg { position: absolute; top: -1px; left: 0; width: 100%; height: 40px; overflow: visible; pointer-events: none; }
+
+  footer {
+    margin-top: 3rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+  }
+</style>
+</head>
+<body>
+
+<h1>Mad Mix Game — mapa de memoria de LOGOTOPO.CM</h1>
+<p class="attribution-line" style="color:var(--muted);font-size:0.85rem;margin:-0.3rem 0 1.2rem 0;">Ingeniería inversa, herramientas y documentación: Rafael Eduardo Martín Candial</p>
+<p class="subtitle">Zoom sobre el rango 0x9470-0xA50D (4254 bytes, "end" inclusivo) de la RAM del Z80 -- el logo animado de Topo Soft de la version de cinta, cargado y ejecutado por <code>TOPO.bas</code> antes de <code>MADMIX.bas</code>. Ver <code>src/load_cas/LOGOTOPO.CM.txt</code> y <code>src/FINDINGS.md</code> para el contexto completo.</p>
+
+<div class="note">
+  <strong>Documento COMPLETO</strong>: <code>LOGOTOPO.CM</code> se
+  dejo explicitamente fuera de alcance de la reorganizacion de
+  <code>load_cas/</code> ("Organizar todo excepto el logo") por ser un
+  sub-proyecto de ingenieria inversa en si mismo -- ya retomado y
+  terminado. Los 4254 bytes reales (0x9470-0xA50D, "end" inclusivo)
+  estan transcritos a <code>src/load_cas/logotopo_cm_body.asm</code>
+  (codigo + TABLA_PUNTEROS_FORMAS + 3 tablas de animacion +
+  TABLA_DELTA_POSICION + TABLA_FORMAS con las 15 formas + 1 bloque
+  huerfano), verificados byte a byte (0 diferencias) via
+  <code>main.asm</code>. <strong>La animacion completa del logo esta
+  CONFIRMADA VISUALMENTE por el usuario</strong>: letras T-O-P-O
+  deslizandose, coloreado expandiendose desde el centro, "Soft"
+  rotando, un punto de luz recorriendola, y estrella parpadeante --
+  TODAS las rutinas de primer nivel tienen nombre real (ver
+  <code>recursos/logotopo_formas.html</code> para las 15 "formas" ya
+  renderizadas con su nombre). Solo quedan etiquetas locales de bucle
+  sin renombrar (<code>L_XXXX</code> = direccion real, puntos de
+  convergencia internos sin necesidad de nombre propio) y el bloque
+  huerfano de 40 bytes sin identificar.
+</div>
+
+<h2>Distribución de LOGOTOPO.CM (0x9470 - 0xA50D)</h2>
+
+<div class="legend">
+  <span><span class="swatch" style="background:var(--c-codigo)"></span>código (confirmado)</span>
+  <span><span class="swatch" style="background:var(--c-recursos)"></span>gestor de recursos / intérprete de bytecode</span>
+  <span><span class="swatch" style="background:var(--c-graficos)"></span>datos gráficos (logo)</span>
+  <span><span class="swatch" style="background:var(--c-nivel)"></span>fichero (bloque LOGOTOPO.CM completo)</span>
+  <span><span class="swatch" style="background:var(--c-variables)"></span>variables / estado en RAM</span>
+  <span><span class="swatch" style="background:var(--c-sinexplorar)"></span>sin explorar todavía</span>
+  <span><span class="swatch" style="background:var(--c-sistema)"></span>sin analizar (fuera de alcance / sistema)</span>
+</div>
+
+<p style="color:var(--muted); font-size:0.9rem; max-width:60rem; margin-bottom:0.3rem;">
+  A diferencia de <code>mapa_memoria.html</code> (que cubre el mapa
+  completo 0x0000-0xFFFF), esta pagina usa una escala PROPIA limitada
+  al rango real de <code>LOGOTOPO.CM</code> -- pensada para ir
+  acotando sub-bloques (rutinas, tablas, bitmap del logo...) a medida
+  que se identifiquen, igual que se hizo historicamente con el mapa
+  principal.
+</p>
+<div class="mem-outer">
+  <div class="file-brackets" id="file-brackets"></div>
+  <div class="mem-bar" id="mem-bar"></div>
+  <div class="mem-ticks" id="mem-ticks"></div>
+</div>
+
+<table class="detail-table" id="mem-table">
+  <thead><tr><th>Rango</th><th>Tamaño</th><th>Categoría</th><th>Descripción</th></tr></thead>
+  <tbody id="mem-table-body"></tbody>
+</table>
+
+<h2>Fichero de cinta y dónde carga</h2>
+<p style="color:var(--muted); font-size:0.9rem; max-width:60rem;">
+  <code>LOGOTOPO.CM</code> no tiene reubicación: carga y se ejecuta
+  directamente en su dirección física (<code>start</code> =
+  <code>exec</code> = 0x9470 en la cabecera del bloque de cinta).
+</p>
+
+<div class="files-outer" id="files-outer"></div>
+
+<table class="detail-table" id="files-table">
+  <thead><tr><th>Fichero</th><th>Tamaño</th><th>Destino</th><th>Notas</th></tr></thead>
+  <tbody id="files-table-body"></tbody>
+</table>
+
+<footer>
+  Rango confirmado por la cabecera real del bloque "LOGOTO" del
+  <code>.cas</code> de 1988 (sync en offset 312, start=0x9470
+  end=0xA50D exec=0x9470, 4254 bytes con cabecera). Copia binaria sin
+  analizar en <code>src/load_cas/LOGOTOPO.CM.bin</code>. Ver
+  <code>src/FINDINGS.md</code> para el detalle tecnico completo de
+  cada hallazgo que se vaya anadiendo aqui.
+</footer>
+
+<script>
+// ============================================================
+// SEGMENTOS DE LOGOTOPO.CM -- ir ampliando/corrigiendo aqui segun
+// avance el desensamblado. start/end en direcciones reales del Z80
+// (0x9470-0xA50D, rango propio de este fichero). category
+// referencia una de las variables --c-* de CSS.
+// ============================================================
+const SEGMENTS = [
+  { start: 0x9470, end: 0x9694, label: "código transcrito, verificado y CONFIRMADO VISUALMENTE AL COMPLETO (549 B)", detail: "0x9470-0x9693: TRANSCRITO Y VERIFICADO, 0 diferencias byte a byte (recompilando via main.asm). CONFIRMADO VISUALMENTE al completo por el usuario, secuencia real (DIBUJAR_LOGO_TOPOSOFT): limpia la tabla de color VRAM (LIMPIAR_TABLA_COLOR_VRAM); dibuja las 4 letras de 'TOPO' deslizándose/revelándose (DIBUJAR_T_TOPO/DIBUJAR_O1_TOPO/DIBUJAR_P_TOPO_ANIMADA/DIBUJAR_O2_TOPO_ANIMADA, intercalando LIMPIAR_TABLA_PATRONES_VRAM); colorea 'TOPO' expandiéndose desde el centro (ANIMAR_COLOR_TOPO) y remata el color (RELLENAR_COLOR_TOPO); 'Soft' rota sobre sí misma con 7 fotogramas (DIBUJAR_SOFT_ROTANDO, llamada 3 veces); un punto de luz recorre 'Soft' por su línea superior (ANIMAR_PUNTO_LUZ_SOFT); termina con la estrella parpadeante junto a la T, 4 fotogramas (DIBUJAR_ESTRELLA_ANIMADA). Las formas/letras usan el motor genérico DIBUJAR_FORMA_ANIMADA, que lee una de las 15 'formas' de la tabla de punteros $9694 (ver recursos/logotopo_formas.html, renderizador de las 15 formas con nombre real por forma). Todas las rutinas de primer nivel de este bloque tienen ya nombre real -- solo quedan etiquetas locales de bucle (L_XXXX) sin renombrar, sin necesidad de nombre propio. Ver src/load_cas/logotopo_cm_body.asm.", category: "codigo" },
+  { start: 0x9694, end: 0x96B2, label: "TABLA_PUNTEROS_FORMAS (30 B, 15 entradas)", detail: "0x9694-0x96B1: 15 palabras, offset (desde TABLA_FORMAS/$9728) de cada una de las 15 'formas' animadas -- indexada por $94BD (doblado) desde DIBUJAR_FORMA_ANIMADA. TRANSCRITA (como diferencia de etiquetas, no hex) y VERIFICADA byte a byte.", category: "dato" },
+  { start: 0x96B2, end: 0x96F2, label: "3 tablas de animación (índices de forma + huecos, 64 B)", detail: "0x96B2-0x96F1: TABLA_ANIMACION_SOFT (25 B, patrón de pulso 0-6, terminador $FF) + 1 byte suelto sin explicar ($96CB) + TABLA_TRAZO_O2_TOPO (29 B, 14 pares fila/forma) + TABLA_ANIMACION_ESTRELLA (9 B, patrón de pulso 11-14). Las 3 CONFIRMADAS VISUALMENTE por el usuario (animación de 'Soft' rotando, revelado de la 2ª O de 'Topo', estrella parpadeante).", category: "dato" },
+  { start: 0x96F2, end: 0x9728, label: "variables de trabajo + TABLA_DELTA_POSICION (54 B)", detail: "0x96F2-0x9727: VARIABLES_TRABAJO_FORMA (6 B a cero en reposo, incluye 2 punteros que DIBUJAR_FORMA_ANIMADA usa como scratch RAM en tiempo de ejecución) + TABLA_DELTA_POSICION (48 B, 24 palabras $C000..$D700 -- el byte alto, enmascarado con RES 7,H/RES 6,H, da un delta secuencial 0-23; no aporta contenido visual).", category: "dato" },
+  { start: 0x9728, end: 0x9AB6, label: "FORMA_SOFT_1..7 -- 'Soft' rotando (7×130 B = 910 B)", detail: "0x9728-0x9AB5: los 7 fotogramas de la animación de 'Soft' rotando sobre sí misma (CONFIRMADO VISUALMENTE por el usuario). Cada uno: cabecera 2 B (ancho=64, filas=2) + 128 B de bitmap 1bpp. Ver recursos/logotopo_formas.html.", category: "graficos" },
+  { start: 0x9AB6, end: 0x9EEA, label: "FORMA_T_TOPO + FORMA_O1_TOPO -- letras T y 1ª O (1074 B)", detail: "0x9AB6-0x9EE9: la T (794 B: cabecera + 792 B bitmap) y la 1ª O (282 B: cabecera + 280 B bitmap) de 'Topo', CONFIRMADAS VISUALMENTE por el usuario (letras deslizándose/revelándose para formar la palabra).", category: "graficos" },
+  { start: 0x9EEA, end: 0x9F12, label: "bloque HUÉRFANO (40 B, sin referencia)", detail: "0x9EEA-0x9F11: 40 bytes de datos gráficos (mismo patrón de sombreado $AA/$55 que las formas reales) pero SIN ninguna entrada de TABLA_PUNTEROS_FORMAS que los referencie -- mismo tipo de hallazgo que los 6 guiones de demo sin usar de madmix1_body.asm (ver mapa_memoria.html). Preservado tal cual (data/logotopo/formas/huerfano_9eea.bin), sin uso conocido.", category: "sinexplorar" },
+  { start: 0x9F12, end: 0xA326, label: "FORMA_P_TOPO + FORMA_O2_TOPO -- letra P y 2ª O (1042 B)", detail: "0x9F12-0xA325: la P (482 B) y la 2ª O (562 B, con revelado animado trazo a trazo vía TABLA_TRAZO_O2_TOPO) de 'Topo', CONFIRMADAS VISUALMENTE por el usuario.", category: "graficos" },
+  { start: 0xA326, end: 0xA50E, label: "FORMA_ESTRELLA_1..4 -- estrella parpadeante (4×122 B = 488 B)", detail: "0xA326-0xA50D (último byte real del fichero, INCLUSIVE): los 4 fotogramas de la estrella parpadeante junto a la T, CONFIRMADOS VISUALMENTE por el usuario. Cada uno: cabecera 2 B (ancho=24, filas=5) + 120 B de bitmap.", category: "graficos" },
+];
+
+// ============================================================
+// FICHERO DE CINTA -- direccion real de carga (cabecera del bloque
+// .cas). LOGOTOPO.CM no se reubica: exec == start.
+// ============================================================
+const FILES = [
+  {
+    name: "LOGOTOPO.CM", size: 4254,
+    loadStart: 0x9470, loadEnd: 0xA50E,
+    temp: false,
+    note: "Cargado por TOPO.bas linea 20 (BLOAD\"CAS:LOGOTOPO.CM\",R) -- dibuja/ejecuta el logo de Topo Soft al arrancar la cinta de 1988, antes de que \"RUN\"CAS:\" ceda el control a MADMIX.bas."
+  }
+];
+
+// --- escala PROPIA de esta pagina: solo el rango de LOGOTOPO.CM,
+// no el mapa de memoria completo (a diferencia de mapa_memoria.html) ---
+const RANGE_START = 0x9470;
+const RANGE_END = 0xA50E; // exclusivo -- el ultimo byte real es $A50D (inclusive), ver FINDINGS.md
+const RANGE_SIZE = RANGE_END - RANGE_START;
+const pct = (addr) => ((addr - RANGE_START) / RANGE_SIZE) * 100;
+
+const CATEGORY_VAR = {
+  codigo: "--c-codigo",
+  recursos: "--c-recursos",
+  graficos: "--c-graficos",
+  nivel: "--c-nivel",
+  variables: "--c-variables",
+  sinexplorar: "--c-sinexplorar",
+  sistema: "--c-sistema",
+};
+
+function fmtAddr(a) { return "0x" + a.toString(16).toUpperCase().padStart(4, "0"); }
+
+// --- llaves de fichero (aqui solo hay uno, sin reubicacion) ---
+const fileBrackets = document.getElementById("file-brackets");
+FILES.forEach((f) => {
+  const finalStart = f.relocation ? f.relocation.toStart : f.loadStart;
+  const finalEnd = f.relocation ? f.relocation.toEnd : f.loadEnd;
+  const div = document.createElement("div");
+  div.className = "file-bracket";
+  div.style.left = pct(finalStart) + "%";
+  div.style.width = Math.max(pct(finalEnd) - pct(finalStart), 0.3) + "%";
+  div.title = f.name + " -- " + fmtAddr(finalStart) + "-" + fmtAddr(finalEnd);
+  const label = document.createElement("div");
+  label.className = "file-bracket-label";
+  label.textContent = f.name;
+  div.appendChild(label);
+  fileBrackets.appendChild(div);
+});
+
+// --- barra de memoria ---
+const bar = document.getElementById("mem-bar");
+SEGMENTS.forEach((seg) => {
+  const div = document.createElement("div");
+  div.className = "mem-seg";
+  div.style.left = pct(seg.start) + "%";
+  div.style.width = (pct(seg.end) - pct(seg.start)) + "%";
+  div.style.background = "var(" + CATEGORY_VAR[seg.category] + ")";
+  div.title = fmtAddr(seg.start) + " - " + fmtAddr(seg.end) + "  (" + (seg.end - seg.start) + " bytes)\n" + seg.detail;
+  const widthPx = (pct(seg.end) - pct(seg.start)) / 100 * bar.clientWidth || 0;
+  if (widthPx > 40) {
+    const lbl = document.createElement("div");
+    lbl.className = "mem-seg-label";
+    lbl.textContent = seg.label;
+    div.appendChild(lbl);
+  }
+  bar.appendChild(div);
+});
+
+// --- regla simple: direcciones cada 0x100 (256 B), suficientemente
+// espaciadas para un rango de ~4KB sin amontonarse ---
+const ticks = document.getElementById("mem-ticks");
+const tickStart = Math.ceil(RANGE_START / 0x100) * 0x100;
+for (let addr = tickStart; addr <= RANGE_END; addr += 0x100) {
+  const t = document.createElement("div");
+  t.className = "tick";
+  t.style.left = pct(addr) + "%";
+  ticks.appendChild(t);
+  const l = document.createElement("div");
+  l.className = "tick-label";
+  l.style.left = pct(addr) + "%";
+  l.textContent = fmtAddr(addr);
+  ticks.appendChild(l);
+}
+
+// --- tabla de detalle: una fila legible por segmento ---
+const memTableBody = document.getElementById("mem-table-body");
+SEGMENTS.forEach((seg) => {
+  const tr = document.createElement("tr");
+  const size = seg.end - seg.start;
+  tr.innerHTML =
+    '<td class="addr">' + fmtAddr(seg.start) + " - " + fmtAddr(seg.end - 1) + '</td>' +
+    '<td class="addr">' + size + ' B</td>' +
+    '<td class="cat"><span class="row-swatch" style="background:var(' + CATEGORY_VAR[seg.category] + ')"></span>' + seg.label + '</td>' +
+    '<td>' + seg.detail + '</td>';
+  memTableBody.appendChild(tr);
+});
+
+// --- tabla de detalle de ficheros ---
+const filesTableBody = document.getElementById("files-table-body");
+FILES.forEach((f) => {
+  const tr = document.createElement("tr");
+  tr.innerHTML =
+    '<td>' + f.name + '</td>' +
+    '<td class="addr">' + f.size + ' B</td>' +
+    '<td class="addr">' + fmtAddr(f.loadStart) + " - " + fmtAddr(f.loadEnd - 1) + (f.temp ? " (temporal)" : "") + '</td>' +
+    '<td>' + (f.note || "") + '</td>';
+  filesTableBody.appendChild(tr);
+  if (f.relocation) {
+    const tr2 = document.createElement("tr");
+    tr2.innerHTML =
+      '<td>' + f.name + ' <span style="color:var(--muted)">(reubicado)</span></td>' +
+      '<td class="addr">—</td>' +
+      '<td class="addr">' + fmtAddr(f.relocation.toStart) + " - " + fmtAddr(f.relocation.toEnd - 1) + '</td>' +
+      '<td>' + f.relocation.via + '</td>';
+    filesTableBody.appendChild(tr2);
+  }
+});
+
+// --- seccion de ficheros, alineada a la MISMA escala de direcciones ---
+const filesOuter = document.getElementById("files-outer");
+FILES.forEach((f) => {
+  const row = document.createElement("div");
+  row.className = "file-row";
+
+  const block = document.createElement("div");
+  block.className = "file-block" + (f.temp ? " temp" : "");
+  block.style.left = pct(f.loadStart) + "%";
+  block.style.width = Math.max(pct(f.loadEnd) - pct(f.loadStart), 0.3) + "%";
+  block.style.background = "var(--c-nivel)";
+  block.title = f.name + " (" + f.size + " bytes) -> " + fmtAddr(f.loadStart) + "-" + fmtAddr(f.loadEnd) + (f.note ? "\n" + f.note : "");
+  block.textContent = f.name;
+  row.appendChild(block);
+
+  filesOuter.appendChild(row);
+
+  if (f.relocation) {
+    const relRow = document.createElement("div");
+    relRow.className = "file-row";
+
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("class", "file-arrow-svg");
+    svg.setAttribute("viewBox", "0 0 100 40");
+    svg.setAttribute("preserveAspectRatio", "none");
+    const x1 = pct(f.loadStart), x2 = pct(f.relocation.toStart);
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("x1", x1); line.setAttribute("y1", "0");
+    line.setAttribute("x2", x2); line.setAttribute("y2", "34");
+    line.setAttribute("stroke", "var(--muted)");
+    line.setAttribute("stroke-width", "0.3");
+    line.setAttribute("vector-effect", "non-scaling-stroke");
+    svg.appendChild(line);
+    relRow.appendChild(svg);
+
+    const relBlock = document.createElement("div");
+    relBlock.className = "file-block";
+    relBlock.style.left = pct(f.relocation.toStart) + "%";
+    relBlock.style.width = Math.max(pct(f.relocation.toEnd) - pct(f.relocation.toStart), 0.3) + "%";
+    relBlock.style.background = "var(--c-nivel)";
+    relBlock.title = f.name + " reubicado -> " + fmtAddr(f.relocation.toStart) + "-" + fmtAddr(f.relocation.toEnd) + "\n" + f.relocation.via;
+    relBlock.textContent = f.name + " (reubicado)";
+    relRow.appendChild(relBlock);
+
+    filesOuter.appendChild(relRow);
+  }
+});
+</script>
+</body>
+</html>

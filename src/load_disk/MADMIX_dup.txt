@@ -1,0 +1,24 @@
+Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+
+MADMIX_dup.bin -- SIN ANALIZAR EN DETALLE (copia verbatim)
+============================================================
+
+El disco original tiene un SEXTO fichero, "MADMIX" (sin extension,
+184 bytes), ademas de los 5 ya reconstruidos (AUTOEXEC.BAS,
+MADMIX.BAS, MADMIX0.BIN, MADMIX1.BIN, MADMIX.SCR). NO forma parte de
+la secuencia real de arranque: AUTOEXEC.BAS hace "RUN"madmix",R", y
+en MSX-DOS BASIC un RUN sin extension busca ".BAS" por defecto, asi
+que ejecuta MADMIX.BAS, no este fichero.
+
+Es casi identico a MADMIX.BAS (mismo BASIC tokenizado, mismas REM de
+titulo/creditos "CRACKED BY PAU D'ACI"), pero 1 byte mas largo (184
+vs 183) con un valor entero distinto en la linea 40 (170 vs 1) --
+posiblemente una version de desarrollo/prueba anterior, dejada en el
+disco por descuido. No se ha investigado mas a fondo (ver FINDINGS.md,
+"secuencia de arranque completa desde el .BAS").
+
+Se conserva como copia binaria verbatim (extraida directamente del
+.dsk original, offset del cluster 2) unicamente para poder generar un
+.dsk byte a byte identico al original desde cero -- sin ella, el
+disco generado seria funcionalmente equivalente pero le faltaria este
+fichero extra.

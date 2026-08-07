@@ -1,0 +1,29 @@
+; !!! AVISO -- LEE ESTO ANTES DE EDITAR !!!
+; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+; Rejilla de losetas de body_l3.bin -- 16 filas x 32 columnas.
+; Cada celda es el byte crudo en hex (2 digitos): bits 0-6 = indice de
+; loseta (ver data/tiles/*.til, 00-90), bit 7 = flag sin confirmar en
+; tiempo de ejecucion (LEVEL_LOADER lo borra al cargar el nivel, ver
+; FINDINGS.md) pero presente de verdad en el binario original.
+; NO añadas ni quites filas ni columnas: el tamaño es FIJO. Si cambia,
+; todo lo que va detras en madmix_scr.asm/madmix1.asm se desplaza de
+; direccion -- el juego compilaria sin error pero cargaria niveles o
+; datos incorrectos en tiempo de ejecucion. Ver FINDINGS.md/README.md.
+; filas=16 columnas=32
+
+2B 25 25 25 47 48 25 25 25 25 25 25 25 25 25 25 2B 25 25 25 25 25 25 25 25 25 25 4A 4B 25 25 25
+22 2D BF BF 49 45 BF 2D BF 2D BF 2D BF 2D BF 2D 22 2D BF 2D BF 2D BF 2D BF 2D BF 43 44 BF BF 2D
+22 BF 29 25 25 25 25 25 25 25 26 BF 24 25 26 BF 23 BF 24 25 26 BF 24 25 25 25 25 25 25 25 2A BF
+22 2D 22 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D 22 2D
+22 BF 22 BF 29 25 26 BF 24 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 26 BF 24 25 2A BF 22 BF
+22 2D 22 2D 22 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D 22 2D 22 2D
+22 BF 22 BF 22 BF 29 26 2D 24 25 26 BF 24 2B 50 38 51 2B 26 2D 24 25 26 2D 24 2A BF 22 BF 22 BF
+23 2D 23 2D 22 2D 22 3C BF 2D BF 2D BF 2D 22 BF BF BF 22 2D BF 2D BF 2D BF 3C 22 2D 22 2D 23 2D
+2D BF 2D BF 22 BF 27 26 2D 24 47 48 26 BF 27 25 25 25 28 BF 24 4A 4B 26 2D 24 28 BF 22 BF 2D BF
+25 25 26 2D 22 2D BF 2D BF BF 49 45 BF 2D BF 2D BF 2D BF 2D BF 43 44 BF BF 2D BF 2D 22 2D 24 25
+2D BF 2D BF 22 3D 24 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 26 3D 22 BF 2D BF
+21 2D 21 2D 27 26 3C 2D BF 2D BF 2D BF 2D BF 36 36 34 BF 2D BF 2D BF 2D BF 2D 3C 24 28 2D 21 2D
+22 BF 22 BF 2D BF 2D 29 25 2A 2D 29 25 25 2A 33 21 34 29 25 25 2A 2D 29 25 2A 2D BF 2D BF 22 BF
+22 2D 27 25 25 26 BF 27 25 28 BF 27 25 25 28 33 22 34 27 25 25 28 BF 27 25 28 BF 24 25 25 28 2D
+22 BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF 36 33 22 36 36 BF 2D BF 2D BF 2D BF 2D BF 2D BF 2D BF
+2C 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 2C 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25

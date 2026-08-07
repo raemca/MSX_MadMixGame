@@ -1,0 +1,39 @@
+; !!! AVISO -- LEE ESTO ANTES DE EDITAR !!!
+; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+; Este fichero se compila con INCBIN a una direccion FIJA, calcada del
+; binario original de 1987. Puedes cambiar valores de una instruccion ya
+; existente (otra nota, duracion, instrumento...) sin ningun problema.
+; NO añadas ni quites lineas, y NO cambies la cuenta de un
+; SET_DURATION_MULTI: si el numero de bytes total cambia al reensamblar,
+; TODO lo que va detras en madmix1.asm se desplaza de direccion, y
+; TABLA_SUBPATRONES_PSG (madmix1.asm) sigue apuntando a la
+; direccion VIEJA -- el juego compilaria sin error pero saltaria a sitios
+; incorrectos en tiempo de ejecucion. Ver FINDINGS.md / README.md.
+; 06_subpatron06_ccef.spt (39 bytes)
+SET_INSTRUMENT 0x04
+SET_FLAGS 0x02
+SET_MIXER 0x01
+SET_DURATION 0x12
+NOTE 0x26
+SET_INSTRUMENT 0x03
+SET_FLAGS 0x00
+SET_MIXER 0x01
+SET_DURATION 0x06
+NOTE 0x24
+HOLD
+NOTE 0x26
+HOLD
+NOTE 0x27
+SET_INSTRUMENT 0x00
+SET_FLAGS 0x00
+SET_MIXER 0x01
+SET_VOLUME 0x0F
+NOTE 0x28
+HOLD
+NOTE 0x28
+HOLD
+NOTE 0x2B
+HOLD
+NOTE 0x28
+NOTE 0x2D
+RETURN_SUBPATTERN

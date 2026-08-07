@@ -1,0 +1,31 @@
+; !!! AVISO -- LEE ESTO ANTES DE EDITAR !!!
+; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+; Rejilla de losetas de body_l9.bin -- 18 filas x 32 columnas.
+; Cada celda es el byte crudo en hex (2 digitos): bits 0-6 = indice de
+; loseta (ver data/tiles/*.til, 00-90), bit 7 = flag sin confirmar en
+; tiempo de ejecucion (LEVEL_LOADER lo borra al cargar el nivel, ver
+; FINDINGS.md) pero presente de verdad en el binario original.
+; NO añadas ni quites filas ni columnas: el tamaño es FIJO. Si cambia,
+; todo lo que va detras en madmix_scr.asm/madmix1.asm se desplaza de
+; direccion -- el juego compilaria sin error pero cargaria niveles o
+; datos incorrectos en tiempo de ejecucion. Ver FINDINGS.md/README.md.
+; filas=18 columnas=32
+
+0B 05 05 05 05 05 05 05 05 05 0B 05 05 05 05 05 05 05 05 05 05 05 0B 05 05 05 05 05 05 05 05 05
+02 3C 2E C0 2E C0 2E C0 2E C0 02 C0 2E C0 2E C0 00 C0 2E C0 2E C0 02 C0 2E C0 2E C0 2E C0 2E 3C
+02 2E 09 05 05 0A C0 09 0A 2E 03 2E 04 06 C0 00 3C 00 C0 04 06 2E 03 2E 09 0A C0 09 05 05 0A 2E
+03 C0 07 05 05 08 2E 07 08 C0 2E C0 2E C0 2E 00 2E 00 2E C0 2E C0 2E C0 07 08 2E 07 05 05 08 C0
+34 35 35 2E C0 2E C0 2E C0 2E 04 05 05 0A C0 2E C0 2E C0 09 05 05 06 2E C0 2E C0 2E C0 2E C0 2E
+37 01 33 04 05 05 06 C0 01 C0 2E C0 2E 03 2E 04 05 06 2E 03 2E C0 2E C0 01 C0 04 05 05 06 2E 01
+37 02 33 2E C0 2E C0 2E 02 2E 04 06 C0 2E C0 2E C0 2E C0 2E C0 04 06 2E 02 2E C0 2E C0 2E C0 02
+37 02 33 04 05 05 06 C0 03 C0 2E C0 01 C0 09 50 38 51 0A C0 01 C0 2E C0 03 C0 04 05 05 06 2E 02
+37 02 33 2E C0 2E C0 2E C0 2E 01 2E 03 2E 02 BF BF BF 02 2E 03 2E 01 2E C0 2E C0 2E C0 2E C0 02
+37 0D 06 C0 04 06 C0 04 06 C0 02 34 35 35 07 05 05 05 08 36 36 34 02 C0 04 06 C0 04 06 C0 04 0E
+37 02 C0 2E C0 2E C0 2E C0 2E 02 34 01 33 35 35 C0 36 36 33 01 34 02 2E C0 2E C0 2E C0 2E 35 02
+37 02 2E 04 05 05 06 C0 01 C0 03 34 07 06 C0 04 05 06 C0 04 08 34 03 C0 01 C0 04 05 05 06 33 02
+37 02 C0 2E C0 2E C0 2E 02 34 35 35 C0 2E C0 2E C0 2E C0 2E C0 36 36 34 02 2E C0 2E C0 2E 33 02
+37 03 2E 04 05 05 06 C0 03 34 09 05 0A C0 09 0A 33 09 0A C0 09 05 0A 34 03 C0 04 05 05 06 33 03
+C0 2E C0 2E C0 2E C0 2E C0 34 02 00 02 2E 07 08 33 07 08 2E 02 00 02 34 C0 2E C0 2E C0 2E 33 35
+01 C0 04 05 05 06 2E 04 06 34 07 05 08 36 36 36 33 35 35 35 07 05 08 34 04 06 C0 04 05 05 06 C0
+02 3C C0 2E C0 2E C0 2E C0 36 36 36 36 33 09 05 05 05 0A 33 35 35 35 35 C0 2E C0 2E C0 2E C0 3C
+0C 05 05 05 05 05 05 05 05 05 05 05 05 05 0C 05 05 05 0C 05 05 05 05 05 05 05 05 05 05 05 05 05

@@ -1,0 +1,22 @@
+; !!! AVISO -- LEE ESTO ANTES DE EDITAR !!!
+; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+; Este fichero se compila con INCBIN a una direccion FIJA, calcada del
+; binario original de 1987. Puedes cambiar valores de una instruccion ya
+; existente (otra nota, duracion, instrumento...) sin ningun problema.
+; NO añadas ni quites lineas, y NO cambies la cuenta de un
+; SET_DURATION_MULTI: si el numero de bytes total cambia al reensamblar,
+; TODO lo que va detras en madmix1.asm se desplaza de direccion, y
+; LEVELCYCLE_RESOURCE_TABLE (madmix_scr.asm) sigue apuntando a la
+; direccion VIEJA -- el juego compilaria sin error pero saltaria a sitios
+; incorrectos en tiempo de ejecucion. Ver FINDINGS.md / README.md.
+; 06_evt01_bola_clavada_ce8b.snd (17 bytes)
+SET_TEMPO 0x64
+SET_MIXER 0x09
+SET_INSTRUMENT 0x0D
+SET_VOLUME 0x0C
+SET_DURATION 0x01
+NOTE 0x19
+SET_MIXER 0x01
+SET_DURATION 0x02
+NOTE 0x1E
+RESET_SHARED_ENVELOPE

@@ -1,0 +1,543 @@
+<!doctype html>
+<!-- Ingeniería inversa, herramientas y documentación: Rafael Eduardo Martín Candial -->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mad Mix Game — flujo detallado de llamadas</title>
+<style>
+  :root {
+    --bg: #faf7f0; --fg: #2a2620; --muted: #6b6458; --border: #ddd4c4;
+    --panel: #ffffff;
+    --c-boot: #d69a3a;
+    --c-motor: #6a86ae;
+    --c-items: #8a6ab0;
+    --c-hud: #7fae6a;
+    --c-menu: #4aa89a;
+    --c-sonido: #c46a6a;
+    --c-graficos: #3aa8c4;
+    --c-otros: #cbc3b6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1b1812; --fg: #ece6d8; --muted: #a89e8c; --border: #3a352b;
+      --panel: #242019;
+      --c-boot: #e6b25a;
+      --c-motor: #7f9bc4;
+      --c-items: #a17fd0;
+      --c-hud: #8fc27a;
+      --c-menu: #5ec2b2;
+      --c-sonido: #d68a8a;
+      --c-graficos: #4ac2d6;
+      --c-otros: #4a453c;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1b1812; --fg: #ece6d8; --muted: #a89e8c; --border: #3a352b;
+    --panel: #242019;
+      --c-boot: #e6b25a;
+      --c-motor: #7f9bc4;
+      --c-items: #a17fd0;
+      --c-hud: #8fc27a;
+      --c-menu: #5ec2b2;
+      --c-sonido: #d68a8a;
+      --c-graficos: #4ac2d6;
+      --c-otros: #4a453c;
+  }
+  :root[data-theme="light"] {
+    --bg: #faf7f0; --fg: #2a2620; --muted: #6b6458; --border: #ddd4c4;
+    --panel: #ffffff;
+    --c-boot: #d69a3a;
+    --c-motor: #6a86ae;
+    --c-items: #8a6ab0;
+    --c-hud: #7fae6a;
+    --c-menu: #4aa89a;
+    --c-sonido: #c46a6a;
+    --c-graficos: #3aa8c4;
+    --c-otros: #cbc3b6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 1.5rem; background: var(--bg); color: var(--fg);
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.5;
+  }
+  h1 { font-size: 1.4rem; margin: 0 0 0.3rem 0; }
+  .subtitle { color: var(--muted); font-size: 0.92rem; margin: 0 0 1rem 0; }
+  .note {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    padding: 0.8rem 1rem; font-size: 0.88rem; color: var(--muted); margin-bottom: 1rem;
+  }
+  .note b { color: var(--fg); }
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 0.9rem; margin-bottom: 1rem;
+    font-size: 0.85rem;
+  }
+  .legend label { display: flex; align-items: center; gap: 0.35rem; cursor: pointer; user-select: none; }
+  .swatch { width: 0.85rem; height: 0.85rem; border-radius: 3px; display: inline-block; flex: none; }
+  .controls { display: flex; gap: 0.6rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  button {
+    background: var(--panel); color: var(--fg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 0.4rem 0.8rem; font-size: 0.85rem; cursor: pointer;
+  }
+  button:hover { border-color: var(--muted); }
+  #diagramWrap {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 1rem; overflow: auto; max-height: 82vh;
+  }
+  #diagram { transform-origin: 0 0; }
+  #diagram .node, #diagram .cluster { cursor: pointer; }
+  .edgeLabel { background: var(--panel) !important; }
+  #boxTooltip {
+    position: fixed; z-index: 1000; display: none; pointer-events: none;
+    max-width: 22rem; background: var(--fg); color: var(--bg);
+    border-radius: 8px; padding: 0.6rem 0.85rem; font-size: 0.95rem;
+    line-height: 1.35; white-space: pre-line; box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  }
+</style>
+</head>
+<body>
+<h1>Mad Mix Game — flujo detallado de llamadas (grafo real)</h1>
+<p class="attribution-line" style="color:var(--muted);font-size:0.85rem;margin:-0.3rem 0 1.2rem 0;">Ingeniería inversa, herramientas y documentación: Rafael Eduardo Martín Candial</p>
+<p class="subtitle">Compañero de <code>flujo_programa.html</code> (inventario + diagrama a mano de ~35 piezas). Generado automáticamente por <code>tools/gen_flow_diagram.py</code> a partir del grafo de llamadas real (<code>src/build/main.lst</code>).</p>
+
+<div class="note">
+  <b>Alcance:</b> solo se representan las 116 etiquetas clasificadas
+  <b>"función"</b> (destino de al menos un <code>CALL</code> en algún sitio del código
+  fuente transcrito) — el mismo conjunto que la categoría "función" del inventario de
+  <code>flujo_programa.html</code>. Las aristas son llamadas <code>CALL</code> reales entre
+  esas funciones (93 aristas); una arista punteada con etiqueta (p.ej. <code>C</code>,
+  <code>NZ</code>) es una llamada condicional (<code>CALL cc,destino</code>) — el texto es
+  el código de condición del Z80, no una descripción semántica de la condición real.
+  <br><br>
+  <b>Lo que NO aparece aquí:</b> los manejadores de tipo de loseta
+  (<code>HNDLR_SUELO_NORMAL</code>, <code>HNDLR_BOLITA_NORMAL</code>, etc., alcanzados vía
+  <code>JP (IX)</code> desde <code>TABLA_MANEJADORES_LOSETA</code>, no vía <code>CALL</code>)
+  ni el resto de puntos "interna" (destino solo de <code>JP</code>/<code>JR</code>, sin
+  <code>CALL</code>) — son un conjunto bastante más grande (~180) y una pieza central real
+  del flujo del juego que este grafo, centrado en llamadas, no captura. Tampoco aparecen
+  rutinas nunca alcanzadas por <code>CALL</code> desde el código transcrito (p.ej.
+  <code>RELOCATOR</code>/<code>JUMP_TO_ENGINE</code> de <code>MADMIX0.BIN</code>, activadas
+  por <code>BLOAD,R</code> desde BASIC, fuera del grafo de llamadas Z80).
+  <br><br>
+  <b>Aristas descartadas:</b> 193 llamadas <code>CALL</code> a nodos "función" NO
+  se representan porque ocurren dentro de una rutina que en sí misma NO es "función" (solo
+  se alcanza por <code>JR</code>/<code>JP</code>, p.ej. <code>LEER_TECLADO</code>,
+  <code>LEER_JOYSTICK</code>, el manejador de interrupción) — no hay un nodo de origen
+  fiable al que atribuírselas sin inventar una relación falsa, así que se omiten en vez de
+  colgarlas de la "función" más cercana en el fichero fuente (error real que tuvo una
+  versión anterior de este script, ver <code>FINDINGS.md</code>).
+  <br><br>
+  <b>El diagrama es grande:</b> carga con zoom ajustado automáticamente a la ventana. Usa
+  "Ajustar al ancho" para que solo haga falta scroll vertical. Pasa el ratón por encima de
+  cualquier caja para ver su contenido completo en un panel junto al cursor; haz clic para
+  fijarlo (útil en pantallas táctiles), y clic fuera para cerrarlo.
+</div>
+
+<div class="legend" id="legend">
+  <label><input type="checkbox" value="boot" checked> <span class="swatch" style="background:var(--c-boot)"></span>Arranque / carga (11)</label>
+  <label><input type="checkbox" value="menu" checked> <span class="swatch" style="background:var(--c-menu)"></span>Menu / intro / creditos (9)</label>
+  <label><input type="checkbox" value="motor" checked> <span class="swatch" style="background:var(--c-motor)"></span>Motor de juego (17)</label>
+  <label><input type="checkbox" value="items" checked> <span class="swatch" style="background:var(--c-items)"></span>Items especiales (13)</label>
+  <label><input type="checkbox" value="hud" checked> <span class="swatch" style="background:var(--c-hud)"></span>HUD / entrada (10)</label>
+  <label><input type="checkbox" value="graficos" checked> <span class="swatch" style="background:var(--c-graficos)"></span>Graficos / VRAM (28)</label>
+  <label><input type="checkbox" value="sonido" checked> <span class="swatch" style="background:var(--c-sonido)"></span>Sonido (14)</label>
+  <label><input type="checkbox" value="otros" checked> <span class="swatch" style="background:var(--c-otros)"></span>Sin clasificar (14)</label>
+</div>
+
+<div class="controls">
+  <button id="zoomIn">Zoom +</button>
+  <button id="zoomOut">Zoom −</button>
+  <button id="zoomReset">Reset zoom</button>
+  <button id="zoomFit">Ajustar a ventana</button>
+  <button id="zoomFitWidth">Ajustar al ancho (solo scroll vertical)</button>
+</div>
+
+<div id="boxTooltip"></div>
+
+<div id="diagramWrap">
+<div id="diagram" class="mermaid">
+flowchart TD
+  subgraph SG_boot["Arranque / carga"]
+    N_DIBUJAR_PORTADA["DIBUJAR_PORTADA<br/>$1000"]
+    N_ACTIVAR_INTERRUPCION_MODO_1["ACTIVAR_INTERRUPCION_MODO_1<br/>$881B"]
+    N_FUNCION_INHABIL["FUNCION_INHABIL<br/>$8889"]
+    N_DETECTAR_SLOTS_RAM["DETECTAR_SLOTS_RAM<br/>$C350"]
+    N_GUARDAR_CONFIG_SLOT_A["GUARDAR_CONFIG_SLOT_A<br/>$C395"]
+    N_GUARDAR_CONFIG_SLOT_B["GUARDAR_CONFIG_SLOT_B<br/>$C39A"]
+    N_DETECTAR_RAM_PAGINA["DETECTAR_RAM_PAGINA<br/>$C3A7"]
+    N_LEER_CINTA["LEER_CINTA<br/>$DDCC"]
+    N_APLICAR_SLOT_PAGINA_0["APLICAR_SLOT_PAGINA_0<br/>$DE93"]
+    N_APLICAR_SLOT_PAGINA_1["APLICAR_SLOT_PAGINA_1<br/>$DE98"]
+    N_APLICAR_SLOT_PAGINA_2["APLICAR_SLOT_PAGINA_2<br/>$DE9D"]
+  end
+  subgraph SG_menu["Menu / intro / creditos"]
+    N_MOSTRAR_MENU_PRINCIPAL["MOSTRAR_MENU_PRINCIPAL<br/>$5B56"]
+    N_DIBUJAR_MENU_PRINCIPAL["DIBUJAR_MENU_PRINCIPAL<br/>$5BCC"]
+    N_LEER_TECLAS_MENU_PRINCIPAL["LEER_TECLAS_MENU_PRINCIPAL<br/>$5C80"]
+    N_DIBUJAR_MENU_REDEFINIR_TECLAS["DIBUJAR_MENU_REDEFINIR_TECLAS<br/>$5D1F"]
+    N_DIBUJAR_NOMBRE_TECLA_ASIGNADA["DIBUJAR_NOMBRE_TECLA_ASIGNADA<br/>$5DF1"]
+    N_REINICIAR_TECLAS_USADAS["REINICIAR_TECLAS_USADAS<br/>$5EDA"]
+    N_ESPERAR_TECLA_NUEVA["ESPERAR_TECLA_NUEVA<br/>$5EEB"]
+    N_DIBUJAR_CREDITOS["DIBUJAR_CREDITOS<br/>$5F77"]
+    N_GESTIONAR_CICLO_NIVELES["GESTIONAR_CICLO_NIVELES<br/>$6045"]
+  end
+  subgraph SG_motor["Motor de juego"]
+    N_ENLACE_MOTOR_MOVIMIENTO_COLISION["ENLACE_MOTOR_MOVIMIENTO_COLISION<br/>$2C36"]
+    N_CONSULTAR_PROXIMA_LOSETA_EN_ESTA_DIRECCION["CONSULTAR_PROXIMA_LOSETA_EN_ESTA_DIRECCION<br/>$2E64"]
+    N_CONSULTAR_LOSETA_LIBRE_DIRECCION["CONSULTAR_LOSETA_LIBRE_DIRECCION<br/>$5414"]
+    N_MAPEAR_COORDENADA_A_DIRECCION["MAPEAR_COORDENADA_A_DIRECCION<br/>$545F"]
+    N_GENERAR_ALEATORIO["GENERAR_ALEATORIO<br/>$5478"]
+    N_CARGAR_NIVEL["CARGAR_NIVEL<br/>$5904"]
+    N_MOTOR_ACTORES["MOTOR_ACTORES<br/>$8440"]
+    N_CAPTURAR_MASCARAS_ACTOR["CAPTURAR_MASCARAS_ACTOR<br/>$8687"]
+    N_CONTINUAR_CAPTURA_MASCARAS_ACTORES["CONTINUAR_CAPTURA_MASCARAS_ACTORES<br/>$86BB"]
+    N_INVERTIR_BITS_PATRON_ACTOR["INVERTIR_BITS_PATRON_ACTOR<br/>$86FA"]
+    N_INVERTIR_ORDEN_BYTES_PATRON_ACTOR["INVERTIR_ORDEN_BYTES_PATRON_ACTOR<br/>$873A"]
+    N_GESTIONAR_FRAME["GESTIONAR_FRAME<br/>$8860"]
+    N_CALCULAR_DIRECCION_MASCARA_ACTOR["CALCULAR_DIRECCION_MASCARA_ACTOR<br/>$8988"]
+    N_RESET_CONTADOR_ACTORES["RESET_CONTADOR_ACTORES<br/>$899B"]
+    N_MAPEAR_LOSETA_RELATIVA_A_ABSOLUTA["MAPEAR_LOSETA_RELATIVA_A_ABSOLUTA<br/>$8CB6"]
+    N_CONSULTAR_TIPO_LOSETA["CONSULTAR_TIPO_LOSETA<br/>$8CDA"]
+    N_ACTUALIZAR_LOSETA_BOLA_ESPECIAL["ACTUALIZAR_LOSETA_BOLA_ESPECIAL<br/>$9106"]
+  end
+  subgraph SG_items["Items especiales"]
+    N_REGISTRAR_PISTA_TANQUE_AVION["REGISTRAR_PISTA_TANQUE_AVION<br/>$3043"]
+    N_HNDLR_PELMAZOIDE["HNDLR_PELMAZOIDE<br/>$51FE"]
+    N_MOTOR_MOVIMIENTO_ITEM["MOTOR_MOVIMIENTO_ITEM<br/>$5278"]
+    N_CALCULAR_POSICION_VRAM_ITEM["CALCULAR_POSICION_VRAM_ITEM<br/>$53A2"]
+    N_HNDLR_MARICOCO["HNDLR_MARICOCO<br/>$54A9"]
+    N_MAPEAR_COORDENADA_A_DIRECCION_LOCAL["MAPEAR_COORDENADA_A_DIRECCION_LOCAL<br/>$5559"]
+    N_HNDLR_REGPUNANTOSO["HNDLR_REGPUNANTOSO<br/>$55C0"]
+    N_AVISAR_PROXIMIDAD_PISTA["AVISAR_PROXIMIDAD_PISTA<br/>$566A"]
+    N_ARMAR_AVISO_DESTELLO["ARMAR_AVISO_DESTELLO<br/>$56CA"]
+    N_ACTUALIZAR_DESTELLO_ITEMS["ACTUALIZAR_DESTELLO_ITEMS<br/>$5782"]
+    N_ACTIVAR_EFECTO_ITEM["ACTIVAR_EFECTO_ITEM<br/>$57D8"]
+    N_INICIALIZAR_ITEMS_NIVEL["INICIALIZAR_ITEMS_NIVEL<br/>$5885"]
+    N_INICIALIZAR_PARCIAL_ITEMS_NIVEL["INICIALIZAR_PARCIAL_ITEMS_NIVEL<br/>$58F8"]
+  end
+  subgraph SG_hud["HUD / entrada"]
+    N_ESPERAR_TECLA_SOLTADA["ESPERAR_TECLA_SOLTADA<br/>$5D04"]
+    N_COMPROBAR_PULSACION["COMPROBAR_PULSACION<br/>$5D0A"]
+    N_DIBUJAR_MARCADOR_PUNTOS["DIBUJAR_MARCADOR_PUNTOS<br/>$8D70"]
+    N_DIBUJAR_MARCADOR_PUNTOS_DIGITOS["DIBUJAR_MARCADOR_PUNTOS_DIGITOS<br/>$8DAC"]
+    N_DIBUJAR_TEXTO_INVERTIDO_VRAM["DIBUJAR_TEXTO_INVERTIDO_VRAM<br/>$8DFE"]
+    N_LEER_ENTRADA["LEER_ENTRADA<br/>$8E3C"]
+    N_ESCANEAR_FILAS_TECLADO["ESCANEAR_FILAS_TECLADO<br/>$8E5A"]
+    N_COMPROBAR_TECLA_MSX["COMPROBAR_TECLA_MSX<br/>$8E7D"]
+    N_DESTELLO_ICONO_COLOR_HUD["DESTELLO_ICONO_COLOR_HUD<br/>$9116"]
+    N_CONFIGURAR_Y_LEER_JOYSTICK_PSG["CONFIGURAR_Y_LEER_JOYSTICK_PSG<br/>$DD8A"]
+  end
+  subgraph SG_graficos["Graficos / VRAM"]
+    N_APAGAR_PANTALLA_VDP["APAGAR_PANTALLA_VDP<br/>$10BC"]
+    N_ENCENDER_PANTALLA_VDP["ENCENDER_PANTALLA_VDP<br/>$10C7"]
+    N_PROGRAMAR_APAGADO_PANTALLA["PROGRAMAR_APAGADO_PANTALLA<br/>$10D8"]
+    N_PROGRAMAR_ENCENDIDO_PANTALLA["PROGRAMAR_ENCENDIDO_PANTALLA<br/>$10DE"]
+    N_DIBUJAR_CAMBIO_LOSETA["DIBUJAR_CAMBIO_LOSETA<br/>$2E9F"]
+    N_RELLENAR_SOLIDO_AREA_JUEGO_BUFFER_VRAM["RELLENAR_SOLIDO_AREA_JUEGO_BUFFER_VRAM<br/>$5B8C"]
+    N_LIMPIAR_VRAM_AREA_JUEGO["LIMPIAR_VRAM_AREA_JUEGO<br/>$5CA0"]
+    N_ESCRIBIR_PATRON_VRAM["ESCRIBIR_PATRON_VRAM<br/>$5CAF"]
+    N_DIBUJAR_TEXTO_VRAM["DIBUJAR_TEXTO_VRAM<br/>$5CD1"]
+    N_DIBUJAR_MARCO_CARAMELO_VRAM["DIBUJAR_MARCO_CARAMELO_VRAM<br/>$6429"]
+    N_APLICAR_COLOR_PANTALLA["APLICAR_COLOR_PANTALLA<br/>$6454"]
+    N_APLICAR_COLOR_CICLO_NIVELES["APLICAR_COLOR_CICLO_NIVELES<br/>$647C"]
+    N_OBTENER_COLOR_VDP["OBTENER_COLOR_VDP<br/>$6484"]
+    N_FIJAR_COLOR_BORDE_VDP["FIJAR_COLOR_BORDE_VDP<br/>$888A"]
+    N_ACTUALIZAR_VRAM_FRAME["ACTUALIZAR_VRAM_FRAME<br/>$8891"]
+    N_FILVRM["FILVRM<br/>$8931"]
+    N_LDIRVM["LDIRVM<br/>$8942"]
+    N_SETVRAM["SETVRAM<br/>$8954"]
+    N_CONSULTAR_COLOR_VDP["CONSULTAR_COLOR_VDP<br/>$8961"]
+    N_WAIT_VBLANK["WAIT_VBLANK<br/>$89A0"]
+    N_GESTIONAR_SCROLL["GESTIONAR_SCROLL<br/>$89AD"]
+    N_DIBUJAR_FILA_LOSETAS_BUFFER_VRAM["DIBUJAR_FILA_LOSETAS_BUFFER_VRAM<br/>$8A5A"]
+    N_MAPEAR_LOSETA_A_GRAFICO["MAPEAR_LOSETA_A_GRAFICO<br/>$8BC9"]
+    N_REDIBUJAR_PANTALLA_COMPLETA_BUFFER_VRAM["REDIBUJAR_PANTALLA_COMPLETA_BUFFER_VRAM<br/>$8C34"]
+    N_LDIRVM_INVERTIDO["LDIRVM_INVERTIDO<br/>$8CA3"]
+    N_APILAR_PETICION_REDIBUJADO["APILAR_PETICION_REDIBUJADO<br/>$8CEE"]
+    N_VACIAR_COLA_REDIBUJADO["VACIAR_COLA_REDIBUJADO<br/>$8CFF"]
+    N_REDIBUJAR_LOSETA_BUFFER_VRAM["REDIBUJAR_LOSETA_BUFFER_VRAM<br/>$8D1B"]
+  end
+  subgraph SG_sonido["Sonido"]
+    N_DESPACHAR_EFECTO_SONIDO["DESPACHAR_EFECTO_SONIDO<br/>$60DC"]
+    N_INSTALAR_RECURSO_SONIDO["INSTALAR_RECURSO_SONIDO<br/>$C4A0"]
+    N_INSTALAR_RECURSO_SONIDO_EN_A["INSTALAR_RECURSO_SONIDO_EN_A<br/>$C4CC"]
+    N_TICK_REPRODUCTOR_PSG["TICK_REPRODUCTOR_PSG<br/>$C4EB"]
+    N_REINICIAR_ENVOLVENTE_VOLUMEN["REINICIAR_ENVOLVENTE_VOLUMEN<br/>$C699"]
+    N_REINICIAR_ENVOLVENTE_TONO["REINICIAR_ENVOLVENTE_TONO<br/>$C6B1"]
+    N_REINICIAR_ENVOLVENTE_RUIDO["REINICIAR_ENVOLVENTE_RUIDO<br/>$C6C9"]
+    N_ACTUALIZAR_MEZCLADOR_CANAL["ACTUALIZAR_MEZCLADOR_CANAL<br/>$C82E"]
+    N_OBTENER_PUNTERO_TRANSPOSICION["OBTENER_PUNTERO_TRANSPOSICION<br/>$C882"]
+    N_MULTIPLICAR_8X16["MULTIPLICAR_8X16<br/>$C88D"]
+    N_DIVIDIR_16X16["DIVIDIR_16X16<br/>$C8A2"]
+    N_LEER_PALABRA_INDEXADA["LEER_PALABRA_INDEXADA<br/>$C8BC"]
+    N_VOLCAR_REGISTROS_PSG["VOLCAR_REGISTROS_PSG<br/>$C8C9"]
+    N_VACIAR_CANALES_SONIDO["VACIAR_CANALES_SONIDO<br/>$CF8B"]
+  end
+  subgraph SG_otros["Sin clasificar"]
+    N_ANIMAR_PUNTO_LUZ_SOFT["ANIMAR_PUNTO_LUZ_SOFT<br/>$9473"]
+    N_ESCRIBIR_8_BYTES_VRAM["ESCRIBIR_8_BYTES_VRAM<br/>$94A6"]
+    N_DIBUJAR_FORMA_ANIMADA["DIBUJAR_FORMA_ANIMADA<br/>$94B1"]
+    N_DIBUJAR_SOFT_ROTANDO["DIBUJAR_SOFT_ROTANDO<br/>$950B"]
+    N_DIBUJAR_T_TOPO["DIBUJAR_T_TOPO<br/>$9532"]
+    N_DIBUJAR_P_TOPO_ANIMADA["DIBUJAR_P_TOPO_ANIMADA<br/>$954D"]
+    N_DIBUJAR_O1_TOPO["DIBUJAR_O1_TOPO<br/>$956B"]
+    N_DIBUJAR_O2_TOPO_ANIMADA["DIBUJAR_O2_TOPO_ANIMADA<br/>$958E"]
+    N_DIBUJAR_ESTRELLA_ANIMADA["DIBUJAR_ESTRELLA_ANIMADA<br/>$95AE"]
+    N_LIMPIAR_TABLA_COLOR_VRAM["LIMPIAR_TABLA_COLOR_VRAM<br/>$9602"]
+    N_RELLENAR_COLOR_TOPO["RELLENAR_COLOR_TOPO<br/>$9614"]
+    N_ANIMAR_COLOR_TOPO["ANIMAR_COLOR_TOPO<br/>$962B"]
+    N_ESCRIBIR_8_BYTES_VRAM_C["ESCRIBIR_8_BYTES_VRAM_C<br/>$967E"]
+    N_LIMPIAR_TABLA_PATRONES_VRAM["LIMPIAR_TABLA_PATRONES_VRAM<br/>$9688"]
+  end
+  N_ACTIVAR_EFECTO_ITEM --> N_ARMAR_AVISO_DESTELLO
+  N_ACTIVAR_EFECTO_ITEM --> N_AVISAR_PROXIMIDAD_PISTA
+  N_ACTIVAR_EFECTO_ITEM --> N_DIBUJAR_MARCADOR_PUNTOS
+  N_ACTUALIZAR_DESTELLO_ITEMS --> N_CALCULAR_POSICION_VRAM_ITEM
+  N_ACTUALIZAR_DESTELLO_ITEMS -.->|NC| N_MOTOR_ACTORES
+  N_ACTUALIZAR_MEZCLADOR_CANAL --> N_LEER_PALABRA_INDEXADA
+  N_ACTUALIZAR_MEZCLADOR_CANAL --> N_OBTENER_PUNTERO_TRANSPOSICION
+  N_ACTUALIZAR_VRAM_FRAME --> N_CONSULTAR_COLOR_VDP
+  N_ACTUALIZAR_VRAM_FRAME --> N_FILVRM
+  N_ACTUALIZAR_VRAM_FRAME --> N_FUNCION_INHABIL
+  N_ACTUALIZAR_VRAM_FRAME --> N_SETVRAM
+  N_ANIMAR_COLOR_TOPO --> N_ESCRIBIR_8_BYTES_VRAM_C
+  N_ANIMAR_PUNTO_LUZ_SOFT --> N_ESCRIBIR_8_BYTES_VRAM
+  N_APLICAR_COLOR_CICLO_NIVELES --> N_PROGRAMAR_APAGADO_PANTALLA
+  N_AVISAR_PROXIMIDAD_PISTA --> N_ARMAR_AVISO_DESTELLO
+  N_CARGAR_NIVEL --> N_INICIALIZAR_ITEMS_NIVEL
+  N_CARGAR_NIVEL --> N_MAPEAR_COORDENADA_A_DIRECCION
+  N_CONSULTAR_LOSETA_LIBRE_DIRECCION --> N_CONSULTAR_TIPO_LOSETA
+  N_CONSULTAR_LOSETA_LIBRE_DIRECCION --> N_MAPEAR_COORDENADA_A_DIRECCION
+  N_DESPACHAR_EFECTO_SONIDO --> N_INSTALAR_RECURSO_SONIDO
+  N_DESPACHAR_EFECTO_SONIDO --> N_TICK_REPRODUCTOR_PSG
+  N_DETECTAR_SLOTS_RAM --> N_DETECTAR_RAM_PAGINA
+  N_DETECTAR_SLOTS_RAM --> N_GUARDAR_CONFIG_SLOT_A
+  N_DETECTAR_SLOTS_RAM --> N_GUARDAR_CONFIG_SLOT_B
+  N_DIBUJAR_CREDITOS --> N_DIBUJAR_TEXTO_VRAM
+  N_DIBUJAR_CREDITOS --> N_LIMPIAR_VRAM_AREA_JUEGO
+  N_DIBUJAR_ESTRELLA_ANIMADA --> N_DIBUJAR_FORMA_ANIMADA
+  N_DIBUJAR_FILA_LOSETAS_BUFFER_VRAM --> N_MAPEAR_LOSETA_A_GRAFICO
+  N_DIBUJAR_MARCADOR_PUNTOS --> N_DIBUJAR_MARCADOR_PUNTOS_DIGITOS
+  N_DIBUJAR_MARCO_CARAMELO_VRAM --> N_FILVRM
+  N_DIBUJAR_MENU_PRINCIPAL --> N_DIBUJAR_TEXTO_VRAM
+  N_DIBUJAR_MENU_REDEFINIR_TECLAS -.->|C| N_DIBUJAR_NOMBRE_TECLA_ASIGNADA
+  N_DIBUJAR_MENU_REDEFINIR_TECLAS --> N_DIBUJAR_TEXTO_VRAM
+  N_DIBUJAR_MENU_REDEFINIR_TECLAS --> N_ESCRIBIR_PATRON_VRAM
+  N_DIBUJAR_MENU_REDEFINIR_TECLAS --> N_ESPERAR_TECLA_NUEVA
+  N_DIBUJAR_MENU_REDEFINIR_TECLAS --> N_ESPERAR_TECLA_SOLTADA
+  N_DIBUJAR_MENU_REDEFINIR_TECLAS --> N_LIMPIAR_VRAM_AREA_JUEGO
+  N_DIBUJAR_MENU_REDEFINIR_TECLAS --> N_REINICIAR_TECLAS_USADAS
+  N_DIBUJAR_O1_TOPO --> N_DIBUJAR_FORMA_ANIMADA
+  N_DIBUJAR_O2_TOPO_ANIMADA --> N_DIBUJAR_FORMA_ANIMADA
+  N_DIBUJAR_PORTADA --> N_APAGAR_PANTALLA_VDP
+  N_DIBUJAR_P_TOPO_ANIMADA --> N_DIBUJAR_FORMA_ANIMADA
+  N_DIBUJAR_SOFT_ROTANDO --> N_DIBUJAR_FORMA_ANIMADA
+  N_DIBUJAR_TEXTO_VRAM --> N_ESCRIBIR_PATRON_VRAM
+  N_DIBUJAR_T_TOPO --> N_DIBUJAR_FORMA_ANIMADA
+  N_DIVIDIR_16X16 --> N_LEER_PALABRA_INDEXADA
+  N_ESCANEAR_FILAS_TECLADO --> N_COMPROBAR_TECLA_MSX
+  N_ESCRIBIR_PATRON_VRAM --> N_FILVRM
+  N_ESCRIBIR_PATRON_VRAM --> N_LDIRVM
+  N_ESPERAR_TECLA_NUEVA --> N_ESPERAR_TECLA_SOLTADA
+  N_ESPERAR_TECLA_SOLTADA --> N_COMPROBAR_PULSACION
+  N_FILVRM --> N_SETVRAM
+  N_GESTIONAR_CICLO_NIVELES --> N_ACTUALIZAR_LOSETA_BOLA_ESPECIAL
+  N_GESTIONAR_CICLO_NIVELES --> N_APLICAR_COLOR_PANTALLA
+  N_GESTIONAR_CICLO_NIVELES --> N_CARGAR_NIVEL
+  N_GESTIONAR_CICLO_NIVELES --> N_COMPROBAR_PULSACION
+  N_GESTIONAR_CICLO_NIVELES --> N_ENLACE_MOTOR_MOVIMIENTO_COLISION
+  N_GESTIONAR_CICLO_NIVELES --> N_INICIALIZAR_ITEMS_NIVEL
+  N_GESTIONAR_CICLO_NIVELES --> N_LEER_ENTRADA
+  N_GESTIONAR_CICLO_NIVELES --> N_REDIBUJAR_PANTALLA_COMPLETA_BUFFER_VRAM
+  N_GESTIONAR_CICLO_NIVELES --> N_WAIT_VBLANK
+  N_GESTIONAR_FRAME --> N_ACTUALIZAR_VRAM_FRAME
+  N_GESTIONAR_FRAME --> N_CONTINUAR_CAPTURA_MASCARAS_ACTORES
+  N_GESTIONAR_FRAME --> N_FUNCION_INHABIL
+  N_GESTIONAR_FRAME --> N_RESET_CONTADOR_ACTORES
+  N_GESTIONAR_FRAME --> N_VACIAR_COLA_REDIBUJADO
+  N_INSTALAR_RECURSO_SONIDO --> N_MULTIPLICAR_8X16
+  N_INSTALAR_RECURSO_SONIDO_EN_A --> N_MULTIPLICAR_8X16
+  N_LDIRVM --> N_SETVRAM
+  N_LDIRVM_INVERTIDO --> N_SETVRAM
+  N_LEER_TECLAS_MENU_PRINCIPAL --> N_ESCANEAR_FILAS_TECLADO
+  N_LIMPIAR_VRAM_AREA_JUEGO --> N_FILVRM
+  N_LIMPIAR_VRAM_AREA_JUEGO --> N_RELLENAR_SOLIDO_AREA_JUEGO_BUFFER_VRAM
+  N_MAPEAR_LOSETA_A_GRAFICO --> N_DIBUJAR_MARCADOR_PUNTOS
+  N_MOSTRAR_MENU_PRINCIPAL --> N_APLICAR_COLOR_CICLO_NIVELES
+  N_MOSTRAR_MENU_PRINCIPAL --> N_LIMPIAR_VRAM_AREA_JUEGO
+  N_MOSTRAR_MENU_PRINCIPAL --> N_PROGRAMAR_APAGADO_PANTALLA
+  N_MOSTRAR_MENU_PRINCIPAL --> N_VACIAR_CANALES_SONIDO
+  N_MOTOR_ACTORES --> N_CALCULAR_DIRECCION_MASCARA_ACTOR
+  N_MOTOR_ACTORES --> N_CAPTURAR_MASCARAS_ACTOR
+  N_MOTOR_ACTORES --> N_INVERTIR_BITS_PATRON_ACTOR
+  N_MOTOR_ACTORES --> N_INVERTIR_ORDEN_BYTES_PATRON_ACTOR
+  N_MOTOR_MOVIMIENTO_ITEM --> N_CONSULTAR_LOSETA_LIBRE_DIRECCION
+  N_MOTOR_MOVIMIENTO_ITEM --> N_GENERAR_ALEATORIO
+  N_REDIBUJAR_PANTALLA_COMPLETA_BUFFER_VRAM --> N_DIBUJAR_FILA_LOSETAS_BUFFER_VRAM
+  N_REDIBUJAR_PANTALLA_COMPLETA_BUFFER_VRAM --> N_DIBUJAR_MARCADOR_PUNTOS
+  N_REDIBUJAR_PANTALLA_COMPLETA_BUFFER_VRAM --> N_FILVRM
+  N_REDIBUJAR_PANTALLA_COMPLETA_BUFFER_VRAM --> N_LDIRVM_INVERTIDO
+  N_REINICIAR_ENVOLVENTE_RUIDO --> N_DIVIDIR_16X16
+  N_REINICIAR_ENVOLVENTE_RUIDO --> N_MULTIPLICAR_8X16
+  N_VACIAR_CANALES_SONIDO --> N_INSTALAR_RECURSO_SONIDO_EN_A
+  N_VACIAR_COLA_REDIBUJADO --> N_REDIBUJAR_LOSETA_BUFFER_VRAM
+  N_WAIT_VBLANK --> N_DIBUJAR_MARCADOR_PUNTOS
+  class N_DIBUJAR_PORTADA,N_ACTIVAR_INTERRUPCION_MODO_1,N_FUNCION_INHABIL,N_DETECTAR_SLOTS_RAM,N_GUARDAR_CONFIG_SLOT_A,N_GUARDAR_CONFIG_SLOT_B,N_DETECTAR_RAM_PAGINA,N_LEER_CINTA,N_APLICAR_SLOT_PAGINA_0,N_APLICAR_SLOT_PAGINA_1,N_APLICAR_SLOT_PAGINA_2 cat_boot;
+  class N_MOSTRAR_MENU_PRINCIPAL,N_DIBUJAR_MENU_PRINCIPAL,N_LEER_TECLAS_MENU_PRINCIPAL,N_DIBUJAR_MENU_REDEFINIR_TECLAS,N_DIBUJAR_NOMBRE_TECLA_ASIGNADA,N_REINICIAR_TECLAS_USADAS,N_ESPERAR_TECLA_NUEVA,N_DIBUJAR_CREDITOS,N_GESTIONAR_CICLO_NIVELES cat_menu;
+  class N_ENLACE_MOTOR_MOVIMIENTO_COLISION,N_CONSULTAR_PROXIMA_LOSETA_EN_ESTA_DIRECCION,N_CONSULTAR_LOSETA_LIBRE_DIRECCION,N_MAPEAR_COORDENADA_A_DIRECCION,N_GENERAR_ALEATORIO,N_CARGAR_NIVEL,N_MOTOR_ACTORES,N_CAPTURAR_MASCARAS_ACTOR,N_CONTINUAR_CAPTURA_MASCARAS_ACTORES,N_INVERTIR_BITS_PATRON_ACTOR,N_INVERTIR_ORDEN_BYTES_PATRON_ACTOR,N_GESTIONAR_FRAME,N_CALCULAR_DIRECCION_MASCARA_ACTOR,N_RESET_CONTADOR_ACTORES,N_MAPEAR_LOSETA_RELATIVA_A_ABSOLUTA,N_CONSULTAR_TIPO_LOSETA,N_ACTUALIZAR_LOSETA_BOLA_ESPECIAL cat_motor;
+  class N_REGISTRAR_PISTA_TANQUE_AVION,N_HNDLR_PELMAZOIDE,N_MOTOR_MOVIMIENTO_ITEM,N_CALCULAR_POSICION_VRAM_ITEM,N_HNDLR_MARICOCO,N_MAPEAR_COORDENADA_A_DIRECCION_LOCAL,N_HNDLR_REGPUNANTOSO,N_AVISAR_PROXIMIDAD_PISTA,N_ARMAR_AVISO_DESTELLO,N_ACTUALIZAR_DESTELLO_ITEMS,N_ACTIVAR_EFECTO_ITEM,N_INICIALIZAR_ITEMS_NIVEL,N_INICIALIZAR_PARCIAL_ITEMS_NIVEL cat_items;
+  class N_ESPERAR_TECLA_SOLTADA,N_COMPROBAR_PULSACION,N_DIBUJAR_MARCADOR_PUNTOS,N_DIBUJAR_MARCADOR_PUNTOS_DIGITOS,N_DIBUJAR_TEXTO_INVERTIDO_VRAM,N_LEER_ENTRADA,N_ESCANEAR_FILAS_TECLADO,N_COMPROBAR_TECLA_MSX,N_DESTELLO_ICONO_COLOR_HUD,N_CONFIGURAR_Y_LEER_JOYSTICK_PSG cat_hud;
+  class N_APAGAR_PANTALLA_VDP,N_ENCENDER_PANTALLA_VDP,N_PROGRAMAR_APAGADO_PANTALLA,N_PROGRAMAR_ENCENDIDO_PANTALLA,N_DIBUJAR_CAMBIO_LOSETA,N_RELLENAR_SOLIDO_AREA_JUEGO_BUFFER_VRAM,N_LIMPIAR_VRAM_AREA_JUEGO,N_ESCRIBIR_PATRON_VRAM,N_DIBUJAR_TEXTO_VRAM,N_DIBUJAR_MARCO_CARAMELO_VRAM,N_APLICAR_COLOR_PANTALLA,N_APLICAR_COLOR_CICLO_NIVELES,N_OBTENER_COLOR_VDP,N_FIJAR_COLOR_BORDE_VDP,N_ACTUALIZAR_VRAM_FRAME,N_FILVRM,N_LDIRVM,N_SETVRAM,N_CONSULTAR_COLOR_VDP,N_WAIT_VBLANK,N_GESTIONAR_SCROLL,N_DIBUJAR_FILA_LOSETAS_BUFFER_VRAM,N_MAPEAR_LOSETA_A_GRAFICO,N_REDIBUJAR_PANTALLA_COMPLETA_BUFFER_VRAM,N_LDIRVM_INVERTIDO,N_APILAR_PETICION_REDIBUJADO,N_VACIAR_COLA_REDIBUJADO,N_REDIBUJAR_LOSETA_BUFFER_VRAM cat_graficos;
+  class N_DESPACHAR_EFECTO_SONIDO,N_INSTALAR_RECURSO_SONIDO,N_INSTALAR_RECURSO_SONIDO_EN_A,N_TICK_REPRODUCTOR_PSG,N_REINICIAR_ENVOLVENTE_VOLUMEN,N_REINICIAR_ENVOLVENTE_TONO,N_REINICIAR_ENVOLVENTE_RUIDO,N_ACTUALIZAR_MEZCLADOR_CANAL,N_OBTENER_PUNTERO_TRANSPOSICION,N_MULTIPLICAR_8X16,N_DIVIDIR_16X16,N_LEER_PALABRA_INDEXADA,N_VOLCAR_REGISTROS_PSG,N_VACIAR_CANALES_SONIDO cat_sonido;
+  class N_ANIMAR_PUNTO_LUZ_SOFT,N_ESCRIBIR_8_BYTES_VRAM,N_DIBUJAR_FORMA_ANIMADA,N_DIBUJAR_SOFT_ROTANDO,N_DIBUJAR_T_TOPO,N_DIBUJAR_P_TOPO_ANIMADA,N_DIBUJAR_O1_TOPO,N_DIBUJAR_O2_TOPO_ANIMADA,N_DIBUJAR_ESTRELLA_ANIMADA,N_LIMPIAR_TABLA_COLOR_VRAM,N_RELLENAR_COLOR_TOPO,N_ANIMAR_COLOR_TOPO,N_ESCRIBIR_8_BYTES_VRAM_C,N_LIMPIAR_TABLA_PATRONES_VRAM cat_otros;
+  classDef cat_boot fill:#d69a3a,stroke:#d69a3a,color:#fff,stroke-width:1px;
+  classDef cat_motor fill:#6a86ae,stroke:#6a86ae,color:#fff,stroke-width:1px;
+  classDef cat_items fill:#8a6ab0,stroke:#8a6ab0,color:#fff,stroke-width:1px;
+  classDef cat_hud fill:#7fae6a,stroke:#7fae6a,color:#fff,stroke-width:1px;
+  classDef cat_menu fill:#4aa89a,stroke:#4aa89a,color:#fff,stroke-width:1px;
+  classDef cat_sonido fill:#c46a6a,stroke:#c46a6a,color:#fff,stroke-width:1px;
+  classDef cat_graficos fill:#3aa8c4,stroke:#3aa8c4,color:#fff,stroke-width:1px;
+  classDef cat_otros fill:#cbc3b6,stroke:#cbc3b6,color:#fff,stroke-width:1px;
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  function currentTheme() {
+    var attr = document.documentElement.getAttribute('data-theme');
+    if (attr === 'dark' || attr === 'light') return attr;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      background: 'transparent',
+      primaryColor: '#ffffff',
+      primaryTextColor: '#2a2620',
+      primaryBorderColor: '#6b6458',
+      lineColor: '#6b6458',
+      fontFamily: '-apple-system, Segoe UI, Roboto, sans-serif',
+      fontSize: '13px'
+    },
+    flowchart: { curve: 'basis', htmlLabels: true, useMaxWidth: false }
+  });
+
+  var scale = 1;
+  var wrap = document.getElementById('diagramWrap');
+  var diagram = document.getElementById('diagram');
+  function applyZoom() { diagram.style.transform = 'scale(' + scale + ')'; }
+  document.getElementById('zoomIn').onclick = function() { scale = Math.min(scale * 1.2, 3); applyZoom(); };
+  document.getElementById('zoomOut').onclick = function() { scale = Math.max(scale / 1.2, 0.2); applyZoom(); };
+  document.getElementById('zoomReset').onclick = function() { scale = 1; applyZoom(); };
+
+  function fitToWindow() {
+    var svg = diagram.querySelector('svg');
+    if (!svg) return;
+    var bbox;
+    try { bbox = svg.getBBox(); } catch (e) { return; }
+    if (!bbox || !bbox.width || !bbox.height) return;
+    var availW = wrap.clientWidth - 32;
+    var availH = wrap.clientHeight - 32;
+    scale = Math.max(Math.min(availW / bbox.width, availH / bbox.height, 1), 0.05);
+    applyZoom();
+  }
+  document.getElementById('zoomFit').onclick = fitToWindow;
+
+  function fitToWidth() {
+    var svg = diagram.querySelector('svg');
+    if (!svg) return;
+    var bbox;
+    try { bbox = svg.getBBox(); } catch (e) { return; }
+    if (!bbox || !bbox.width) return;
+    var availW = wrap.clientWidth - 32;
+    scale = Math.max(availW / bbox.width, 0.05);
+    applyZoom();
+  }
+  document.getElementById('zoomFitWidth').onclick = fitToWidth;
+
+  function nodeText(el) {
+    var parts = [];
+    el.childNodes.forEach(function(n) {
+      if (n.nodeType === Node.TEXT_NODE) parts.push(n.textContent);
+      else if (n.tagName === 'BR') parts.push('\n');
+      else if (n.tagName && n.tagName.toLowerCase() === 'title') { /* ignora titulos ya existentes */ }
+      else parts.push(nodeText(n));
+    });
+    return parts.join('');
+  }
+
+  var boxTooltip = document.getElementById('boxTooltip');
+  var tooltipPinned = false;
+
+  function positionTooltip(x, y) {
+    var pad = 18;
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var rect = boxTooltip.getBoundingClientRect();
+    var left = x + pad;
+    var top = y + pad;
+    if (left + rect.width > vw) left = x - rect.width - pad;
+    if (top + rect.height > vh) top = y - rect.height - pad;
+    boxTooltip.style.left = Math.max(4, left) + 'px';
+    boxTooltip.style.top = Math.max(4, top) + 'px';
+  }
+  function showTooltip(text, x, y) {
+    boxTooltip.textContent = text;
+    boxTooltip.style.display = 'block';
+    positionTooltip(x, y);
+  }
+  function hideTooltip() {
+    boxTooltip.style.display = 'none';
+    tooltipPinned = false;
+  }
+
+  function wireTooltips() {
+    var svg = diagram.querySelector('svg');
+    if (!svg) return;
+    svg.querySelectorAll('.node, .cluster').forEach(function(nodeEl) {
+      var text = nodeText(nodeEl).replace(/[ \t]*\n[ \t]*/g, '\n').trim();
+      if (!text) return;
+      nodeEl.addEventListener('mouseenter', function(ev) {
+        if (!tooltipPinned) showTooltip(text, ev.clientX, ev.clientY);
+      });
+      nodeEl.addEventListener('mousemove', function(ev) {
+        if (!tooltipPinned) positionTooltip(ev.clientX, ev.clientY);
+      });
+      nodeEl.addEventListener('mouseleave', function() {
+        if (!tooltipPinned) hideTooltip();
+      });
+      nodeEl.addEventListener('click', function(ev) {
+        ev.stopPropagation();
+        showTooltip(text, ev.clientX, ev.clientY);
+        tooltipPinned = true;
+      });
+    });
+    document.addEventListener('click', hideTooltip);
+  }
+
+  var wireAttempts = 0;
+  var wireTimer = setInterval(function() {
+    wireAttempts++;
+    var svg = diagram.querySelector('svg');
+    var ready = svg && svg.querySelectorAll('.node, .cluster').length > 0;
+    if (ready) {
+      clearInterval(wireTimer);
+      fitToWindow();
+      wireTooltips();
+    } else if (wireAttempts > 100) {
+      clearInterval(wireTimer); // se rindio tras 10s -- algo fue mal en el render de mermaid
+    }
+  }, 100);
+
+  document.querySelectorAll('#legend input[type=checkbox]').forEach(function(cb) {
+    cb.addEventListener('change', function() {
+      var cat = cb.value;
+      var display = cb.checked ? '' : 'none';
+      document.querySelectorAll('.cat_' + cat).forEach(function(el) {
+        el.style.display = display;
+      });
+    });
+  });
+</script>
+</body>
+</html>

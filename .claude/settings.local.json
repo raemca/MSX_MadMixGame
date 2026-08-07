@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(powershell -File \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User-Documents-Programacion-MSX-proyectos-madmixgame\\\\64af8c43-e34c-4a8d-ada7-025cec0632b1\\\\scratchpad\\\\verify_cas_calibrated.ps1\")",
+      "PowerShell(powershell -File \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User-Documents-Programacion-MSX-proyectos-madmixgame\\\\64af8c43-e34c-4a8d-ada7-025cec0632b1\\\\scratchpad\\\\show_byte_diffs.ps1\")",
+      "PowerShell(sjasmplus src/madmix_scr.asm --sym=build/madmix_scr.sym 2>&1)",
+      "PowerShell(py \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User-Documents-Programacion-MSX-proyectos-madmixgame\\\\64af8c43-e34c-4a8d-ada7-025cec0632b1\\\\scratchpad\\\\scan_cas_v2.py\")",
+      "PowerShell(py \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User-Documents-Programacion-MSX-proyectos-madmixgame\\\\64af8c43-e34c-4a8d-ada7-025cec0632b1\\\\scratchpad\\\\parse_all_blocks_v2.py\")",
+      "PowerShell(py \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User-Documents-Programacion-MSX-proyectos-madmixgame\\\\64af8c43-e34c-4a8d-ada7-025cec0632b1\\\\scratchpad\\\\diff_28ec_block.py\")",
+      "PowerShell(py \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User-Documents-Programacion-MSX-proyectos-madmixgame\\\\64af8c43-e34c-4a8d-ada7-025cec0632b1\\\\scratchpad\\\\render_portada_patron.py\")"
+    ]
+  }
+}

@@ -1,0 +1,3645 @@
+﻿z80dasm: Portable Z80 disassembler
+Copyright (C) Marcel de Kogel 1996,1997
+    jp     $95d1           ; 009470 C3 D1 95 
+    ld     hl,$2f78        ; 009473 21 78 2F 
+    ld     de,$2fb8        ; 009476 11 B8 2F 
+    ld     bc,$00f7        ; 009479 01 F7 00 
+    and    a               ; 00947C A7 
+    sbc    hl,de           ; 00947D ED 52 
+    ret    z               ; 00947F C8 
+    add    hl,de           ; 009480 19 
+    ld     a,$81           ; 009481 3E 81 
+    call   $94a6           ; 009483 CD A6 94 
+    push   hl              ; 009486 E5 
+    add    hl,bc           ; 009487 09 
+    ld     a,$81           ; 009488 3E 81 
+    call   $94a6           ; 00948A CD A6 94 
+    pop    hl              ; 00948D E1 
+    push   hl              ; 00948E E5 
+    ld     a,$f1           ; 00948F 3E F1 
+    call   $94a6           ; 009491 CD A6 94 
+    add    hl,bc           ; 009494 09 
+    ld     a,$f1           ; 009495 3E F1 
+    call   $94a6           ; 009497 CD A6 94 
+    pop    hl              ; 00949A E1 
+    ei                     ; 00949B FB 
+    push   bc              ; 00949C C5 
+    ld     b,$03           ; 00949D 06 03 
+    halt                   ; 00949F 76 
+    djnz   $949f           ; 0094A0 10 FD 
+    pop    bc              ; 0094A2 C1 
+    di                     ; 0094A3 F3 
+    jr     $947c           ; 0094A4 18 D6 
+    push   bc              ; 0094A6 C5 
+    ld     b,$08           ; 0094A7 06 08 
+    call   $004d           ; 0094A9 CD 4D 00 
+    inc    hl              ; 0094AC 23 
+    djnz   $94a9           ; 0094AD 10 FA 
+    pop    bc              ; 0094AF C1 
+    ret                    ; 0094B0 C9 
+    ld     hl,$0000        ; 0094B1 21 00 00 
+    add    hl,hl           ; 0094B4 29 
+    ld     de,$96f8        ; 0094B5 11 F8 96 
+    add    hl,de           ; 0094B8 19 
+    ld     ($96f6),hl      ; 0094B9 22 F6 96 
+    ld     hl,$0000        ; 0094BC 21 00 00 
+    add    hl,hl           ; 0094BF 29 
+    ld     de,$9694        ; 0094C0 11 94 96 
+    add    hl,de           ; 0094C3 19 
+    ld     e,(hl)          ; 0094C4 5E 
+    inc    hl              ; 0094C5 23 
+    ld     d,(hl)          ; 0094C6 56 
+    ld     hl,$9728        ; 0094C7 21 28 97 
+    add    hl,de           ; 0094CA 19 
+    ld     a,(hl)          ; 0094CB 7E 
+    ld     ($94f1),a       ; 0094CC 32 F1 94 
+    inc    hl              ; 0094CF 23 
+    ld     a,(hl)          ; 0094D0 7E 
+    ld     ($94dd),a       ; 0094D1 32 DD 94 
+    inc    hl              ; 0094D4 23 
+    ld     ($96f4),hl      ; 0094D5 22 F4 96 
+    ld     ix,($96f6)      ; 0094D8 DD 2A F6 96 
+    ld     c,$0a           ; 0094DC 0E 0A 
+    ld     e,(ix+$00)      ; 0094DE DD 5E 00 
+    inc    ix              ; 0094E1 DD 23 
+    ld     d,(ix+$00)      ; 0094E3 DD 56 00 
+    inc    ix              ; 0094E6 DD 23 
+    ld     hl,$0000        ; 0094E8 21 00 00 
+    add    hl,de           ; 0094EB 19 
+    ld     de,($96f4)      ; 0094EC ED 5B F4 96 
+    ld     b,$00           ; 0094F0 06 00 
+    ld     a,(de)          ; 0094F2 1A 
+    or     (hl)            ; 0094F3 B6 
+    inc    de              ; 0094F4 13 
+    res    7,h             ; 0094F5 CB BC 
+    res    6,h             ; 0094F7 CB B4 
+    call   $004d           ; 0094F9 CD 4D 00 
+    inc    hl              ; 0094FC 23 
+    set    6,h             ; 0094FD CB F4 
+    set    7,h             ; 0094FF CB FC 
+    djnz   $94f2           ; 009501 10 EF 
+    ld     ($96f4),de      ; 009503 ED 53 F4 96 
+    dec    c               ; 009507 0D 
+    jr     nz,$94de        ; 009508 20 D4 
+    ret                    ; 00950A C9 
+    ld     a,$0f           ; 00950B 3E 0F 
+    ld     ($94b2),a       ; 00950D 32 B2 94 
+    ld     a,$78           ; 009510 3E 78 
+    ld     ($94e9),a       ; 009512 32 E9 94 
+    xor    a               ; 009515 AF 
+    ld     ($94f3),a       ; 009516 32 F3 94 
+    ld     hl,$96b2        ; 009519 21 B2 96 
+    ld     a,(hl)          ; 00951C 7E 
+    cp     $ff             ; 00951D FE FF 
+    ret    z               ; 00951F C8 
+    ld     ($94bd),a       ; 009520 32 BD 94 
+    push   hl              ; 009523 E5 
+    ei                     ; 009524 FB 
+    ld     b,$02           ; 009525 06 02 
+    halt                   ; 009527 76 
+    djnz   $9527           ; 009528 10 FD 
+    di                     ; 00952A F3 
+    call   $94b1           ; 00952B CD B1 94 
+    pop    hl              ; 00952E E1 
+    inc    hl              ; 00952F 23 
+    jr     $951c           ; 009530 18 EA 
+    ld     a,$07           ; 009532 3E 07 
+    ld     ($94bd),a       ; 009534 32 BD 94 
+    ld     a,$06           ; 009537 3E 06 
+    ld     ($94b2),a       ; 009539 32 B2 94 
+    ld     a,$00           ; 00953C 3E 00 
+    cp     $18             ; 00953E FE 18 
+    ret    z               ; 009540 C8 
+    ld     ($94e9),a       ; 009541 32 E9 94 
+    push   af              ; 009544 F5 
+    call   $94b1           ; 009545 CD B1 94 
+    pop    af              ; 009548 F1 
+    add    a,$08           ; 009549 C6 08 
+    jr     $953e           ; 00954B 18 F1 
+    ld     a,$09           ; 00954D 3E 09 
+    ld     ($94bd),a       ; 00954F 32 BD 94 
+    ld     a,$07           ; 009552 3E 07 
+    ld     ($94b2),a       ; 009554 32 B2 94 
+    ld     a,$90           ; 009557 3E 90 
+    cp     $50             ; 009559 FE 50 
+    ret    z               ; 00955B C8 
+    ld     ($94e9),a       ; 00955C 32 E9 94 
+    push   af              ; 00955F F5 
+    ei                     ; 009560 FB 
+    halt                   ; 009561 76 
+    di                     ; 009562 F3 
+    call   $94b1           ; 009563 CD B1 94 
+    pop    af              ; 009566 F1 
+    sub    $08             ; 009567 D6 08 
+    jr     $9559           ; 009569 18 EE 
+    ld     a,$b6           ; 00956B 3E B6 
+    ld     ($94f3),a       ; 00956D 32 F3 94 
+    ld     a,$08           ; 009570 3E 08 
+    ld     ($94bd),a       ; 009572 32 BD 94 
+    ld     a,$38           ; 009575 3E 38 
+    ld     ($94e9),a       ; 009577 32 E9 94 
+    ld     a,$00           ; 00957A 3E 00 
+    cp     $07             ; 00957C FE 07 
+    jr     z,$958b         ; 00957E 28 0B 
+    ld     ($94b2),a       ; 009580 32 B2 94 
+    push   af              ; 009583 F5 
+    call   $94b1           ; 009584 CD B1 94 
+    pop    af              ; 009587 F1 
+    inc    a               ; 009588 3C 
+    jr     $957c           ; 009589 18 F1 
+    jp     $94b1           ; 00958B C3 B1 94 
+    ld     a,$0a           ; 00958E 3E 0A 
+    ld     ($94bd),a       ; 009590 32 BD 94 
+    ld     hl,$96cc        ; 009593 21 CC 96 
+    ld     a,(hl)          ; 009596 7E 
+    cp     $ff             ; 009597 FE FF 
+    jr     z,$95ab         ; 009599 28 10 
+    inc    hl              ; 00959B 23 
+    ld     ($94e9),a       ; 00959C 32 E9 94 
+    ld     a,(hl)          ; 00959F 7E 
+    inc    hl              ; 0095A0 23 
+    ld     ($94b2),a       ; 0095A1 32 B2 94 
+    push   hl              ; 0095A4 E5 
+    call   $94b1           ; 0095A5 CD B1 94 
+    pop    hl              ; 0095A8 E1 
+    jr     $9596           ; 0095A9 18 EB 
+    jp     $94b1           ; 0095AB C3 B1 94 
+    ld     hl,$96e9        ; 0095AE 21 E9 96 
+    ld     a,(hl)          ; 0095B1 7E 
+    cp     $ff             ; 0095B2 FE FF 
+    ret    z               ; 0095B4 C8 
+    push   hl              ; 0095B5 E5 
+    ld     ($94bd),a       ; 0095B6 32 BD 94 
+    ld     a,$b0           ; 0095B9 3E B0 
+    ld     ($94e9),a       ; 0095BB 32 E9 94 
+    ld     a,$0d           ; 0095BE 3E 0D 
+    ld     ($94b2),a       ; 0095C0 32 B2 94 
+    ei                     ; 0095C3 FB 
+    ld     b,$04           ; 0095C4 06 04 
+    halt                   ; 0095C6 76 
+    djnz   $95c6           ; 0095C7 10 FD 
+    di                     ; 0095C9 F3 
+    call   $94b1           ; 0095CA CD B1 94 
+    pop    hl              ; 0095CD E1 
+    inc    hl              ; 0095CE 23 
+    jr     $95b1           ; 0095CF 18 E0 
+    di                     ; 0095D1 F3 
+    xor    a               ; 0095D2 AF 
+    ld     ($94f3),a       ; 0095D3 32 F3 94 
+    call   $9602           ; 0095D6 CD 02 96 
+    call   $9532           ; 0095D9 CD 32 95 
+    call   $954d           ; 0095DC CD 4D 95 
+    call   $9688           ; 0095DF CD 88 96 
+    call   $956b           ; 0095E2 CD 6B 95 
+    call   $9688           ; 0095E5 CD 88 96 
+    call   $958e           ; 0095E8 CD 8E 95 
+    call   $962b           ; 0095EB CD 2B 96 
+    call   $9614           ; 0095EE CD 14 96 
+    call   $950b           ; 0095F1 CD 0B 95 
+    call   $950b           ; 0095F4 CD 0B 95 
+    call   $950b           ; 0095F7 CD 0B 95 
+    call   $9473           ; 0095FA CD 73 94 
+    call   $95ae           ; 0095FD CD AE 95 
+    ei                     ; 009600 FB 
+    ret                    ; 009601 C9 
+    ld     hl,$2000        ; 009602 21 00 20 
+    ld     bc,$1800        ; 009605 01 00 18 
+    ld     a,$f0           ; 009608 3E F0 
+    call   $004d           ; 00960A CD 4D 00 
+    inc    hl              ; 00960D 23 
+    dec    bc              ; 00960E 0B 
+    ld     a,b             ; 00960F 78 
+    or     c               ; 009610 B1 
+    jr     nz,$9608        ; 009611 20 F5 
+    ret                    ; 009613 C9 
+    ld     hl,$2f78        ; 009614 21 78 2F 
+    ld     a,$81           ; 009617 3E 81 
+    ld     c,$02           ; 009619 0E 02 
+    ld     b,$40           ; 00961B 06 40 
+    call   $004d           ; 00961D CD 4D 00 
+    inc    hl              ; 009620 23 
+    djnz   $961d           ; 009621 10 FA 
+    ld     de,$00c0        ; 009623 11 C0 00 
+    add    hl,de           ; 009626 19 
+    dec    c               ; 009627 0D 
+    jr     nz,$961b        ; 009628 20 F1 
+    ret                    ; 00962A C9 
+    ld     de,$0008        ; 00962B 11 08 00 
+    ld     hl,$2658        ; 00962E 21 58 26 
+    push   hl              ; 009631 E5 
+    ld     b,$05           ; 009632 06 05 
+    push   de              ; 009634 D5 
+    ld     a,$71           ; 009635 3E 71 
+    call   $967e           ; 009637 CD 7E 96 
+    ld     de,$00f8        ; 00963A 11 F8 00 
+    add    hl,de           ; 00963D 19 
+    djnz   $9635           ; 00963E 10 F5 
+    ld     b,$06           ; 009640 06 06 
+    ld     a,$31           ; 009642 3E 31 
+    call   $967e           ; 009644 CD 7E 96 
+    add    hl,de           ; 009647 19 
+    djnz   $9642           ; 009648 10 F8 
+    pop    de              ; 00964A D1 
+    pop    hl              ; 00964B E1 
+    push   hl              ; 00964C E5 
+    add    hl,de           ; 00964D 19 
+    push   de              ; 00964E D5 
+    ld     b,$05           ; 00964F 06 05 
+    ld     a,$71           ; 009651 3E 71 
+    call   $967e           ; 009653 CD 7E 96 
+    ld     de,$00f8        ; 009656 11 F8 00 
+    add    hl,de           ; 009659 19 
+    djnz   $9651           ; 00965A 10 F5 
+    ld     b,$06           ; 00965C 06 06 
+    ld     a,$31           ; 00965E 3E 31 
+    call   $967e           ; 009660 CD 7E 96 
+    add    hl,de           ; 009663 19 
+    djnz   $965e           ; 009664 10 F8 
+    pop    de              ; 009666 D1 
+    pop    hl              ; 009667 E1 
+    ld     a,e             ; 009668 7B 
+    cp     $98             ; 009669 FE 98 
+    ret    z               ; 00966B C8 
+    ei                     ; 00966C FB 
+    ld     b,$04           ; 00966D 06 04 
+    halt                   ; 00966F 76 
+    djnz   $966f           ; 009670 10 FD 
+    di                     ; 009672 F3 
+    add    a,$10           ; 009673 C6 10 
+    ld     e,a             ; 009675 5F 
+    push   de              ; 009676 D5 
+    ld     de,$fff8        ; 009677 11 F8 FF 
+    add    hl,de           ; 00967A 19 
+    pop    de              ; 00967B D1 
+    jr     $9631           ; 00967C 18 B3 
+    ld     c,$08           ; 00967E 0E 08 
+    call   $004d           ; 009680 CD 4D 00 
+    inc    hl              ; 009683 23 
+    dec    c               ; 009684 0D 
+    jr     nz,$9680        ; 009685 20 F9 
+    ret                    ; 009687 C9 
+    ld     hl,$0000        ; 009688 21 00 00 
+    ld     de,$c000        ; 00968B 11 00 C0 
+    ld     bc,$1800        ; 00968E 01 00 18 
+    jp     $0059           ; 009691 C3 59 00 
+    nop                    ; 009694 00 
+    nop                    ; 009695 00 
+    add    a,d             ; 009696 82 
+    nop                    ; 009697 00 
+    inc    b               ; 009698 04 
+    ld     bc,$0186        ; 009699 01 86 01 
+    ex     af,af'          ; 00969C 08 
+    ld     (bc),a          ; 00969D 02 
+    adc    a,d             ; 00969E 8A 
+    ld     (bc),a          ; 00969F 02 
+    inc    c               ; 0096A0 0C 
+    inc    bc              ; 0096A1 03 
+    adc    a,(hl)          ; 0096A2 8E 
+    inc    bc              ; 0096A3 03 
+    xor    b               ; 0096A4 A8 
+    ld     b,$ea           ; 0096A5 06 EA 
+    rlca                   ; 0096A7 07 
+    call   z,$fe09         ; 0096A8 CC 09 FE 
+    dec    bc              ; 0096AB 0B 
+    ld     a,b             ; 0096AC 78 
+    inc    c               ; 0096AD 0C 
+    jp     p,$6c0c         ; 0096AE F2 0C 6C 
+    dec    c               ; 0096B1 0D 
+    ld     bc,$0201        ; 0096B2 01 01 02 
+    ld     (bc),a          ; 0096B5 02 
+    inc    bc              ; 0096B6 03 
+    inc    bc              ; 0096B7 03 
+    inc    b               ; 0096B8 04 
+    inc    b               ; 0096B9 04 
+    dec    b               ; 0096BA 05 
+    dec    b               ; 0096BB 05 
+    ld     b,$06           ; 0096BC 06 06 
+    dec    b               ; 0096BE 05 
+    dec    b               ; 0096BF 05 
+    inc    b               ; 0096C0 04 
+    inc    b               ; 0096C1 04 
+    inc    bc              ; 0096C2 03 
+    inc    bc              ; 0096C3 03 
+    ld     (bc),a          ; 0096C4 02 
+    ld     (bc),a          ; 0096C5 02 
+    ld     bc,$0001        ; 0096C6 01 01 00 
+    nop                    ; 0096C9 00 
+    rst    38h             ; 0096CA FF 
+    rst    38h             ; 0096CB FF 
+    jr     nc,$96d4        ; 0096CC 30 06 
+    jr     nc,$96d5        ; 0096CE 30 05 
+    jr     nc,$96d6        ; 0096D0 30 04 
+    jr     c,$96d8         ; 0096D2 38 04 
+    jr     c,$96d9         ; 0096D4 38 03 
+    ld     b,b             ; 0096D6 40 
+    ld     (bc),a          ; 0096D7 02 
+    ld     c,b             ; 0096D8 48 
+    ld     (bc),a          ; 0096D9 02 
+    ld     d,b             ; 0096DA 50 
+    ld     bc,$0258        ; 0096DB 01 58 02 
+    ld     h,b             ; 0096DE 60 
+    ld     (bc),a          ; 0096DF 02 
+    ld     l,b             ; 0096E0 68 
+    inc    bc              ; 0096E1 03 
+    ld     (hl),b          ; 0096E2 70 
+    inc    b               ; 0096E3 04 
+    ld     (hl),b          ; 0096E4 70 
+    dec    b               ; 0096E5 05 
+    ld     (hl),b          ; 0096E6 70 
+    ld     b,$ff           ; 0096E7 06 FF 
+    dec    bc              ; 0096E9 0B 
+    inc    c               ; 0096EA 0C 
+    dec    c               ; 0096EB 0D 
+    inc    c               ; 0096EC 0C 
+    dec    bc              ; 0096ED 0B 
+    inc    c               ; 0096EE 0C 
+    dec    c               ; 0096EF 0D 
+    ld     c,$ff           ; 0096F0 0E FF 
+    nop                    ; 0096F2 00 
+    nop                    ; 0096F3 00 
+    nop                    ; 0096F4 00 
+    nop                    ; 0096F5 00 
+    nop                    ; 0096F6 00 
+    nop                    ; 0096F7 00 
+    nop                    ; 0096F8 00 
+    ret    nz              ; 0096F9 C0 
+    nop                    ; 0096FA 00 
+    pop    bc              ; 0096FB C1 
+    nop                    ; 0096FC 00 
+    jp     nz,$c300        ; 0096FD C2 00 C3 
+    nop                    ; 009700 00 
+    call   nz,$c500        ; 009701 C4 00 C5 
+    nop                    ; 009704 00 
+    add    a,$00           ; 009705 C6 00 
+    rst    00h             ; 009707 C7 
+    nop                    ; 009708 00 
+    ret    z               ; 009709 C8 
+    nop                    ; 00970A 00 
+    ret                    ; 00970B C9 
+    nop                    ; 00970C 00 
+    jp     z,$cb00         ; 00970D CA 00 CB 
+    nop                    ; 009710 00 
+    call   z,$cd00         ; 009711 CC 00 CD 
+    nop                    ; 009714 00 
+    adc    a,$00           ; 009715 CE 00 
+    rst    08h             ; 009717 CF 
+    nop                    ; 009718 00 
+    ret    nc              ; 009719 D0 
+    nop                    ; 00971A 00 
+    pop    de              ; 00971B D1 
+    nop                    ; 00971C 00 
+    jp     nc,$d300        ; 00971D D2 00 D3 
+    nop                    ; 009720 00 
+    call   nc,$d500        ; 009721 D4 00 D5 
+    nop                    ; 009724 00 
+    sub    $00             ; 009725 D6 00 
+    rst    10h             ; 009727 D7 
+    ld     b,b             ; 009728 40 
+    ld     (bc),a          ; 009729 02 
+    nop                    ; 00972A 00 
+    nop                    ; 00972B 00 
+    nop                    ; 00972C 00 
+    rra                    ; 00972D 1F 
+    ccf                    ; 00972E 3F 
+    ld     a,b             ; 00972F 78 
+    ld     (hl),b          ; 009730 70 
+    ccf                    ; 009731 3F 
+    nop                    ; 009732 00 
+    nop                    ; 009733 00 
+    nop                    ; 009734 00 
+    ret    po              ; 009735 E0 
+    ret    m               ; 009736 F8 
+    inc    a               ; 009737 3C 
+    ld     bc,$00fd        ; 009738 01 FD 00 
+    nop                    ; 00973B 00 
+    nop                    ; 00973C 00 
+    rra                    ; 00973D 1F 
+    ld     a,a             ; 00973E 7F 
+    ret    m               ; 00973F F8 
+    ret    nz              ; 009740 C0 
+    add    a,b             ; 009741 80 
+    nop                    ; 009742 00 
+    nop                    ; 009743 00 
+    nop                    ; 009744 00 
+    ret    p               ; 009745 F0 
+    call   m,$073e         ; 009746 FC 3E 07 
+    inc    bc              ; 009749 03 
+    nop                    ; 00974A 00 
+    nop                    ; 00974B 00 
+    nop                    ; 00974C 00 
+    inc    bc              ; 00974D 03 
+    rlca                   ; 00974E 07 
+    ld     e,$38           ; 00974F 1E 38 
+    ccf                    ; 009751 3F 
+    nop                    ; 009752 00 
+    nop                    ; 009753 00 
+    nop                    ; 009754 00 
+    rst    38h             ; 009755 FF 
+    rst    38h             ; 009756 FF 
+    nop                    ; 009757 00 
+    nop                    ; 009758 00 
+    add    a,b             ; 009759 80 
+    nop                    ; 00975A 00 
+    nop                    ; 00975B 00 
+    nop                    ; 00975C 00 
+    sbc    a,a             ; 00975D 9F 
+    sbc    a,a             ; 00975E 9F 
+    sub    b               ; 00975F 90 
+    nop                    ; 009760 00 
+    nop                    ; 009761 00 
+    nop                    ; 009762 00 
+    nop                    ; 009763 00 
+    nop                    ; 009764 00 
+    cp     $fe             ; 009765 FE FE 
+    jp     nz,$c0c0        ; 009767 C2 C0 C0 
+    rrca                   ; 00976A 0F 
+    ld     (hl),b          ; 00976B 70 
+    jr     c,$978d         ; 00976C 38 1F 
+    rlca                   ; 00976E 07 
+    nop                    ; 00976F 00 
+    nop                    ; 009770 00 
+    nop                    ; 009771 00 
+    db     $fd             ; 009772 FD 
+    inc    e               ; 009773 1C 
+    jr     c,$9766         ; 009774 38 F0 
+    ret    nz              ; 009776 C0 
+    nop                    ; 009777 00 
+    nop                    ; 009778 00 
+    nop                    ; 009779 00 
+    ret    nz              ; 00977A C0 
+    ret    p               ; 00977B F0 
+    ld     a,h             ; 00977C 7C 
+    rra                    ; 00977D 1F 
+    rlca                   ; 00977E 07 
+    nop                    ; 00977F 00 
+    nop                    ; 009780 00 
+    nop                    ; 009781 00 
+    rlca                   ; 009782 07 
+    ld     e,$7c           ; 009783 1E 7C 
+    ret    p               ; 009785 F0 
+    ret    nz              ; 009786 C0 
+    nop                    ; 009787 00 
+    nop                    ; 009788 00 
+    nop                    ; 009789 00 
+    ccf                    ; 00978A 3F 
+    jr     nc,$97bd        ; 00978B 30 30 
+    jr     nc,$97bf        ; 00978D 30 30 
+    nop                    ; 00978F 00 
+    nop                    ; 009790 00 
+    nop                    ; 009791 00 
+    add    a,b             ; 009792 80 
+    nop                    ; 009793 00 
+    nop                    ; 009794 00 
+    nop                    ; 009795 00 
+    nop                    ; 009796 00 
+    nop                    ; 009797 00 
+    nop                    ; 009798 00 
+    nop                    ; 009799 00 
+    nop                    ; 00979A 00 
+    nop                    ; 00979B 00 
+    nop                    ; 00979C 00 
+    nop                    ; 00979D 00 
+    nop                    ; 00979E 00 
+    nop                    ; 00979F 00 
+    nop                    ; 0097A0 00 
+    nop                    ; 0097A1 00 
+    ret    nz              ; 0097A2 C0 
+    ret    nz              ; 0097A3 C0 
+    ret    nz              ; 0097A4 C0 
+    ret    nz              ; 0097A5 C0 
+    ret    nz              ; 0097A6 C0 
+    nop                    ; 0097A7 00 
+    nop                    ; 0097A8 00 
+    nop                    ; 0097A9 00 
+    ld     b,b             ; 0097AA 40 
+    ld     (bc),a          ; 0097AB 02 
+    nop                    ; 0097AC 00 
+    nop                    ; 0097AD 00 
+    nop                    ; 0097AE 00 
+    nop                    ; 0097AF 00 
+    nop                    ; 0097B0 00 
+    nop                    ; 0097B1 00 
+    rra                    ; 0097B2 1F 
+    ld     a,b             ; 0097B3 78 
+    nop                    ; 0097B4 00 
+    nop                    ; 0097B5 00 
+    nop                    ; 0097B6 00 
+    nop                    ; 0097B7 00 
+    nop                    ; 0097B8 00 
+    nop                    ; 0097B9 00 
+    ret    po              ; 0097BA E0 
+    inc    a               ; 0097BB 3C 
+    nop                    ; 0097BC 00 
+    nop                    ; 0097BD 00 
+    nop                    ; 0097BE 00 
+    nop                    ; 0097BF 00 
+    nop                    ; 0097C0 00 
+    nop                    ; 0097C1 00 
+    rra                    ; 0097C2 1F 
+    ret    m               ; 0097C3 F8 
+    nop                    ; 0097C4 00 
+    nop                    ; 0097C5 00 
+    nop                    ; 0097C6 00 
+    nop                    ; 0097C7 00 
+    nop                    ; 0097C8 00 
+    nop                    ; 0097C9 00 
+    ret    p               ; 0097CA F0 
+    ld     e,$00           ; 0097CB 1E 00 
+    nop                    ; 0097CD 00 
+    nop                    ; 0097CE 00 
+    nop                    ; 0097CF 00 
+    nop                    ; 0097D0 00 
+    nop                    ; 0097D1 00 
+    inc    bc              ; 0097D2 03 
+    ld     e,$00           ; 0097D3 1E 00 
+    nop                    ; 0097D5 00 
+    nop                    ; 0097D6 00 
+    nop                    ; 0097D7 00 
+    nop                    ; 0097D8 00 
+    nop                    ; 0097D9 00 
+    rst    38h             ; 0097DA FF 
+    nop                    ; 0097DB 00 
+    nop                    ; 0097DC 00 
+    nop                    ; 0097DD 00 
+    nop                    ; 0097DE 00 
+    nop                    ; 0097DF 00 
+    nop                    ; 0097E0 00 
+    nop                    ; 0097E1 00 
+    sbc    a,a             ; 0097E2 9F 
+    sub    b               ; 0097E3 90 
+    nop                    ; 0097E4 00 
+    nop                    ; 0097E5 00 
+    nop                    ; 0097E6 00 
+    nop                    ; 0097E7 00 
+    nop                    ; 0097E8 00 
+    nop                    ; 0097E9 00 
+    cp     $c2             ; 0097EA FE C2 
+    ccf                    ; 0097EC 3F 
+    ld     (hl),b          ; 0097ED 70 
+    rra                    ; 0097EE 1F 
+    nop                    ; 0097EF 00 
+    nop                    ; 0097F0 00 
+    nop                    ; 0097F1 00 
+    nop                    ; 0097F2 00 
+    nop                    ; 0097F3 00 
+    db     $fd             ; 0097F4 FD 
+    inc    e               ; 0097F5 1C 
+    ret    p               ; 0097F6 F0 
+    nop                    ; 0097F7 00 
+    nop                    ; 0097F8 00 
+    nop                    ; 0097F9 00 
+    nop                    ; 0097FA 00 
+    nop                    ; 0097FB 00 
+    add    a,b             ; 0097FC 80 
+    ret    p               ; 0097FD F0 
+    ccf                    ; 0097FE 3F 
+    nop                    ; 0097FF 00 
+    nop                    ; 009800 00 
+    nop                    ; 009801 00 
+    nop                    ; 009802 00 
+    nop                    ; 009803 00 
+    inc    bc              ; 009804 03 
+    ld     e,$f8           ; 009805 1E F8 
+    nop                    ; 009807 00 
+    nop                    ; 009808 00 
+    nop                    ; 009809 00 
+    nop                    ; 00980A 00 
+    nop                    ; 00980B 00 
+    ccf                    ; 00980C 3F 
+    jr     nc,$983f        ; 00980D 30 30 
+    nop                    ; 00980F 00 
+    nop                    ; 009810 00 
+    nop                    ; 009811 00 
+    nop                    ; 009812 00 
+    nop                    ; 009813 00 
+    add    a,b             ; 009814 80 
+    nop                    ; 009815 00 
+    nop                    ; 009816 00 
+    nop                    ; 009817 00 
+    nop                    ; 009818 00 
+    nop                    ; 009819 00 
+    nop                    ; 00981A 00 
+    nop                    ; 00981B 00 
+    nop                    ; 00981C 00 
+    nop                    ; 00981D 00 
+    nop                    ; 00981E 00 
+    nop                    ; 00981F 00 
+    nop                    ; 009820 00 
+    nop                    ; 009821 00 
+    nop                    ; 009822 00 
+    nop                    ; 009823 00 
+    ret    nz              ; 009824 C0 
+    ret    nz              ; 009825 C0 
+    ret    nz              ; 009826 C0 
+    nop                    ; 009827 00 
+    nop                    ; 009828 00 
+    nop                    ; 009829 00 
+    nop                    ; 00982A 00 
+    nop                    ; 00982B 00 
+    ld     b,b             ; 00982C 40 
+    ld     (bc),a          ; 00982D 02 
+    nop                    ; 00982E 00 
+    nop                    ; 00982F 00 
+    nop                    ; 009830 00 
+    nop                    ; 009831 00 
+    nop                    ; 009832 00 
+    nop                    ; 009833 00 
+    nop                    ; 009834 00 
+    rra                    ; 009835 1F 
+    nop                    ; 009836 00 
+    nop                    ; 009837 00 
+    nop                    ; 009838 00 
+    nop                    ; 009839 00 
+    nop                    ; 00983A 00 
+    nop                    ; 00983B 00 
+    nop                    ; 00983C 00 
+    ret    po              ; 00983D E0 
+    nop                    ; 00983E 00 
+    nop                    ; 00983F 00 
+    nop                    ; 009840 00 
+    nop                    ; 009841 00 
+    nop                    ; 009842 00 
+    nop                    ; 009843 00 
+    nop                    ; 009844 00 
+    ld     a,a             ; 009845 7F 
+    nop                    ; 009846 00 
+    nop                    ; 009847 00 
+    nop                    ; 009848 00 
+    nop                    ; 009849 00 
+    nop                    ; 00984A 00 
+    nop                    ; 00984B 00 
+    nop                    ; 00984C 00 
+    call   m,$0000         ; 00984D FC 00 00 
+    nop                    ; 009850 00 
+    nop                    ; 009851 00 
+    nop                    ; 009852 00 
+    nop                    ; 009853 00 
+    nop                    ; 009854 00 
+    inc    bc              ; 009855 03 
+    nop                    ; 009856 00 
+    nop                    ; 009857 00 
+    nop                    ; 009858 00 
+    nop                    ; 009859 00 
+    nop                    ; 00985A 00 
+    nop                    ; 00985B 00 
+    nop                    ; 00985C 00 
+    rst    38h             ; 00985D FF 
+    nop                    ; 00985E 00 
+    nop                    ; 00985F 00 
+    nop                    ; 009860 00 
+    nop                    ; 009861 00 
+    nop                    ; 009862 00 
+    nop                    ; 009863 00 
+    nop                    ; 009864 00 
+    sbc    a,a             ; 009865 9F 
+    nop                    ; 009866 00 
+    nop                    ; 009867 00 
+    nop                    ; 009868 00 
+    nop                    ; 009869 00 
+    nop                    ; 00986A 00 
+    nop                    ; 00986B 00 
+    nop                    ; 00986C 00 
+    cp     $3f             ; 00986D FE 3F 
+    rra                    ; 00986F 1F 
+    nop                    ; 009870 00 
+    nop                    ; 009871 00 
+    nop                    ; 009872 00 
+    nop                    ; 009873 00 
+    nop                    ; 009874 00 
+    nop                    ; 009875 00 
+    db     $fd             ; 009876 FD 
+    ret    p               ; 009877 F0 
+    nop                    ; 009878 00 
+    nop                    ; 009879 00 
+    nop                    ; 00987A 00 
+    nop                    ; 00987B 00 
+    nop                    ; 00987C 00 
+    nop                    ; 00987D 00 
+    ret    nz              ; 00987E C0 
+    ld     a,a             ; 00987F 7F 
+    nop                    ; 009880 00 
+    nop                    ; 009881 00 
+    nop                    ; 009882 00 
+    nop                    ; 009883 00 
+    nop                    ; 009884 00 
+    nop                    ; 009885 00 
+    rlca                   ; 009886 07 
+    call   m,$0000         ; 009887 FC 00 00 
+    nop                    ; 00988A 00 
+    nop                    ; 00988B 00 
+    nop                    ; 00988C 00 
+    nop                    ; 00988D 00 
+    ccf                    ; 00988E 3F 
+    jr     nc,$9891        ; 00988F 30 00 
+    nop                    ; 009891 00 
+    nop                    ; 009892 00 
+    nop                    ; 009893 00 
+    nop                    ; 009894 00 
+    nop                    ; 009895 00 
+    add    a,b             ; 009896 80 
+    nop                    ; 009897 00 
+    nop                    ; 009898 00 
+    nop                    ; 009899 00 
+    nop                    ; 00989A 00 
+    nop                    ; 00989B 00 
+    nop                    ; 00989C 00 
+    nop                    ; 00989D 00 
+    nop                    ; 00989E 00 
+    nop                    ; 00989F 00 
+    nop                    ; 0098A0 00 
+    nop                    ; 0098A1 00 
+    nop                    ; 0098A2 00 
+    nop                    ; 0098A3 00 
+    nop                    ; 0098A4 00 
+    nop                    ; 0098A5 00 
+    ret    nz              ; 0098A6 C0 
+    ret    nz              ; 0098A7 C0 
+    nop                    ; 0098A8 00 
+    nop                    ; 0098A9 00 
+    nop                    ; 0098AA 00 
+    nop                    ; 0098AB 00 
+    nop                    ; 0098AC 00 
+    nop                    ; 0098AD 00 
+    ld     b,b             ; 0098AE 40 
+    ld     (bc),a          ; 0098AF 02 
+    nop                    ; 0098B0 00 
+    nop                    ; 0098B1 00 
+    nop                    ; 0098B2 00 
+    nop                    ; 0098B3 00 
+    nop                    ; 0098B4 00 
+    nop                    ; 0098B5 00 
+    nop                    ; 0098B6 00 
+    nop                    ; 0098B7 00 
+    nop                    ; 0098B8 00 
+    nop                    ; 0098B9 00 
+    nop                    ; 0098BA 00 
+    nop                    ; 0098BB 00 
+    nop                    ; 0098BC 00 
+    nop                    ; 0098BD 00 
+    nop                    ; 0098BE 00 
+    nop                    ; 0098BF 00 
+    nop                    ; 0098C0 00 
+    nop                    ; 0098C1 00 
+    nop                    ; 0098C2 00 
+    nop                    ; 0098C3 00 
+    nop                    ; 0098C4 00 
+    nop                    ; 0098C5 00 
+    nop                    ; 0098C6 00 
+    nop                    ; 0098C7 00 
+    nop                    ; 0098C8 00 
+    nop                    ; 0098C9 00 
+    nop                    ; 0098CA 00 
+    nop                    ; 0098CB 00 
+    nop                    ; 0098CC 00 
+    nop                    ; 0098CD 00 
+    nop                    ; 0098CE 00 
+    nop                    ; 0098CF 00 
+    nop                    ; 0098D0 00 
+    nop                    ; 0098D1 00 
+    nop                    ; 0098D2 00 
+    nop                    ; 0098D3 00 
+    nop                    ; 0098D4 00 
+    nop                    ; 0098D5 00 
+    nop                    ; 0098D6 00 
+    nop                    ; 0098D7 00 
+    nop                    ; 0098D8 00 
+    nop                    ; 0098D9 00 
+    nop                    ; 0098DA 00 
+    nop                    ; 0098DB 00 
+    nop                    ; 0098DC 00 
+    nop                    ; 0098DD 00 
+    nop                    ; 0098DE 00 
+    nop                    ; 0098DF 00 
+    nop                    ; 0098E0 00 
+    nop                    ; 0098E1 00 
+    nop                    ; 0098E2 00 
+    nop                    ; 0098E3 00 
+    nop                    ; 0098E4 00 
+    nop                    ; 0098E5 00 
+    nop                    ; 0098E6 00 
+    nop                    ; 0098E7 00 
+    nop                    ; 0098E8 00 
+    nop                    ; 0098E9 00 
+    nop                    ; 0098EA 00 
+    nop                    ; 0098EB 00 
+    nop                    ; 0098EC 00 
+    nop                    ; 0098ED 00 
+    nop                    ; 0098EE 00 
+    nop                    ; 0098EF 00 
+    ccf                    ; 0098F0 3F 
+    nop                    ; 0098F1 00 
+    nop                    ; 0098F2 00 
+    nop                    ; 0098F3 00 
+    nop                    ; 0098F4 00 
+    nop                    ; 0098F5 00 
+    nop                    ; 0098F6 00 
+    nop                    ; 0098F7 00 
+    db     $fd             ; 0098F8 FD 
+    nop                    ; 0098F9 00 
+    nop                    ; 0098FA 00 
+    nop                    ; 0098FB 00 
+    nop                    ; 0098FC 00 
+    nop                    ; 0098FD 00 
+    nop                    ; 0098FE 00 
+    nop                    ; 0098FF 00 
+    rst    38h             ; 009900 FF 
+    nop                    ; 009901 00 
+    nop                    ; 009902 00 
+    nop                    ; 009903 00 
+    nop                    ; 009904 00 
+    nop                    ; 009905 00 
+    nop                    ; 009906 00 
+    nop                    ; 009907 00 
+    rst    38h             ; 009908 FF 
+    nop                    ; 009909 00 
+    nop                    ; 00990A 00 
+    nop                    ; 00990B 00 
+    nop                    ; 00990C 00 
+    nop                    ; 00990D 00 
+    nop                    ; 00990E 00 
+    nop                    ; 00990F 00 
+    ccf                    ; 009910 3F 
+    nop                    ; 009911 00 
+    nop                    ; 009912 00 
+    nop                    ; 009913 00 
+    nop                    ; 009914 00 
+    nop                    ; 009915 00 
+    nop                    ; 009916 00 
+    nop                    ; 009917 00 
+    rst    38h             ; 009918 FF 
+    nop                    ; 009919 00 
+    nop                    ; 00991A 00 
+    nop                    ; 00991B 00 
+    nop                    ; 00991C 00 
+    nop                    ; 00991D 00 
+    nop                    ; 00991E 00 
+    nop                    ; 00991F 00 
+    sbc    a,a             ; 009920 9F 
+    nop                    ; 009921 00 
+    nop                    ; 009922 00 
+    nop                    ; 009923 00 
+    nop                    ; 009924 00 
+    nop                    ; 009925 00 
+    nop                    ; 009926 00 
+    nop                    ; 009927 00 
+    cp     $00             ; 009928 FE 00 
+    nop                    ; 00992A 00 
+    nop                    ; 00992B 00 
+    nop                    ; 00992C 00 
+    nop                    ; 00992D 00 
+    nop                    ; 00992E 00 
+    nop                    ; 00992F 00 
+    ld     b,b             ; 009930 40 
+    ld     (bc),a          ; 009931 02 
+    nop                    ; 009932 00 
+    nop                    ; 009933 00 
+    nop                    ; 009934 00 
+    nop                    ; 009935 00 
+    nop                    ; 009936 00 
+    nop                    ; 009937 00 
+    nop                    ; 009938 00 
+    rra                    ; 009939 1F 
+    nop                    ; 00993A 00 
+    nop                    ; 00993B 00 
+    nop                    ; 00993C 00 
+    nop                    ; 00993D 00 
+    nop                    ; 00993E 00 
+    nop                    ; 00993F 00 
+    nop                    ; 009940 00 
+    ret    p               ; 009941 F0 
+    nop                    ; 009942 00 
+    nop                    ; 009943 00 
+    nop                    ; 009944 00 
+    nop                    ; 009945 00 
+    nop                    ; 009946 00 
+    nop                    ; 009947 00 
+    nop                    ; 009948 00 
+    ld     a,a             ; 009949 7F 
+    nop                    ; 00994A 00 
+    nop                    ; 00994B 00 
+    nop                    ; 00994C 00 
+    nop                    ; 00994D 00 
+    nop                    ; 00994E 00 
+    nop                    ; 00994F 00 
+    nop                    ; 009950 00 
+    call   m,$0000         ; 009951 FC 00 00 
+    nop                    ; 009954 00 
+    nop                    ; 009955 00 
+    nop                    ; 009956 00 
+    nop                    ; 009957 00 
+    nop                    ; 009958 00 
+    jr     nc,$995b        ; 009959 30 00 
+    nop                    ; 00995B 00 
+    nop                    ; 00995C 00 
+    nop                    ; 00995D 00 
+    nop                    ; 00995E 00 
+    nop                    ; 00995F 00 
+    nop                    ; 009960 00 
+    nop                    ; 009961 00 
+    nop                    ; 009962 00 
+    nop                    ; 009963 00 
+    nop                    ; 009964 00 
+    nop                    ; 009965 00 
+    nop                    ; 009966 00 
+    nop                    ; 009967 00 
+    nop                    ; 009968 00 
+    nop                    ; 009969 00 
+    nop                    ; 00996A 00 
+    nop                    ; 00996B 00 
+    nop                    ; 00996C 00 
+    nop                    ; 00996D 00 
+    nop                    ; 00996E 00 
+    nop                    ; 00996F 00 
+    nop                    ; 009970 00 
+    ret    nz              ; 009971 C0 
+    ccf                    ; 009972 3F 
+    rra                    ; 009973 1F 
+    nop                    ; 009974 00 
+    nop                    ; 009975 00 
+    nop                    ; 009976 00 
+    nop                    ; 009977 00 
+    nop                    ; 009978 00 
+    nop                    ; 009979 00 
+    db     $fd             ; 00997A FD 
+    ret    po              ; 00997B E0 
+    nop                    ; 00997C 00 
+    nop                    ; 00997D 00 
+    nop                    ; 00997E 00 
+    nop                    ; 00997F 00 
+    nop                    ; 009980 00 
+    nop                    ; 009981 00 
+    ret    nz              ; 009982 C0 
+    ld     a,a             ; 009983 7F 
+    nop                    ; 009984 00 
+    nop                    ; 009985 00 
+    nop                    ; 009986 00 
+    nop                    ; 009987 00 
+    nop                    ; 009988 00 
+    nop                    ; 009989 00 
+    rlca                   ; 00998A 07 
+    call   m,$0000         ; 00998B FC 00 00 
+    nop                    ; 00998E 00 
+    nop                    ; 00998F 00 
+    nop                    ; 009990 00 
+    nop                    ; 009991 00 
+    ccf                    ; 009992 3F 
+    inc    bc              ; 009993 03 
+    nop                    ; 009994 00 
+    nop                    ; 009995 00 
+    nop                    ; 009996 00 
+    nop                    ; 009997 00 
+    nop                    ; 009998 00 
+    nop                    ; 009999 00 
+    add    a,b             ; 00999A 80 
+    rst    38h             ; 00999B FF 
+    nop                    ; 00999C 00 
+    nop                    ; 00999D 00 
+    nop                    ; 00999E 00 
+    nop                    ; 00999F 00 
+    nop                    ; 0099A0 00 
+    nop                    ; 0099A1 00 
+    nop                    ; 0099A2 00 
+    sbc    a,a             ; 0099A3 9F 
+    nop                    ; 0099A4 00 
+    nop                    ; 0099A5 00 
+    nop                    ; 0099A6 00 
+    nop                    ; 0099A7 00 
+    nop                    ; 0099A8 00 
+    nop                    ; 0099A9 00 
+    ret    nz              ; 0099AA C0 
+    cp     $00             ; 0099AB FE 00 
+    nop                    ; 0099AD 00 
+    nop                    ; 0099AE 00 
+    nop                    ; 0099AF 00 
+    nop                    ; 0099B0 00 
+    nop                    ; 0099B1 00 
+    ld     b,b             ; 0099B2 40 
+    ld     (bc),a          ; 0099B3 02 
+    nop                    ; 0099B4 00 
+    nop                    ; 0099B5 00 
+    nop                    ; 0099B6 00 
+    nop                    ; 0099B7 00 
+    nop                    ; 0099B8 00 
+    nop                    ; 0099B9 00 
+    rra                    ; 0099BA 1F 
+    ld     (hl),b          ; 0099BB 70 
+    nop                    ; 0099BC 00 
+    nop                    ; 0099BD 00 
+    nop                    ; 0099BE 00 
+    nop                    ; 0099BF 00 
+    nop                    ; 0099C0 00 
+    nop                    ; 0099C1 00 
+    ret    p               ; 0099C2 F0 
+    inc    e               ; 0099C3 1C 
+    nop                    ; 0099C4 00 
+    nop                    ; 0099C5 00 
+    nop                    ; 0099C6 00 
+    nop                    ; 0099C7 00 
+    nop                    ; 0099C8 00 
+    nop                    ; 0099C9 00 
+    ccf                    ; 0099CA 3F 
+    ret    p               ; 0099CB F0 
+    nop                    ; 0099CC 00 
+    nop                    ; 0099CD 00 
+    nop                    ; 0099CE 00 
+    nop                    ; 0099CF 00 
+    nop                    ; 0099D0 00 
+    nop                    ; 0099D1 00 
+    ret    m               ; 0099D2 F8 
+    ld     e,$00           ; 0099D3 1E 00 
+    nop                    ; 0099D5 00 
+    nop                    ; 0099D6 00 
+    nop                    ; 0099D7 00 
+    nop                    ; 0099D8 00 
+    nop                    ; 0099D9 00 
+    jr     nc,$9a0c        ; 0099DA 30 30 
+    nop                    ; 0099DC 00 
+    nop                    ; 0099DD 00 
+    nop                    ; 0099DE 00 
+    nop                    ; 0099DF 00 
+    nop                    ; 0099E0 00 
+    nop                    ; 0099E1 00 
+    nop                    ; 0099E2 00 
+    nop                    ; 0099E3 00 
+    nop                    ; 0099E4 00 
+    nop                    ; 0099E5 00 
+    nop                    ; 0099E6 00 
+    nop                    ; 0099E7 00 
+    nop                    ; 0099E8 00 
+    nop                    ; 0099E9 00 
+    nop                    ; 0099EA 00 
+    nop                    ; 0099EB 00 
+    nop                    ; 0099EC 00 
+    nop                    ; 0099ED 00 
+    nop                    ; 0099EE 00 
+    nop                    ; 0099EF 00 
+    nop                    ; 0099F0 00 
+    nop                    ; 0099F1 00 
+    ret    nz              ; 0099F2 C0 
+    ret    nz              ; 0099F3 C0 
+    ccf                    ; 0099F4 3F 
+    ld     a,b             ; 0099F5 78 
+    rra                    ; 0099F6 1F 
+    nop                    ; 0099F7 00 
+    nop                    ; 0099F8 00 
+    nop                    ; 0099F9 00 
+    nop                    ; 0099FA 00 
+    nop                    ; 0099FB 00 
+    db     $fd             ; 0099FC FD 
+    inc    a               ; 0099FD 3C 
+    ret    po              ; 0099FE E0 
+    nop                    ; 0099FF 00 
+    nop                    ; 009A00 00 
+    nop                    ; 009A01 00 
+    nop                    ; 009A02 00 
+    nop                    ; 009A03 00 
+    add    a,b             ; 009A04 80 
+    ret    m               ; 009A05 F8 
+    rra                    ; 009A06 1F 
+    nop                    ; 009A07 00 
+    nop                    ; 009A08 00 
+    nop                    ; 009A09 00 
+    nop                    ; 009A0A 00 
+    nop                    ; 009A0B 00 
+    inc    bc              ; 009A0C 03 
+    ld     e,$f0           ; 009A0D 1E F0 
+    nop                    ; 009A0F 00 
+    nop                    ; 009A10 00 
+    nop                    ; 009A11 00 
+    nop                    ; 009A12 00 
+    nop                    ; 009A13 00 
+    ccf                    ; 009A14 3F 
+    ld     e,$03           ; 009A15 1E 03 
+    nop                    ; 009A17 00 
+    nop                    ; 009A18 00 
+    nop                    ; 009A19 00 
+    nop                    ; 009A1A 00 
+    nop                    ; 009A1B 00 
+    add    a,b             ; 009A1C 80 
+    nop                    ; 009A1D 00 
+    rst    38h             ; 009A1E FF 
+    nop                    ; 009A1F 00 
+    nop                    ; 009A20 00 
+    nop                    ; 009A21 00 
+    nop                    ; 009A22 00 
+    nop                    ; 009A23 00 
+    nop                    ; 009A24 00 
+    sub    b               ; 009A25 90 
+    sbc    a,a             ; 009A26 9F 
+    nop                    ; 009A27 00 
+    nop                    ; 009A28 00 
+    nop                    ; 009A29 00 
+    nop                    ; 009A2A 00 
+    nop                    ; 009A2B 00 
+    ret    nz              ; 009A2C C0 
+    jp     nz,$00fe        ; 009A2D C2 FE 00 
+    nop                    ; 009A30 00 
+    nop                    ; 009A31 00 
+    nop                    ; 009A32 00 
+    nop                    ; 009A33 00 
+    ld     b,b             ; 009A34 40 
+    ld     (bc),a          ; 009A35 02 
+    nop                    ; 009A36 00 
+    nop                    ; 009A37 00 
+    nop                    ; 009A38 00 
+    rlca                   ; 009A39 07 
+    rra                    ; 009A3A 1F 
+    jr     c,$9aad         ; 009A3B 38 70 
+    rrca                   ; 009A3D 0F 
+    nop                    ; 009A3E 00 
+    nop                    ; 009A3F 00 
+    nop                    ; 009A40 00 
+    ret    nz              ; 009A41 C0 
+    ret    p               ; 009A42 F0 
+    jr     c,$9a61         ; 009A43 38 1C 
+    db     $fd             ; 009A45 FD 
+    nop                    ; 009A46 00 
+    nop                    ; 009A47 00 
+    nop                    ; 009A48 00 
+    rlca                   ; 009A49 07 
+    rra                    ; 009A4A 1F 
+    ld     a,h             ; 009A4B 7C 
+    ret    p               ; 009A4C F0 
+    ret    nz              ; 009A4D C0 
+    nop                    ; 009A4E 00 
+    nop                    ; 009A4F 00 
+    nop                    ; 009A50 00 
+    ret    nz              ; 009A51 C0 
+    ret    p               ; 009A52 F0 
+    ld     a,h             ; 009A53 7C 
+    ld     e,$07           ; 009A54 1E 07 
+    nop                    ; 009A56 00 
+    nop                    ; 009A57 00 
+    nop                    ; 009A58 00 
+    jr     nc,$9a8b        ; 009A59 30 30 
+    jr     nc,$9a8d        ; 009A5B 30 30 
+    ccf                    ; 009A5D 3F 
+    nop                    ; 009A5E 00 
+    nop                    ; 009A5F 00 
+    nop                    ; 009A60 00 
+    nop                    ; 009A61 00 
+    nop                    ; 009A62 00 
+    nop                    ; 009A63 00 
+    nop                    ; 009A64 00 
+    add    a,b             ; 009A65 80 
+    nop                    ; 009A66 00 
+    nop                    ; 009A67 00 
+    nop                    ; 009A68 00 
+    nop                    ; 009A69 00 
+    nop                    ; 009A6A 00 
+    nop                    ; 009A6B 00 
+    nop                    ; 009A6C 00 
+    nop                    ; 009A6D 00 
+    nop                    ; 009A6E 00 
+    nop                    ; 009A6F 00 
+    nop                    ; 009A70 00 
+    ret    nz              ; 009A71 C0 
+    ret    nz              ; 009A72 C0 
+    ret    nz              ; 009A73 C0 
+    ret    nz              ; 009A74 C0 
+    ret    nz              ; 009A75 C0 
+    ccf                    ; 009A76 3F 
+    ld     (hl),b          ; 009A77 70 
+    ld     a,b             ; 009A78 78 
+    ccf                    ; 009A79 3F 
+    rra                    ; 009A7A 1F 
+    nop                    ; 009A7B 00 
+    nop                    ; 009A7C 00 
+    nop                    ; 009A7D 00 
+    db     $fd             ; 009A7E FD 
+    ld     bc,$f83c        ; 009A7F 01 3C F8 
+    ret    po              ; 009A82 E0 
+    nop                    ; 009A83 00 
+    nop                    ; 009A84 00 
+    nop                    ; 009A85 00 
+    add    a,b             ; 009A86 80 
+    ret    nz              ; 009A87 C0 
+    ret    m               ; 009A88 F8 
+    ld     a,a             ; 009A89 7F 
+    rra                    ; 009A8A 1F 
+    nop                    ; 009A8B 00 
+    nop                    ; 009A8C 00 
+    nop                    ; 009A8D 00 
+    inc    bc              ; 009A8E 03 
+    rlca                   ; 009A8F 07 
+    ld     a,$fc           ; 009A90 3E FC 
+    ret    p               ; 009A92 F0 
+    nop                    ; 009A93 00 
+    nop                    ; 009A94 00 
+    nop                    ; 009A95 00 
+    ccf                    ; 009A96 3F 
+    jr     c,$9ab7         ; 009A97 38 1E 
+    rlca                   ; 009A99 07 
+    inc    bc              ; 009A9A 03 
+    nop                    ; 009A9B 00 
+    nop                    ; 009A9C 00 
+    nop                    ; 009A9D 00 
+    add    a,b             ; 009A9E 80 
+    nop                    ; 009A9F 00 
+    nop                    ; 009AA0 00 
+    rst    38h             ; 009AA1 FF 
+    rst    38h             ; 009AA2 FF 
+    nop                    ; 009AA3 00 
+    nop                    ; 009AA4 00 
+    nop                    ; 009AA5 00 
+    nop                    ; 009AA6 00 
+    nop                    ; 009AA7 00 
+    sub    b               ; 009AA8 90 
+    sbc    a,a             ; 009AA9 9F 
+    sbc    a,a             ; 009AAA 9F 
+    nop                    ; 009AAB 00 
+    nop                    ; 009AAC 00 
+    nop                    ; 009AAD 00 
+    ret    nz              ; 009AAE C0 
+    ret    nz              ; 009AAF C0 
+    jp     nz,$fefe        ; 009AB0 C2 FE FE 
+    nop                    ; 009AB3 00 
+    nop                    ; 009AB4 00 
+    nop                    ; 009AB5 00 
+    ld     c,b             ; 009AB6 48 
+    dec    bc              ; 009AB7 0B 
+    nop                    ; 009AB8 00 
+    nop                    ; 009AB9 00 
+    nop                    ; 009ABA 00 
+    nop                    ; 009ABB 00 
+    nop                    ; 009ABC 00 
+    nop                    ; 009ABD 00 
+    nop                    ; 009ABE 00 
+    nop                    ; 009ABF 00 
+    nop                    ; 009AC0 00 
+    nop                    ; 009AC1 00 
+    inc    bc              ; 009AC2 03 
+    ld     (bc),a          ; 009AC3 02 
+    ld     (bc),a          ; 009AC4 02 
+    ld     (bc),a          ; 009AC5 02 
+    ld     (bc),a          ; 009AC6 02 
+    ld     (bc),a          ; 009AC7 02 
+    nop                    ; 009AC8 00 
+    nop                    ; 009AC9 00 
+    rst    38h             ; 009ACA FF 
+    nop                    ; 009ACB 00 
+    ld     a,a             ; 009ACC 7F 
+    ccf                    ; 009ACD 3F 
+    rra                    ; 009ACE 1F 
+    nop                    ; 009ACF 00 
+    nop                    ; 009AD0 00 
+    nop                    ; 009AD1 00 
+    rst    38h             ; 009AD2 FF 
+    nop                    ; 009AD3 00 
+    ld     (hl),b          ; 009AD4 70 
+    ld     (ix+$00),d      ; 009AD5 DD 72 00 
+    nop                    ; 009AD8 00 
+    nop                    ; 009AD9 00 
+    rst    38h             ; 009ADA FF 
+    nop                    ; 009ADB 00 
+    nop                    ; 009ADC 00 
+    ld     d,b             ; 009ADD 50 
+    xor    b               ; 009ADE A8 
+    ld     bc,$0000        ; 009ADF 01 00 00 
+    ret    p               ; 009AE2 F0 
+    djnz   $9af5           ; 009AE3 10 10 
+    ld     d,b             ; 009AE5 50 
+    ret    nc              ; 009AE6 D0 
+    ret    nc              ; 009AE7 D0 
+    nop                    ; 009AE8 00 
+    nop                    ; 009AE9 00 
+    nop                    ; 009AEA 00 
+    nop                    ; 009AEB 00 
+    nop                    ; 009AEC 00 
+    nop                    ; 009AED 00 
+    nop                    ; 009AEE 00 
+    nop                    ; 009AEF 00 
+    nop                    ; 009AF0 00 
+    nop                    ; 009AF1 00 
+    nop                    ; 009AF2 00 
+    nop                    ; 009AF3 00 
+    nop                    ; 009AF4 00 
+    nop                    ; 009AF5 00 
+    nop                    ; 009AF6 00 
+    nop                    ; 009AF7 00 
+    nop                    ; 009AF8 00 
+    nop                    ; 009AF9 00 
+    nop                    ; 009AFA 00 
+    nop                    ; 009AFB 00 
+    nop                    ; 009AFC 00 
+    nop                    ; 009AFD 00 
+    nop                    ; 009AFE 00 
+    nop                    ; 009AFF 00 
+    nop                    ; 009B00 00 
+    nop                    ; 009B01 00 
+    nop                    ; 009B02 00 
+    nop                    ; 009B03 00 
+    nop                    ; 009B04 00 
+    nop                    ; 009B05 00 
+    nop                    ; 009B06 00 
+    nop                    ; 009B07 00 
+    ld     (bc),a          ; 009B08 02 
+    ld     (bc),a          ; 009B09 02 
+    ld     (bc),a          ; 009B0A 02 
+    ld     (bc),a          ; 009B0B 02 
+    ld     (bc),a          ; 009B0C 02 
+    ld     (bc),a          ; 009B0D 02 
+    ld     (bc),a          ; 009B0E 02 
+    ld     (bc),a          ; 009B0F 02 
+    rrca                   ; 009B10 0F 
+    ex     af,af'          ; 009B11 08 
+    add    a,h             ; 009B12 84 
+    adc    a,d             ; 009B13 8A 
+    ld     b,c             ; 009B14 41 
+    adc    a,d             ; 009B15 8A 
+    ld     b,l             ; 009B16 45 
+    adc    a,b             ; 009B17 88 
+    rst    38h             ; 009B18 FF 
+    nop                    ; 009B19 00 
+    nop                    ; 009B1A 00 
+    nop                    ; 009B1B 00 
+    nop                    ; 009B1C 00 
+    nop                    ; 009B1D 00 
+    nop                    ; 009B1E 00 
+    add    a,b             ; 009B1F 80 
+    db     $fd             ; 009B20 FD 
+    dec    b               ; 009B21 05 
+    dec    b               ; 009B22 05 
+    dec    b               ; 009B23 05 
+    dec    b               ; 009B24 05 
+    dec    b               ; 009B25 05 
+    dec    b               ; 009B26 05 
+    dec    b               ; 009B27 05 
+    ret    nc              ; 009B28 D0 
+    ret    nc              ; 009B29 D0 
+    ret    nc              ; 009B2A D0 
+    sub    b               ; 009B2B 90 
+    ret    nc              ; 009B2C D0 
+    ret    nc              ; 009B2D D0 
+    ld     d,b             ; 009B2E 50 
+    ret    nc              ; 009B2F D0 
+    nop                    ; 009B30 00 
+    nop                    ; 009B31 00 
+    nop                    ; 009B32 00 
+    nop                    ; 009B33 00 
+    nop                    ; 009B34 00 
+    nop                    ; 009B35 00 
+    nop                    ; 009B36 00 
+    nop                    ; 009B37 00 
+    nop                    ; 009B38 00 
+    nop                    ; 009B39 00 
+    nop                    ; 009B3A 00 
+    nop                    ; 009B3B 00 
+    nop                    ; 009B3C 00 
+    nop                    ; 009B3D 00 
+    nop                    ; 009B3E 00 
+    nop                    ; 009B3F 00 
+    nop                    ; 009B40 00 
+    nop                    ; 009B41 00 
+    nop                    ; 009B42 00 
+    nop                    ; 009B43 00 
+    nop                    ; 009B44 00 
+    nop                    ; 009B45 00 
+    nop                    ; 009B46 00 
+    nop                    ; 009B47 00 
+    nop                    ; 009B48 00 
+    nop                    ; 009B49 00 
+    nop                    ; 009B4A 00 
+    nop                    ; 009B4B 00 
+    nop                    ; 009B4C 00 
+    nop                    ; 009B4D 00 
+    nop                    ; 009B4E 00 
+    nop                    ; 009B4F 00 
+    ld     (bc),a          ; 009B50 02 
+    ld     (bc),a          ; 009B51 02 
+    ld     (bc),a          ; 009B52 02 
+    ld     (bc),a          ; 009B53 02 
+    ld     (bc),a          ; 009B54 02 
+    ld     (bc),a          ; 009B55 02 
+    ld     a,$20           ; 009B56 3E 20 
+    ld     b,l             ; 009B58 45 
+    ld     c,d             ; 009B59 4A 
+    call   $eda8           ; 009B5A CD A8 ED 
+    ld     l,d             ; 009B5D 6A 
+    call   $00ea           ; 009B5E CD EA 00 
+    nop                    ; 009B61 00 
+    ld     b,b             ; 009B62 40 
+    add    a,b             ; 009B63 80 
+    ld     b,b             ; 009B64 40 
+    jr     nz,$9ba7        ; 009B65 20 40 
+    and    b               ; 009B67 A0 
+    inc    b               ; 009B68 04 
+    dec    b               ; 009B69 05 
+    dec    b               ; 009B6A 05 
+    dec    b               ; 009B6B 05 
+    inc    b               ; 009B6C 04 
+    dec    b               ; 009B6D 05 
+    dec    b               ; 009B6E 05 
+    dec    b               ; 009B6F 05 
+    sub    b               ; 009B70 90 
+    ret    nc              ; 009B71 D0 
+    ld     d,b             ; 009B72 50 
+    ret    nc              ; 009B73 D0 
+    sub    b               ; 009B74 90 
+    ret    nc              ; 009B75 D0 
+    ld     d,b             ; 009B76 50 
+    ret    nz              ; 009B77 C0 
+    nop                    ; 009B78 00 
+    nop                    ; 009B79 00 
+    nop                    ; 009B7A 00 
+    nop                    ; 009B7B 00 
+    nop                    ; 009B7C 00 
+    nop                    ; 009B7D 00 
+    nop                    ; 009B7E 00 
+    nop                    ; 009B7F 00 
+    nop                    ; 009B80 00 
+    nop                    ; 009B81 00 
+    nop                    ; 009B82 00 
+    nop                    ; 009B83 00 
+    nop                    ; 009B84 00 
+    nop                    ; 009B85 00 
+    nop                    ; 009B86 00 
+    nop                    ; 009B87 00 
+    nop                    ; 009B88 00 
+    nop                    ; 009B89 00 
+    nop                    ; 009B8A 00 
+    nop                    ; 009B8B 00 
+    nop                    ; 009B8C 00 
+    nop                    ; 009B8D 00 
+    nop                    ; 009B8E 00 
+    nop                    ; 009B8F 00 
+    nop                    ; 009B90 00 
+    nop                    ; 009B91 00 
+    nop                    ; 009B92 00 
+    nop                    ; 009B93 00 
+    nop                    ; 009B94 00 
+    nop                    ; 009B95 00 
+    nop                    ; 009B96 00 
+    nop                    ; 009B97 00 
+    daa                    ; 009B98 27 
+    inc    hl              ; 009B99 23 
+    ld     hl,$2020        ; 009B9A 21 20 20 
+    jr     nz,$9bbf        ; 009B9D 20 20 
+    jr     z,$9c0e         ; 009B9F 28 6D 
+    xor    d               ; 009BA1 AA 
+    call   $ff0e           ; 009BA2 CD 0E FF 
+    cp     $ff             ; 009BA5 FE FF 
+    rst    38h             ; 009BA7 FF 
+    djnz   $9b52           ; 009BA8 10 A8 
+    ld     b,h             ; 009BAA 44 
+    xor    b               ; 009BAB A8 
+    ld     d,b             ; 009BAC 50 
+    xor    d               ; 009BAD AA 
+    ld     b,l             ; 009BAE 45 
+    xor    d               ; 009BAF AA 
+    inc    b               ; 009BB0 04 
+    dec    b               ; 009BB1 05 
+    inc    b               ; 009BB2 04 
+    inc    b               ; 009BB3 04 
+    rlca                   ; 009BB4 07 
+    nop                    ; 009BB5 00 
+    nop                    ; 009BB6 00 
+    nop                    ; 009BB7 00 
+    cp     b               ; 009BB8 B8 
+    ld     a,h             ; 009BB9 7C 
+    ret    m               ; 009BBA F8 
+    nop                    ; 009BBB 00 
+    ret    p               ; 009BBC F0 
+    jr     nz,$9bdf        ; 009BBD 20 20 
+    ld     b,b             ; 009BBF 40 
+    nop                    ; 009BC0 00 
+    nop                    ; 009BC1 00 
+    nop                    ; 009BC2 00 
+    nop                    ; 009BC3 00 
+    nop                    ; 009BC4 00 
+    nop                    ; 009BC5 00 
+    nop                    ; 009BC6 00 
+    nop                    ; 009BC7 00 
+    nop                    ; 009BC8 00 
+    nop                    ; 009BC9 00 
+    nop                    ; 009BCA 00 
+    nop                    ; 009BCB 00 
+    nop                    ; 009BCC 00 
+    nop                    ; 009BCD 00 
+    nop                    ; 009BCE 00 
+    nop                    ; 009BCF 00 
+    nop                    ; 009BD0 00 
+    nop                    ; 009BD1 00 
+    nop                    ; 009BD2 00 
+    nop                    ; 009BD3 00 
+    nop                    ; 009BD4 00 
+    nop                    ; 009BD5 00 
+    nop                    ; 009BD6 00 
+    nop                    ; 009BD7 00 
+    nop                    ; 009BD8 00 
+    nop                    ; 009BD9 00 
+    nop                    ; 009BDA 00 
+    nop                    ; 009BDB 00 
+    nop                    ; 009BDC 00 
+    nop                    ; 009BDD 00 
+    nop                    ; 009BDE 00 
+    nop                    ; 009BDF 00 
+    jr     nz,$9c0a        ; 009BE0 20 28 
+    inc    h               ; 009BE2 24 
+    jr     z,$9c09         ; 009BE3 28 24 
+    jr     z,$9c0b         ; 009BE5 28 24 
+    jr     z,$9be8         ; 009BE7 28 FF 
+    rst    38h             ; 009BE9 FF 
+    rst    38h             ; 009BEA FF 
+    cp     a               ; 009BEB BF 
+    cp     a               ; 009BEC BF 
+    cp     a               ; 009BED BF 
+    sbc    a,a             ; 009BEE 9F 
+    add    a,a             ; 009BEF 87 
+    pop    de              ; 009BF0 D1 
+    jp     pe,$ead5        ; 009BF1 EA D5 EA 
+    call   p,$fffe         ; 009BF4 F4 FE FF 
+    rst    38h             ; 009BF7 FF 
+    ld     b,b             ; 009BF8 40 
+    jr     nz,$9c4b        ; 009BF9 20 50 
+    xor    b               ; 009BFB A8 
+    inc    b               ; 009BFC 04 
+    xor    e               ; 009BFD AB 
+    ret    nc              ; 009BFE D0 
+    ret    m               ; 009BFF F8 
+    ld     b,b             ; 009C00 40 
+    add    a,b             ; 009C01 80 
+    add    a,b             ; 009C02 80 
+    add    a,b             ; 009C03 80 
+    add    a,b             ; 009C04 80 
+    nop                    ; 009C05 00 
+    nop                    ; 009C06 00 
+    nop                    ; 009C07 00 
+    nop                    ; 009C08 00 
+    nop                    ; 009C09 00 
+    nop                    ; 009C0A 00 
+    nop                    ; 009C0B 00 
+    nop                    ; 009C0C 00 
+    nop                    ; 009C0D 00 
+    nop                    ; 009C0E 00 
+    nop                    ; 009C0F 00 
+    nop                    ; 009C10 00 
+    nop                    ; 009C11 00 
+    nop                    ; 009C12 00 
+    nop                    ; 009C13 00 
+    nop                    ; 009C14 00 
+    nop                    ; 009C15 00 
+    nop                    ; 009C16 00 
+    nop                    ; 009C17 00 
+    nop                    ; 009C18 00 
+    nop                    ; 009C19 00 
+    nop                    ; 009C1A 00 
+    nop                    ; 009C1B 00 
+    nop                    ; 009C1C 00 
+    nop                    ; 009C1D 00 
+    nop                    ; 009C1E 00 
+    nop                    ; 009C1F 00 
+    nop                    ; 009C20 00 
+    nop                    ; 009C21 00 
+    nop                    ; 009C22 00 
+    nop                    ; 009C23 00 
+    nop                    ; 009C24 00 
+    nop                    ; 009C25 00 
+    nop                    ; 009C26 00 
+    nop                    ; 009C27 00 
+    inc    h               ; 009C28 24 
+    jr     z,$9c4f         ; 009C29 28 24 
+    jr     z,$9c53         ; 009C2B 28 26 
+    inc    h               ; 009C2D 24 
+    ld     l,$2a           ; 009C2E 2E 2A 
+    add    a,b             ; 009C30 80 
+    add    a,b             ; 009C31 80 
+    add    a,b             ; 009C32 80 
+    add    a,b             ; 009C33 80 
+    add    a,b             ; 009C34 80 
+    add    a,b             ; 009C35 80 
+    call   m,$0004         ; 009C36 FC 04 00 
+    nop                    ; 009C39 00 
+    nop                    ; 009C3A 00 
+    nop                    ; 009C3B 00 
+    nop                    ; 009C3C 00 
+    nop                    ; 009C3D 00 
+    nop                    ; 009C3E 00 
+    nop                    ; 009C3F 00 
+    nop                    ; 009C40 00 
+    ld     bc,$0101        ; 009C41 01 01 01 
+    ld     bc,$0300        ; 009C44 01 00 03 
+    rrca                   ; 009C47 0F 
+    nop                    ; 009C48 00 
+    nop                    ; 009C49 00 
+    nop                    ; 009C4A 00 
+    nop                    ; 009C4B 00 
+    add    a,b             ; 009C4C 80 
+    add    a,b             ; 009C4D 80 
+    add    a,b             ; 009C4E 80 
+    add    a,b             ; 009C4F 80 
+    nop                    ; 009C50 00 
+    nop                    ; 009C51 00 
+    nop                    ; 009C52 00 
+    nop                    ; 009C53 00 
+    nop                    ; 009C54 00 
+    nop                    ; 009C55 00 
+    nop                    ; 009C56 00 
+    nop                    ; 009C57 00 
+    nop                    ; 009C58 00 
+    nop                    ; 009C59 00 
+    nop                    ; 009C5A 00 
+    nop                    ; 009C5B 00 
+    nop                    ; 009C5C 00 
+    nop                    ; 009C5D 00 
+    nop                    ; 009C5E 00 
+    nop                    ; 009C5F 00 
+    nop                    ; 009C60 00 
+    nop                    ; 009C61 00 
+    nop                    ; 009C62 00 
+    nop                    ; 009C63 00 
+    nop                    ; 009C64 00 
+    nop                    ; 009C65 00 
+    nop                    ; 009C66 00 
+    nop                    ; 009C67 00 
+    nop                    ; 009C68 00 
+    nop                    ; 009C69 00 
+    nop                    ; 009C6A 00 
+    nop                    ; 009C6B 00 
+    nop                    ; 009C6C 00 
+    nop                    ; 009C6D 00 
+    nop                    ; 009C6E 00 
+    nop                    ; 009C6F 00 
+    dec    l               ; 009C70 2D 
+    dec    hl              ; 009C71 2B 
+    ld     h,$20           ; 009C72 26 20 
+    ccf                    ; 009C74 3F 
+    nop                    ; 009C75 00 
+    nop                    ; 009C76 00 
+    nop                    ; 009C77 00 
+    ld     h,h             ; 009C78 64 
+    call   nz,$0286        ; 009C79 C4 86 02 
+    add    a,d             ; 009C7C 82 
+    add    a,e             ; 009C7D 83 
+    add    a,c             ; 009C7E 81 
+    pop    bc              ; 009C7F C1 
+    nop                    ; 009C80 00 
+    nop                    ; 009C81 00 
+    inc    bc              ; 009C82 03 
+    rlca                   ; 009C83 07 
+    rra                    ; 009C84 1F 
+    ccf                    ; 009C85 3F 
+    rst    38h             ; 009C86 FF 
+    rst    38h             ; 009C87 FF 
+    ld     a,a             ; 009C88 7F 
+    rst    38h             ; 009C89 FF 
+    rst    38h             ; 009C8A FF 
+    rst    38h             ; 009C8B FF 
+    rst    38h             ; 009C8C FF 
+    rst    38h             ; 009C8D FF 
+    rst    38h             ; 009C8E FF 
+    rst    38h             ; 009C8F FF 
+    ret    nz              ; 009C90 C0 
+    ret    nz              ; 009C91 C0 
+    ret    po              ; 009C92 E0 
+    ret    po              ; 009C93 E0 
+    ret    p               ; 009C94 F0 
+    ret    m               ; 009C95 F8 
+    ret    m               ; 009C96 F8 
+    call   m,$0000         ; 009C97 FC 00 00 
+    nop                    ; 009C9A 00 
+    nop                    ; 009C9B 00 
+    nop                    ; 009C9C 00 
+    nop                    ; 009C9D 00 
+    nop                    ; 009C9E 00 
+    nop                    ; 009C9F 00 
+    nop                    ; 009CA0 00 
+    nop                    ; 009CA1 00 
+    nop                    ; 009CA2 00 
+    nop                    ; 009CA3 00 
+    nop                    ; 009CA4 00 
+    nop                    ; 009CA5 00 
+    nop                    ; 009CA6 00 
+    nop                    ; 009CA7 00 
+    nop                    ; 009CA8 00 
+    nop                    ; 009CA9 00 
+    nop                    ; 009CAA 00 
+    nop                    ; 009CAB 00 
+    nop                    ; 009CAC 00 
+    nop                    ; 009CAD 00 
+    nop                    ; 009CAE 00 
+    nop                    ; 009CAF 00 
+    nop                    ; 009CB0 00 
+    nop                    ; 009CB1 00 
+    nop                    ; 009CB2 00 
+    nop                    ; 009CB3 00 
+    nop                    ; 009CB4 00 
+    nop                    ; 009CB5 00 
+    nop                    ; 009CB6 00 
+    nop                    ; 009CB7 00 
+    nop                    ; 009CB8 00 
+    nop                    ; 009CB9 00 
+    nop                    ; 009CBA 00 
+    nop                    ; 009CBB 00 
+    nop                    ; 009CBC 00 
+    nop                    ; 009CBD 00 
+    nop                    ; 009CBE 00 
+    nop                    ; 009CBF 00 
+    ld     b,c             ; 009CC0 41 
+    ld     b,b             ; 009CC1 40 
+    ld     h,b             ; 009CC2 60 
+    jr     nz,$9cf5        ; 009CC3 20 30 
+    ld     (de),a          ; 009CC5 12 
+    add    hl,de           ; 009CC6 19 
+    ld     a,(bc)          ; 009CC7 0A 
+    rst    38h             ; 009CC8 FF 
+    rst    38h             ; 009CC9 FF 
+    rst    38h             ; 009CCA FF 
+    ld     a,a             ; 009CCB 7F 
+    ld     a,a             ; 009CCC 7F 
+    ccf                    ; 009CCD 3F 
+    ccf                    ; 009CCE 3F 
+    sbc    a,a             ; 009CCF 9F 
+    rst    38h             ; 009CD0 FF 
+    rst    38h             ; 009CD1 FF 
+    rst    38h             ; 009CD2 FF 
+    rst    38h             ; 009CD3 FF 
+    rst    38h             ; 009CD4 FF 
+    rst    38h             ; 009CD5 FF 
+    rst    38h             ; 009CD6 FF 
+    rst    38h             ; 009CD7 FF 
+    cp     $ff             ; 009CD8 FE FF 
+    rst    38h             ; 009CDA FF 
+    rst    38h             ; 009CDB FF 
+    rst    38h             ; 009CDC FF 
+    rst    38h             ; 009CDD FF 
+    rst    38h             ; 009CDE FF 
+    rst    38h             ; 009CDF FF 
+    nop                    ; 009CE0 00 
+    nop                    ; 009CE1 00 
+    ret    nz              ; 009CE2 C0 
+    ret    p               ; 009CE3 F0 
+    call   m,$ffff         ; 009CE4 FC FF FF 
+    rst    38h             ; 009CE7 FF 
+    nop                    ; 009CE8 00 
+    nop                    ; 009CE9 00 
+    nop                    ; 009CEA 00 
+    nop                    ; 009CEB 00 
+    nop                    ; 009CEC 00 
+    ret    nz              ; 009CED C0 
+    rst    38h             ; 009CEE FF 
+    rst    38h             ; 009CEF FF 
+    nop                    ; 009CF0 00 
+    nop                    ; 009CF1 00 
+    nop                    ; 009CF2 00 
+    ld     bc,$7f07        ; 009CF3 01 07 7F 
+    rst    38h             ; 009CF6 FF 
+    rst    38h             ; 009CF7 FF 
+    nop                    ; 009CF8 00 
+    nop                    ; 009CF9 00 
+    nop                    ; 009CFA 00 
+    nop                    ; 009CFB 00 
+    nop                    ; 009CFC 00 
+    nop                    ; 009CFD 00 
+    nop                    ; 009CFE 00 
+    nop                    ; 009CFF 00 
+    nop                    ; 009D00 00 
+    nop                    ; 009D01 00 
+    nop                    ; 009D02 00 
+    nop                    ; 009D03 00 
+    nop                    ; 009D04 00 
+    nop                    ; 009D05 00 
+    nop                    ; 009D06 00 
+    nop                    ; 009D07 00 
+    dec    c               ; 009D08 0D 
+    ld     b,$02           ; 009D09 06 02 
+    inc    bc              ; 009D0B 03 
+    ld     bc,$0000        ; 009D0C 01 00 00 
+    nop                    ; 009D0F 00 
+    ld     c,a             ; 009D10 4F 
+    adc    a,a             ; 009D11 8F 
+    ld     d,a             ; 009D12 57 
+    dec    hl              ; 009D13 2B 
+    sub    l               ; 009D14 95 
+    adc    a,$5b           ; 009D15 CE 5B 
+    ld     l,(hl)          ; 009D17 6E 
+    rst    38h             ; 009D18 FF 
+    rst    38h             ; 009D19 FF 
+    rst    38h             ; 009D1A FF 
+    rst    38h             ; 009D1B FF 
+    rst    38h             ; 009D1C FF 
+    rst    38h             ; 009D1D FF 
+    ld     a,a             ; 009D1E 7F 
+    cp     a               ; 009D1F BF 
+    rst    38h             ; 009D20 FF 
+    rst    38h             ; 009D21 FF 
+    rst    38h             ; 009D22 FF 
+    rst    38h             ; 009D23 FF 
+    rst    38h             ; 009D24 FF 
+    rst    38h             ; 009D25 FF 
+    rst    38h             ; 009D26 FF 
+    rst    38h             ; 009D27 FF 
+    rst    38h             ; 009D28 FF 
+    rst    38h             ; 009D29 FF 
+    rst    38h             ; 009D2A FF 
+    rst    38h             ; 009D2B FF 
+    rst    38h             ; 009D2C FF 
+    rst    38h             ; 009D2D FF 
+    rst    38h             ; 009D2E FF 
+    rst    38h             ; 009D2F FF 
+    rst    38h             ; 009D30 FF 
+    rst    38h             ; 009D31 FF 
+    cp     $fd             ; 009D32 FE FD 
+    jp     m,$fafd         ; 009D34 FA FD FA 
+    push   af              ; 009D37 F5 
+    jp     m,$aad5         ; 009D38 FA D5 AA 
+    ld     d,l             ; 009D3B 55 
+    xor    d               ; 009D3C AA 
+    ld     d,l             ; 009D3D 55 
+    xor    d               ; 009D3E AA 
+    ld     d,l             ; 009D3F 55 
+    nop                    ; 009D40 00 
+    nop                    ; 009D41 00 
+    nop                    ; 009D42 00 
+    nop                    ; 009D43 00 
+    nop                    ; 009D44 00 
+    nop                    ; 009D45 00 
+    nop                    ; 009D46 00 
+    nop                    ; 009D47 00 
+    nop                    ; 009D48 00 
+    nop                    ; 009D49 00 
+    nop                    ; 009D4A 00 
+    nop                    ; 009D4B 00 
+    nop                    ; 009D4C 00 
+    nop                    ; 009D4D 00 
+    nop                    ; 009D4E 00 
+    nop                    ; 009D4F 00 
+    nop                    ; 009D50 00 
+    nop                    ; 009D51 00 
+    nop                    ; 009D52 00 
+    nop                    ; 009D53 00 
+    nop                    ; 009D54 00 
+    nop                    ; 009D55 00 
+    nop                    ; 009D56 00 
+    nop                    ; 009D57 00 
+    scf                    ; 009D58 37 
+    ld     a,(de)          ; 009D59 1A 
+    dec    c               ; 009D5A 0D 
+    ld     b,$03           ; 009D5B 06 03 
+    nop                    ; 009D5D 00 
+    nop                    ; 009D5E 00 
+    nop                    ; 009D5F 00 
+    rst    18h             ; 009D60 DF 
+    rst    28h             ; 009D61 EF 
+    di                     ; 009D62 F3 
+    ld     a,l             ; 009D63 7D 
+    cp     (hl)            ; 009D64 BE 
+    rst    18h             ; 009D65 DF 
+    ld     h,a             ; 009D66 67 
+    dec    sp              ; 009D67 3B 
+    rst    38h             ; 009D68 FF 
+    rst    38h             ; 009D69 FF 
+    rst    38h             ; 009D6A FF 
+    rst    38h             ; 009D6B FF 
+    ld     a,a             ; 009D6C 7F 
+    sbc    a,a             ; 009D6D 9F 
+    rst    20h             ; 009D6E E7 
+    ret    pe              ; 009D6F E8 
+    rst    38h             ; 009D70 FF 
+    rst    38h             ; 009D71 FF 
+    rst    38h             ; 009D72 FF 
+    rst    38h             ; 009D73 FF 
+    rst    38h             ; 009D74 FF 
+    rst    38h             ; 009D75 FF 
+    rst    38h             ; 009D76 FF 
+    rst    38h             ; 009D77 FF 
+    jp     m,$eaf5         ; 009D78 FA F5 EA 
+    push   af              ; 009D7B F5 
+    jp     pe,$eaf5        ; 009D7C EA F5 EA 
+    push   de              ; 009D7F D5 
+    xor    d               ; 009D80 AA 
+    ld     d,l             ; 009D81 55 
+    xor    d               ; 009D82 AA 
+    ld     d,l             ; 009D83 55 
+    xor    d               ; 009D84 AA 
+    ld     d,l             ; 009D85 55 
+    xor    d               ; 009D86 AA 
+    ld     d,l             ; 009D87 55 
+    nop                    ; 009D88 00 
+    nop                    ; 009D89 00 
+    nop                    ; 009D8A 00 
+    nop                    ; 009D8B 00 
+    nop                    ; 009D8C 00 
+    nop                    ; 009D8D 00 
+    nop                    ; 009D8E 00 
+    nop                    ; 009D8F 00 
+    nop                    ; 009D90 00 
+    nop                    ; 009D91 00 
+    nop                    ; 009D92 00 
+    nop                    ; 009D93 00 
+    nop                    ; 009D94 00 
+    nop                    ; 009D95 00 
+    nop                    ; 009D96 00 
+    nop                    ; 009D97 00 
+    nop                    ; 009D98 00 
+    nop                    ; 009D99 00 
+    nop                    ; 009D9A 00 
+    nop                    ; 009D9B 00 
+    nop                    ; 009D9C 00 
+    nop                    ; 009D9D 00 
+    nop                    ; 009D9E 00 
+    nop                    ; 009D9F 00 
+    nop                    ; 009DA0 00 
+    nop                    ; 009DA1 00 
+    nop                    ; 009DA2 00 
+    nop                    ; 009DA3 00 
+    nop                    ; 009DA4 00 
+    nop                    ; 009DA5 00 
+    nop                    ; 009DA6 00 
+    nop                    ; 009DA7 00 
+    inc    c               ; 009DA8 0C 
+    rlca                   ; 009DA9 07 
+    ld     bc,$0000        ; 009DAA 01 00 00 
+    nop                    ; 009DAD 00 
+    nop                    ; 009DAE 00 
+    nop                    ; 009DAF 00 
+    cp     $2b             ; 009DB0 FE 2B 
+    adc    a,$71           ; 009DB2 CE 71 
+    ld     e,$03           ; 009DB4 1E 03 
+    nop                    ; 009DB6 00 
+    nop                    ; 009DB7 00 
+    rra                    ; 009DB8 1F 
+    ld     b,b             ; 009DB9 40 
+    xor    d               ; 009DBA AA 
+    dec    d               ; 009DBB 15 
+    nop                    ; 009DBC 00 
+    ret    nz              ; 009DBD C0 
+    ld     a,(hl)          ; 009DBE 7E 
+    inc    bc              ; 009DBF 03 
+    jp     pe,$00d5        ; 009DC0 EA D5 00 
+    nop                    ; 009DC3 00 
+    nop                    ; 009DC4 00 
+    nop                    ; 009DC5 00 
+    nop                    ; 009DC6 00 
+    rst    38h             ; 009DC7 FF 
+    xor    d               ; 009DC8 AA 
+    ld     b,b             ; 009DC9 40 
+    nop                    ; 009DCA 00 
+    nop                    ; 009DCB 00 
+    nop                    ; 009DCC 00 
+    nop                    ; 009DCD 00 
+    rrca                   ; 009DCE 0F 
+    ret    m               ; 009DCF F8 
+    jr     z,$9dd9         ; 009DD0 28 07 
+    nop                    ; 009DD2 00 
+    nop                    ; 009DD3 00 
+    nop                    ; 009DD4 00 
+    nop                    ; 009DD5 00 
+    nop                    ; 009DD6 00 
+    nop                    ; 009DD7 00 
+    nop                    ; 009DD8 00 
+    nop                    ; 009DD9 00 
+    nop                    ; 009DDA 00 
+    nop                    ; 009DDB 00 
+    nop                    ; 009DDC 00 
+    nop                    ; 009DDD 00 
+    nop                    ; 009DDE 00 
+    nop                    ; 009DDF 00 
+    nop                    ; 009DE0 00 
+    nop                    ; 009DE1 00 
+    nop                    ; 009DE2 00 
+    nop                    ; 009DE3 00 
+    nop                    ; 009DE4 00 
+    nop                    ; 009DE5 00 
+    nop                    ; 009DE6 00 
+    nop                    ; 009DE7 00 
+    nop                    ; 009DE8 00 
+    nop                    ; 009DE9 00 
+    nop                    ; 009DEA 00 
+    nop                    ; 009DEB 00 
+    nop                    ; 009DEC 00 
+    nop                    ; 009DED 00 
+    nop                    ; 009DEE 00 
+    nop                    ; 009DEF 00 
+    nop                    ; 009DF0 00 
+    nop                    ; 009DF1 00 
+    nop                    ; 009DF2 00 
+    nop                    ; 009DF3 00 
+    nop                    ; 009DF4 00 
+    nop                    ; 009DF5 00 
+    nop                    ; 009DF6 00 
+    nop                    ; 009DF7 00 
+    nop                    ; 009DF8 00 
+    nop                    ; 009DF9 00 
+    nop                    ; 009DFA 00 
+    nop                    ; 009DFB 00 
+    nop                    ; 009DFC 00 
+    nop                    ; 009DFD 00 
+    nop                    ; 009DFE 00 
+    nop                    ; 009DFF 00 
+    nop                    ; 009E00 00 
+    nop                    ; 009E01 00 
+    nop                    ; 009E02 00 
+    nop                    ; 009E03 00 
+    nop                    ; 009E04 00 
+    nop                    ; 009E05 00 
+    nop                    ; 009E06 00 
+    nop                    ; 009E07 00 
+    nop                    ; 009E08 00 
+    rrca                   ; 009E09 0F 
+    nop                    ; 009E0A 00 
+    nop                    ; 009E0B 00 
+    nop                    ; 009E0C 00 
+    nop                    ; 009E0D 00 
+    nop                    ; 009E0E 00 
+    nop                    ; 009E0F 00 
+    rst    38h             ; 009E10 FF 
+    add    a,b             ; 009E11 80 
+    nop                    ; 009E12 00 
+    nop                    ; 009E13 00 
+    nop                    ; 009E14 00 
+    nop                    ; 009E15 00 
+    nop                    ; 009E16 00 
+    nop                    ; 009E17 00 
+    ret    po              ; 009E18 E0 
+    ld     a,$00           ; 009E19 3E 00 
+    nop                    ; 009E1B 00 
+    nop                    ; 009E1C 00 
+    nop                    ; 009E1D 00 
+    nop                    ; 009E1E 00 
+    nop                    ; 009E1F 00 
+    nop                    ; 009E20 00 
+    nop                    ; 009E21 00 
+    nop                    ; 009E22 00 
+    nop                    ; 009E23 00 
+    inc    bc              ; 009E24 03 
+    ld     b,$0c           ; 009E25 06 0C 
+    ex     af,af'          ; 009E27 08 
+    nop                    ; 009E28 00 
+    nop                    ; 009E29 00 
+    jr     c,$9e0c         ; 009E2A 38 E0 
+    add    a,b             ; 009E2C 80 
+    nop                    ; 009E2D 00 
+    nop                    ; 009E2E 00 
+    ld     bc,$350a        ; 009E2F 01 0A 35 
+    ld     a,(bc)          ; 009E32 0A 
+    dec    d               ; 009E33 15 
+    ld     a,(bc)          ; 009E34 0A 
+    nop                    ; 009E35 00 
+    ld     hl,($aa55)      ; 009E36 2A 55 AA 
+    ld     d,l             ; 009E39 55 
+    add    a,e             ; 009E3A 83 
+    ld     a,h             ; 009E3B 7C 
+    cp     e               ; 009E3C BB 
+    ld     a,a             ; 009E3D 7F 
+    add    a,(hl)          ; 009E3E 86 
+    ld     b,c             ; 009E3F 41 
+    add    a,b             ; 009E40 80 
+    nop                    ; 009E41 00 
+    add    a,b             ; 009E42 80 
+    ret    po              ; 009E43 E0 
+    jr     c,$9dd2         ; 009E44 38 8C 
+    call   p,$78f8         ; 009E46 F4 F8 78 
+    jr     c,$9e4b         ; 009E49 38 00 
+    ld     bc,$0303        ; 009E4B 01 03 03 
+    rlca                   ; 009E4E 07 
+    rrca                   ; 009E4F 0F 
+    rrca                   ; 009E50 0F 
+    rra                    ; 009E51 1F 
+    ld     l,d             ; 009E52 6A 
+    push   af              ; 009E53 F5 
+    jp     m,$faf5         ; 009E54 FA F5 FA 
+    push   af              ; 009E57 F5 
+    jp     m,$aafd         ; 009E58 FA FD AA 
+    ld     d,l             ; 009E5B 55 
+    xor    d               ; 009E5C AA 
+    ld     d,l             ; 009E5D 55 
+    xor    d               ; 009E5E AA 
+    ld     d,l             ; 009E5F 55 
+    xor    d               ; 009E60 AA 
+    ld     d,l             ; 009E61 55 
+    and    b               ; 009E62 A0 
+    ld     b,b             ; 009E63 40 
+    xor    b               ; 009E64 A8 
+    ld     d,b             ; 009E65 50 
+    and    b               ; 009E66 A0 
+    ld     d,h             ; 009E67 54 
+    xor    b               ; 009E68 A8 
+    ld     d,l             ; 009E69 55 
+    ex     af,af'          ; 009E6A 08 
+    nop                    ; 009E6B 00 
+    nop                    ; 009E6C 00 
+    nop                    ; 009E6D 00 
+    nop                    ; 009E6E 00 
+    nop                    ; 009E6F 00 
+    nop                    ; 009E70 00 
+    ex     af,af'          ; 009E71 08 
+    rra                    ; 009E72 1F 
+    ccf                    ; 009E73 3F 
+    ccf                    ; 009E74 3F 
+    ccf                    ; 009E75 3F 
+    ccf                    ; 009E76 3F 
+    ld     a,a             ; 009E77 7F 
+    ccf                    ; 009E78 3F 
+    rrca                   ; 009E79 0F 
+    cp     $fd             ; 009E7A FE FD 
+    cp     $ff             ; 009E7C FE FF 
+    cp     $ff             ; 009E7E FE FF 
+    rst    38h             ; 009E80 FF 
+    rst    38h             ; 009E81 FF 
+    xor    d               ; 009E82 AA 
+    ld     d,l             ; 009E83 55 
+    xor    d               ; 009E84 AA 
+    ld     d,l             ; 009E85 55 
+    xor    d               ; 009E86 AA 
+    push   de              ; 009E87 D5 
+    jp     m,$aaff         ; 009E88 FA FF AA 
+    ld     d,l             ; 009E8B 55 
+    xor    d               ; 009E8C AA 
+    ld     d,l             ; 009E8D 55 
+    xor    d               ; 009E8E AA 
+    ld     d,l             ; 009E8F 55 
+    xor    d               ; 009E90 AA 
+    ret    nc              ; 009E91 D0 
+    inc    d               ; 009E92 14 
+    jr     c,$9e49         ; 009E93 38 B4 
+    ld     a,($2a9d)       ; 009E95 3A 9D 2A 
+    rra                    ; 009E98 1F 
+    ld     c,$00           ; 009E99 0E 00 
+    djnz   $9ec5           ; 009E9B 10 28 
+    djnz   $9ea7           ; 009E9D 10 08 
+    inc    b               ; 009E9F 04 
+    ld     a,(bc)          ; 009EA0 0A 
+    ld     bc,$0000        ; 009EA1 01 00 00 
+    nop                    ; 009EA4 00 
+    nop                    ; 009EA5 00 
+    nop                    ; 009EA6 00 
+    nop                    ; 009EA7 00 
+    nop                    ; 009EA8 00 
+    nop                    ; 009EA9 00 
+    nop                    ; 009EAA 00 
+    nop                    ; 009EAB 00 
+    nop                    ; 009EAC 00 
+    nop                    ; 009EAD 00 
+    nop                    ; 009EAE 00 
+    nop                    ; 009EAF 00 
+    nop                    ; 009EB0 00 
+    nop                    ; 009EB1 00 
+    nop                    ; 009EB2 00 
+    nop                    ; 009EB3 00 
+    nop                    ; 009EB4 00 
+    nop                    ; 009EB5 00 
+    nop                    ; 009EB6 00 
+    nop                    ; 009EB7 00 
+    nop                    ; 009EB8 00 
+    nop                    ; 009EB9 00 
+    nop                    ; 009EBA 00 
+    ld     b,b             ; 009EBB 40 
+    nop                    ; 009EBC 00 
+    ld     b,b             ; 009EBD 40 
+    ld     l,b             ; 009EBE 68 
+    ld     d,h             ; 009EBF 54 
+    ld     a,d             ; 009EC0 7A 
+    ld     e,l             ; 009EC1 5D 
+    ld     a,(bc)          ; 009EC2 0A 
+    inc    b               ; 009EC3 04 
+    ld     (bc),a          ; 009EC4 02 
+    ld     bc,$0102        ; 009EC5 01 02 01 
+    nop                    ; 009EC8 00 
+    nop                    ; 009EC9 00 
+    add    a,b             ; 009ECA 80 
+    ld     b,b             ; 009ECB 40 
+    jr     nz,$9f1e        ; 009ECC 20 50 
+    xor    d               ; 009ECE AA 
+    ld     d,l             ; 009ECF 55 
+    xor    b               ; 009ED0 A8 
+    ld     d,l             ; 009ED1 55 
+    nop                    ; 009ED2 00 
+    nop                    ; 009ED3 00 
+    nop                    ; 009ED4 00 
+    nop                    ; 009ED5 00 
+    add    a,b             ; 009ED6 80 
+    ld     d,b             ; 009ED7 50 
+    xor    d               ; 009ED8 AA 
+    ld     b,l             ; 009ED9 45 
+    nop                    ; 009EDA 00 
+    nop                    ; 009EDB 00 
+    nop                    ; 009EDC 00 
+    nop                    ; 009EDD 00 
+    nop                    ; 009EDE 00 
+    nop                    ; 009EDF 00 
+    nop                    ; 009EE0 00 
+    ld     d,l             ; 009EE1 55 
+    ld     (hl),a          ; 009EE2 77 
+    ld     a,a             ; 009EE3 7F 
+    ld     e,(hl)          ; 009EE4 5E 
+    halt                   ; 009EE5 76 
+    ld     a,h             ; 009EE6 7C 
+    ld     a,b             ; 009EE7 78 
+    ld     a,b             ; 009EE8 78 
+    ld     (hl),b          ; 009EE9 70 
+    nop                    ; 009EEA 00 
+    nop                    ; 009EEB 00 
+    nop                    ; 009EEC 00 
+    nop                    ; 009EED 00 
+    nop                    ; 009EEE 00 
+    nop                    ; 009EEF 00 
+    nop                    ; 009EF0 00 
+    nop                    ; 009EF1 00 
+    ld     a,(bc)          ; 009EF2 0A 
+    dec    b               ; 009EF3 05 
+    nop                    ; 009EF4 00 
+    nop                    ; 009EF5 00 
+    nop                    ; 009EF6 00 
+    nop                    ; 009EF7 00 
+    nop                    ; 009EF8 00 
+    nop                    ; 009EF9 00 
+    xor    d               ; 009EFA AA 
+    ld     d,l             ; 009EFB 55 
+    and    d               ; 009EFC A2 
+    dec    d               ; 009EFD 15 
+    nop                    ; 009EFE 00 
+    nop                    ; 009EFF 00 
+    nop                    ; 009F00 00 
+    nop                    ; 009F01 00 
+    ld     hl,($a854)      ; 009F02 2A 54 A8 
+    nop                    ; 009F05 00 
+    nop                    ; 009F06 00 
+    nop                    ; 009F07 00 
+    nop                    ; 009F08 00 
+    nop                    ; 009F09 00 
+    ld     b,b             ; 009F0A 40 
+    nop                    ; 009F0B 00 
+    nop                    ; 009F0C 00 
+    nop                    ; 009F0D 00 
+    nop                    ; 009F0E 00 
+    nop                    ; 009F0F 00 
+    nop                    ; 009F10 00 
+    nop                    ; 009F11 00 
+    jr     nc,$9f1e        ; 009F12 30 0A 
+    nop                    ; 009F14 00 
+    nop                    ; 009F15 00 
+    nop                    ; 009F16 00 
+    nop                    ; 009F17 00 
+    nop                    ; 009F18 00 
+    nop                    ; 009F19 00 
+    nop                    ; 009F1A 00 
+    nop                    ; 009F1B 00 
+    nop                    ; 009F1C 00 
+    nop                    ; 009F1D 00 
+    nop                    ; 009F1E 00 
+    nop                    ; 009F1F 00 
+    nop                    ; 009F20 00 
+    nop                    ; 009F21 00 
+    nop                    ; 009F22 00 
+    rrca                   ; 009F23 0F 
+    nop                    ; 009F24 00 
+    nop                    ; 009F25 00 
+    nop                    ; 009F26 00 
+    nop                    ; 009F27 00 
+    nop                    ; 009F28 00 
+    nop                    ; 009F29 00 
+    rst    38h             ; 009F2A FF 
+    add    a,b             ; 009F2B 80 
+    nop                    ; 009F2C 00 
+    nop                    ; 009F2D 00 
+    nop                    ; 009F2E 00 
+    nop                    ; 009F2F 00 
+    nop                    ; 009F30 00 
+    nop                    ; 009F31 00 
+    ret    po              ; 009F32 E0 
+    ld     a,$00           ; 009F33 3E 00 
+    nop                    ; 009F35 00 
+    nop                    ; 009F36 00 
+    nop                    ; 009F37 00 
+    nop                    ; 009F38 00 
+    nop                    ; 009F39 00 
+    nop                    ; 009F3A 00 
+    nop                    ; 009F3B 00 
+    nop                    ; 009F3C 00 
+    nop                    ; 009F3D 00 
+    nop                    ; 009F3E 00 
+    nop                    ; 009F3F 00 
+    nop                    ; 009F40 00 
+    nop                    ; 009F41 00 
+    nop                    ; 009F42 00 
+    nop                    ; 009F43 00 
+    nop                    ; 009F44 00 
+    nop                    ; 009F45 00 
+    inc    bc              ; 009F46 03 
+    ld     b,$04           ; 009F47 06 04 
+    nop                    ; 009F49 00 
+    nop                    ; 009F4A 00 
+    nop                    ; 009F4B 00 
+    jr     c,$9f2e         ; 009F4C 38 E0 
+    add    a,b             ; 009F4E 80 
+    nop                    ; 009F4F 00 
+    nop                    ; 009F50 00 
+    ld     (bc),a          ; 009F51 02 
+    rrca                   ; 009F52 0F 
+    ccf                    ; 009F53 3F 
+    ld     (bc),a          ; 009F54 02 
+    dec    d               ; 009F55 15 
+    ld     a,(bc)          ; 009F56 0A 
+    nop                    ; 009F57 00 
+    dec    d               ; 009F58 15 
+    xor    d               ; 009F59 AA 
+    ld     d,l             ; 009F5A 55 
+    xor    d               ; 009F5B AA 
+    add    a,e             ; 009F5C 83 
+    ld     a,h             ; 009F5D 7C 
+    xor    l               ; 009F5E AD 
+    ccf                    ; 009F5F 3F 
+    ld     b,(hl)          ; 009F60 46 
+    ld     bc,$0000        ; 009F61 01 00 00 
+    add    a,b             ; 009F64 80 
+    ret    po              ; 009F65 E0 
+    jr     c,$9f34         ; 009F66 38 CC 
+    call   p,$78f8         ; 009F68 F4 F8 78 
+    jr     c,$9f6d         ; 009F6B 38 00 
+    nop                    ; 009F6D 00 
+    nop                    ; 009F6E 00 
+    nop                    ; 009F6F 00 
+    nop                    ; 009F70 00 
+    nop                    ; 009F71 00 
+    nop                    ; 009F72 00 
+    nop                    ; 009F73 00 
+    nop                    ; 009F74 00 
+    ld     bc,$0303        ; 009F75 01 03 03 
+    ld     bc,$0000        ; 009F78 01 00 00 
+    ex     af,af'          ; 009F7B 08 
+    ld     a,a             ; 009F7C 7F 
+    rst    38h             ; 009F7D FF 
+    rst    38h             ; 009F7E FF 
+    rst    38h             ; 009F7F FF 
+    rst    38h             ; 009F80 FF 
+    rst    38h             ; 009F81 FF 
+    rst    38h             ; 009F82 FF 
+    ld     a,a             ; 009F83 7F 
+    push   de              ; 009F84 D5 
+    jp     pe,$ead5        ; 009F85 EA D5 EA 
+    push   de              ; 009F88 D5 
+    xor    d               ; 009F89 AA 
+    push   de              ; 009F8A D5 
+    xor    d               ; 009F8B AA 
+    nop                    ; 009F8C 00 
+    nop                    ; 009F8D 00 
+    nop                    ; 009F8E 00 
+    nop                    ; 009F8F 00 
+    ld     b,b             ; 009F90 40 
+    add    a,b             ; 009F91 80 
+    ld     b,b             ; 009F92 40 
+    add    a,b             ; 009F93 80 
+    ex     af,af'          ; 009F94 08 
+    nop                    ; 009F95 00 
+    nop                    ; 009F96 00 
+    nop                    ; 009F97 00 
+    nop                    ; 009F98 00 
+    ex     af,af'          ; 009F99 08 
+    inc    b               ; 009F9A 04 
+    ld     a,(bc)          ; 009F9B 0A 
+    nop                    ; 009F9C 00 
+    nop                    ; 009F9D 00 
+    nop                    ; 009F9E 00 
+    nop                    ; 009F9F 00 
+    nop                    ; 009FA0 00 
+    nop                    ; 009FA1 00 
+    nop                    ; 009FA2 00 
+    nop                    ; 009FA3 00 
+    inc    d               ; 009FA4 14 
+    jr     c,$9fdb         ; 009FA5 38 34 
+    ld     a,($2a1d)       ; 009FA7 3A 1D 2A 
+    rra                    ; 009FAA 1F 
+    ld     c,$7f           ; 009FAB 0E 7F 
+    ccf                    ; 009FAD 3F 
+    ccf                    ; 009FAE 3F 
+    ccf                    ; 009FAF 3F 
+    ccf                    ; 009FB0 3F 
+    rra                    ; 009FB1 1F 
+    rrca                   ; 009FB2 0F 
+    inc    bc              ; 009FB3 03 
+    push   de              ; 009FB4 D5 
+    jp     pe,$ead5        ; 009FB5 EA D5 EA 
+    push   af              ; 009FB8 F5 
+    jp     m,$fefd         ; 009FB9 FA FD FE 
+    ld     d,b             ; 009FBC 50 
+    and    b               ; 009FBD A0 
+    ld     d,b             ; 009FBE 50 
+    xor    b               ; 009FBF A8 
+    ld     d,c             ; 009FC0 51 
+    xor    b               ; 009FC1 A8 
+    ld     d,h             ; 009FC2 54 
+    xor    b               ; 009FC3 A8 
+    inc    d               ; 009FC4 14 
+    ld     hl,($3e15)      ; 009FC5 2A 15 3E 
+    ccf                    ; 009FC8 3F 
+    ld     a,a             ; 009FC9 7F 
+    ccf                    ; 009FCA 3F 
+    ld     c,$00           ; 009FCB 0E 00 
+    nop                    ; 009FCD 00 
+    nop                    ; 009FCE 00 
+    nop                    ; 009FCF 00 
+    nop                    ; 009FD0 00 
+    nop                    ; 009FD1 00 
+    nop                    ; 009FD2 00 
+    nop                    ; 009FD3 00 
+    nop                    ; 009FD4 00 
+    ld     b,b             ; 009FD5 40 
+    nop                    ; 009FD6 00 
+    ld     b,b             ; 009FD7 40 
+    ld     l,b             ; 009FD8 68 
+    ld     d,h             ; 009FD9 54 
+    ld     a,d             ; 009FDA 7A 
+    ld     e,l             ; 009FDB 5D 
+    nop                    ; 009FDC 00 
+    ld     d,b             ; 009FDD 50 
+    ld     d,b             ; 009FDE 50 
+    ld     d,b             ; 009FDF 50 
+    and    b               ; 009FE0 A0 
+    and    b               ; 009FE1 A0 
+    and    b               ; 009FE2 A0 
+    xor    d               ; 009FE3 AA 
+    nop                    ; 009FE4 00 
+    nop                    ; 009FE5 00 
+    nop                    ; 009FE6 00 
+    nop                    ; 009FE7 00 
+    nop                    ; 009FE8 00 
+    nop                    ; 009FE9 00 
+    nop                    ; 009FEA 00 
+    and    b               ; 009FEB A0 
+    nop                    ; 009FEC 00 
+    ld     bc,$0101        ; 009FED 01 01 01 
+    nop                    ; 009FF0 00 
+    nop                    ; 009FF1 00 
+    nop                    ; 009FF2 00 
+    nop                    ; 009FF3 00 
+    nop                    ; 009FF4 00 
+    nop                    ; 009FF5 00 
+    nop                    ; 009FF6 00 
+    inc    b               ; 009FF7 04 
+    add    a,d             ; 009FF8 82 
+    sub    l               ; 009FF9 95 
+    xor    d               ; 009FFA AA 
+    sub    l               ; 009FFB 95 
+    nop                    ; 009FFC 00 
+    nop                    ; 009FFD 00 
+    nop                    ; 009FFE 00 
+    nop                    ; 009FFF 00 
+    nop                    ; 00A000 00 
+    nop                    ; 00A001 00 
+    nop                    ; 00A002 00 
+    nop                    ; 00A003 00 
+    ld     (hl),a          ; 00A004 77 
+    ld     a,a             ; 00A005 7F 
+    ld     e,(hl)          ; 00A006 5E 
+    halt                   ; 00A007 76 
+    ld     a,l             ; 00A008 7D 
+    ld     a,d             ; 00A009 7A 
+    ld     a,c             ; 00A00A 79 
+    ld     (hl),d          ; 00A00B 72 
+    dec    d               ; 00A00C 15 
+    ld     l,d             ; 00A00D 6A 
+    sub    l               ; 00A00E 95 
+    ld     hl,($aa15)      ; 00A00F 2A 15 AA 
+    ld     d,l             ; 00A012 55 
+    xor    d               ; 00A013 AA 
+    ld     d,c             ; 00A014 51 
+    xor    d               ; 00A015 AA 
+    ld     d,l             ; 00A016 55 
+    xor    d               ; 00A017 AA 
+    ld     d,l             ; 00A018 55 
+    xor    d               ; 00A019 AA 
+    ld     d,l             ; 00A01A 55 
+    xor    d               ; 00A01B AA 
+    ld     b,b             ; 00A01C 40 
+    xor    d               ; 00A01D AA 
+    ld     d,l             ; 00A01E 55 
+    xor    d               ; 00A01F AA 
+    ld     d,l             ; 00A020 55 
+    xor    d               ; 00A021 AA 
+    ld     d,l             ; 00A022 55 
+    xor    d               ; 00A023 AA 
+    ld     c,d             ; 00A024 4A 
+    push   de              ; 00A025 D5 
+    ld     l,d             ; 00A026 6A 
+    and    h               ; 00A027 A4 
+    ld     (hl),h          ; 00A028 74 
+    cp     b               ; 00A029 B8 
+    ld     a,b             ; 00A02A 78 
+    ret    p               ; 00A02B F0 
+    nop                    ; 00A02C 00 
+    nop                    ; 00A02D 00 
+    nop                    ; 00A02E 00 
+    nop                    ; 00A02F 00 
+    nop                    ; 00A030 00 
+    nop                    ; 00A031 00 
+    nop                    ; 00A032 00 
+    nop                    ; 00A033 00 
+    ld     b,l             ; 00A034 45 
+    ld     hl,($6a55)      ; 00A035 2A 55 6A 
+    ld     (hl),l          ; 00A038 75 
+    ld     l,d             ; 00A039 6A 
+    ld     (hl),l          ; 00A03A 75 
+    ld     a,d             ; 00A03B 7A 
+    ld     d,l             ; 00A03C 55 
+    xor    d               ; 00A03D AA 
+    ld     d,l             ; 00A03E 55 
+    xor    d               ; 00A03F AA 
+    ld     d,a             ; 00A040 57 
+    xor    a               ; 00A041 AF 
+    ld     e,a             ; 00A042 5F 
+    cp     a               ; 00A043 BF 
+    ld     d,l             ; 00A044 55 
+    xor    d               ; 00A045 AA 
+    ld     e,a             ; 00A046 5F 
+    cp     a               ; 00A047 BF 
+    rst    38h             ; 00A048 FF 
+    ret    m               ; 00A049 F8 
+    ret    m               ; 00A04A F8 
+    jp     m,$ff55         ; 00A04B FA 55 FF 
+    cp     $f9             ; 00A04E FE F9 
+    jp     nz,$0205        ; 00A050 C2 05 02 
+    nop                    ; 00A053 00 
+    ret    nz              ; 00A054 C0 
+    cp     b               ; 00A055 B8 
+    ld     l,b             ; 00A056 68 
+    cp     b               ; 00A057 B8 
+    ret    po              ; 00A058 E0 
+    ld     c,b             ; 00A059 48 
+    jr     c,$a03c         ; 00A05A 38 E0 
+    nop                    ; 00A05C 00 
+    nop                    ; 00A05D 00 
+    nop                    ; 00A05E 00 
+    nop                    ; 00A05F 00 
+    nop                    ; 00A060 00 
+    nop                    ; 00A061 00 
+    nop                    ; 00A062 00 
+    nop                    ; 00A063 00 
+    ccf                    ; 00A064 3F 
+    ld     d,a             ; 00A065 57 
+    dec    hl              ; 00A066 2B 
+    ld     d,l             ; 00A067 55 
+    dec    hl              ; 00A068 2B 
+    ld     d,l             ; 00A069 55 
+    ld     hl,($ff55)      ; 00A06A 2A 55 FF 
+    rst    38h             ; 00A06D FF 
+    rst    38h             ; 00A06E FF 
+    rst    38h             ; 00A06F FF 
+    rst    38h             ; 00A070 FF 
+    rst    38h             ; 00A071 FF 
+    rst    38h             ; 00A072 FF 
+    rst    38h             ; 00A073 FF 
+    ei                     ; 00A074 FB 
+    ei                     ; 00A075 FB 
+    ei                     ; 00A076 FB 
+    ei                     ; 00A077 FB 
+    pop    af              ; 00A078 F1 
+    ret    po              ; 00A079 E0 
+    ret    nz              ; 00A07A C0 
+    add    a,b             ; 00A07B 80 
+    inc    bc              ; 00A07C 03 
+    sbc    a,(hl)          ; 00A07D 9E 
+    or     b               ; 00A07E B0 
+    and    b               ; 00A07F A0 
+    and    b               ; 00A080 A0 
+    jr     nz,$a0e3        ; 00A081 20 60 
+    ret    nz              ; 00A083 C0 
+    add    a,b             ; 00A084 80 
+    nop                    ; 00A085 00 
+    nop                    ; 00A086 00 
+    nop                    ; 00A087 00 
+    nop                    ; 00A088 00 
+    nop                    ; 00A089 00 
+    nop                    ; 00A08A 00 
+    nop                    ; 00A08B 00 
+    nop                    ; 00A08C 00 
+    nop                    ; 00A08D 00 
+    nop                    ; 00A08E 00 
+    nop                    ; 00A08F 00 
+    nop                    ; 00A090 00 
+    nop                    ; 00A091 00 
+    nop                    ; 00A092 00 
+    nop                    ; 00A093 00 
+    ld     hl,($2a55)      ; 00A094 2A 55 2A 
+    ld     d,l             ; 00A097 55 
+    ld     hl,($2855)      ; 00A098 2A 55 28 
+    ld     b,e             ; 00A09B 43 
+    rst    38h             ; 00A09C FF 
+    ld     a,(hl)          ; 00A09D 7E 
+    ret    m               ; 00A09E F8 
+    ld     (hl),l          ; 00A09F 75 
+    adc    a,d             ; 00A0A0 8A 
+    dec    (hl)            ; 00A0A1 35 
+    ret    pe              ; 00A0A2 E8 
+    or     e               ; 00A0A3 B3 
+    ld     bc,$a643        ; 00A0A4 01 43 A6 
+    ld     c,h             ; 00A0A7 4C 
+    cp     b               ; 00A0A8 B8 
+    ld     h,b             ; 00A0A9 60 
+    ret    nz              ; 00A0AA C0 
+    add    a,b             ; 00A0AB 80 
+    add    a,b             ; 00A0AC 80 
+    nop                    ; 00A0AD 00 
+    nop                    ; 00A0AE 00 
+    nop                    ; 00A0AF 00 
+    nop                    ; 00A0B0 00 
+    nop                    ; 00A0B1 00 
+    nop                    ; 00A0B2 00 
+    nop                    ; 00A0B3 00 
+    nop                    ; 00A0B4 00 
+    nop                    ; 00A0B5 00 
+    nop                    ; 00A0B6 00 
+    nop                    ; 00A0B7 00 
+    nop                    ; 00A0B8 00 
+    nop                    ; 00A0B9 00 
+    nop                    ; 00A0BA 00 
+    nop                    ; 00A0BB 00 
+    nop                    ; 00A0BC 00 
+    nop                    ; 00A0BD 00 
+    nop                    ; 00A0BE 00 
+    nop                    ; 00A0BF 00 
+    nop                    ; 00A0C0 00 
+    nop                    ; 00A0C1 00 
+    nop                    ; 00A0C2 00 
+    nop                    ; 00A0C3 00 
+    rra                    ; 00A0C4 1F 
+    ld     a,a             ; 00A0C5 7F 
+    ld     a,(hl)          ; 00A0C6 7E 
+    ld     (hl),c          ; 00A0C7 71 
+    rrca                   ; 00A0C8 0F 
+    ld     a,b             ; 00A0C9 78 
+    ret    nz              ; 00A0CA C0 
+    nop                    ; 00A0CB 00 
+    and    $9c             ; 00A0CC E6 9C 
+    ld     (hl),b          ; 00A0CE 70 
+    ret    nz              ; 00A0CF C0 
+    nop                    ; 00A0D0 00 
+    nop                    ; 00A0D1 00 
+    nop                    ; 00A0D2 00 
+    nop                    ; 00A0D3 00 
+    nop                    ; 00A0D4 00 
+    nop                    ; 00A0D5 00 
+    nop                    ; 00A0D6 00 
+    nop                    ; 00A0D7 00 
+    nop                    ; 00A0D8 00 
+    nop                    ; 00A0D9 00 
+    nop                    ; 00A0DA 00 
+    nop                    ; 00A0DB 00 
+    nop                    ; 00A0DC 00 
+    nop                    ; 00A0DD 00 
+    nop                    ; 00A0DE 00 
+    nop                    ; 00A0DF 00 
+    nop                    ; 00A0E0 00 
+    nop                    ; 00A0E1 00 
+    nop                    ; 00A0E2 00 
+    nop                    ; 00A0E3 00 
+    nop                    ; 00A0E4 00 
+    nop                    ; 00A0E5 00 
+    nop                    ; 00A0E6 00 
+    nop                    ; 00A0E7 00 
+    nop                    ; 00A0E8 00 
+    nop                    ; 00A0E9 00 
+    nop                    ; 00A0EA 00 
+    nop                    ; 00A0EB 00 
+    nop                    ; 00A0EC 00 
+    nop                    ; 00A0ED 00 
+    nop                    ; 00A0EE 00 
+    nop                    ; 00A0EF 00 
+    nop                    ; 00A0F0 00 
+    nop                    ; 00A0F1 00 
+    nop                    ; 00A0F2 00 
+    nop                    ; 00A0F3 00 
+    jr     c,$a100         ; 00A0F4 38 0A 
+    nop                    ; 00A0F6 00 
+    nop                    ; 00A0F7 00 
+    nop                    ; 00A0F8 00 
+    nop                    ; 00A0F9 00 
+    nop                    ; 00A0FA 00 
+    nop                    ; 00A0FB 00 
+    nop                    ; 00A0FC 00 
+    nop                    ; 00A0FD 00 
+    nop                    ; 00A0FE 00 
+    nop                    ; 00A0FF 00 
+    nop                    ; 00A100 00 
+    nop                    ; 00A101 00 
+    nop                    ; 00A102 00 
+    nop                    ; 00A103 00 
+    nop                    ; 00A104 00 
+    nop                    ; 00A105 00 
+    nop                    ; 00A106 00 
+    nop                    ; 00A107 00 
+    nop                    ; 00A108 00 
+    nop                    ; 00A109 00 
+    nop                    ; 00A10A 00 
+    nop                    ; 00A10B 00 
+    nop                    ; 00A10C 00 
+    nop                    ; 00A10D 00 
+    nop                    ; 00A10E 00 
+    nop                    ; 00A10F 00 
+    nop                    ; 00A110 00 
+    nop                    ; 00A111 00 
+    nop                    ; 00A112 00 
+    nop                    ; 00A113 00 
+    nop                    ; 00A114 00 
+    nop                    ; 00A115 00 
+    nop                    ; 00A116 00 
+    nop                    ; 00A117 00 
+    nop                    ; 00A118 00 
+    nop                    ; 00A119 00 
+    nop                    ; 00A11A 00 
+    nop                    ; 00A11B 00 
+    nop                    ; 00A11C 00 
+    nop                    ; 00A11D 00 
+    nop                    ; 00A11E 00 
+    nop                    ; 00A11F 00 
+    nop                    ; 00A120 00 
+    nop                    ; 00A121 00 
+    nop                    ; 00A122 00 
+    nop                    ; 00A123 00 
+    nop                    ; 00A124 00 
+    nop                    ; 00A125 00 
+    nop                    ; 00A126 00 
+    nop                    ; 00A127 00 
+    nop                    ; 00A128 00 
+    nop                    ; 00A129 00 
+    nop                    ; 00A12A 00 
+    nop                    ; 00A12B 00 
+    nop                    ; 00A12C 00 
+    nop                    ; 00A12D 00 
+    nop                    ; 00A12E 00 
+    nop                    ; 00A12F 00 
+    nop                    ; 00A130 00 
+    nop                    ; 00A131 00 
+    nop                    ; 00A132 00 
+    nop                    ; 00A133 00 
+    nop                    ; 00A134 00 
+    nop                    ; 00A135 00 
+    nop                    ; 00A136 00 
+    nop                    ; 00A137 00 
+    nop                    ; 00A138 00 
+    nop                    ; 00A139 00 
+    nop                    ; 00A13A 00 
+    nop                    ; 00A13B 00 
+    nop                    ; 00A13C 00 
+    nop                    ; 00A13D 00 
+    nop                    ; 00A13E 00 
+    nop                    ; 00A13F 00 
+    nop                    ; 00A140 00 
+    nop                    ; 00A141 00 
+    nop                    ; 00A142 00 
+    nop                    ; 00A143 00 
+    nop                    ; 00A144 00 
+    rrca                   ; 00A145 0F 
+    nop                    ; 00A146 00 
+    nop                    ; 00A147 00 
+    nop                    ; 00A148 00 
+    nop                    ; 00A149 00 
+    nop                    ; 00A14A 00 
+    nop                    ; 00A14B 00 
+    rst    38h             ; 00A14C FF 
+    add    a,b             ; 00A14D 80 
+    nop                    ; 00A14E 00 
+    nop                    ; 00A14F 00 
+    nop                    ; 00A150 00 
+    nop                    ; 00A151 00 
+    nop                    ; 00A152 00 
+    nop                    ; 00A153 00 
+    ret    p               ; 00A154 F0 
+    ld     a,$00           ; 00A155 3E 00 
+    nop                    ; 00A157 00 
+    nop                    ; 00A158 00 
+    nop                    ; 00A159 00 
+    nop                    ; 00A15A 00 
+    nop                    ; 00A15B 00 
+    nop                    ; 00A15C 00 
+    nop                    ; 00A15D 00 
+    nop                    ; 00A15E 00 
+    nop                    ; 00A15F 00 
+    nop                    ; 00A160 00 
+    nop                    ; 00A161 00 
+    nop                    ; 00A162 00 
+    nop                    ; 00A163 00 
+    nop                    ; 00A164 00 
+    nop                    ; 00A165 00 
+    nop                    ; 00A166 00 
+    nop                    ; 00A167 00 
+    nop                    ; 00A168 00 
+    nop                    ; 00A169 00 
+    nop                    ; 00A16A 00 
+    nop                    ; 00A16B 00 
+    nop                    ; 00A16C 00 
+    nop                    ; 00A16D 00 
+    nop                    ; 00A16E 00 
+    nop                    ; 00A16F 00 
+    inc    bc              ; 00A170 03 
+    ld     b,$04           ; 00A171 06 04 
+    nop                    ; 00A173 00 
+    nop                    ; 00A174 00 
+    nop                    ; 00A175 00 
+    jr     c,$a158         ; 00A176 38 E0 
+    add    a,b             ; 00A178 80 
+    nop                    ; 00A179 00 
+    nop                    ; 00A17A 00 
+    inc    bc              ; 00A17B 03 
+    rrca                   ; 00A17C 0F 
+    ccf                    ; 00A17D 3F 
+    ld     bc,$452a        ; 00A17E 01 2A 45 
+    nop                    ; 00A181 00 
+    jr     z,$a158         ; 00A182 28 D4 
+    xor    d               ; 00A184 AA 
+    push   de              ; 00A185 D5 
+    ld     b,e             ; 00A186 43 
+    xor    h               ; 00A187 AC 
+    ld     e,e             ; 00A188 5B 
+    ccf                    ; 00A189 3F 
+    ld     b,$01           ; 00A18A 06 01 
+    nop                    ; 00A18C 00 
+    nop                    ; 00A18D 00 
+    add    a,b             ; 00A18E 80 
+    ret    po              ; 00A18F E0 
+    jr     c,$a15e         ; 00A190 38 CC 
+    or     (hl)            ; 00A192 B6 
+    ei                     ; 00A193 FB 
+    ld     a,l             ; 00A194 7D 
+    ld     a,$00           ; 00A195 3E 00 
+    nop                    ; 00A197 00 
+    nop                    ; 00A198 00 
+    nop                    ; 00A199 00 
+    nop                    ; 00A19A 00 
+    nop                    ; 00A19B 00 
+    add    a,b             ; 00A19C 80 
+    ret    nz              ; 00A19D C0 
+    nop                    ; 00A19E 00 
+    nop                    ; 00A19F 00 
+    nop                    ; 00A1A0 00 
+    nop                    ; 00A1A1 00 
+    nop                    ; 00A1A2 00 
+    nop                    ; 00A1A3 00 
+    nop                    ; 00A1A4 00 
+    nop                    ; 00A1A5 00 
+    nop                    ; 00A1A6 00 
+    ld     bc,$0303        ; 00A1A7 01 03 03 
+    ld     bc,$0408        ; 00A1AA 01 08 04 
+    ld     a,(bc)          ; 00A1AD 0A 
+    ld     a,a             ; 00A1AE 7F 
+    rst    38h             ; 00A1AF FF 
+    rst    38h             ; 00A1B0 FF 
+    rst    38h             ; 00A1B1 FF 
+    rst    38h             ; 00A1B2 FF 
+    rst    38h             ; 00A1B3 FF 
+    rst    38h             ; 00A1B4 FF 
+    ld     a,a             ; 00A1B5 7F 
+    xor    d               ; 00A1B6 AA 
+    push   de              ; 00A1B7 D5 
+    xor    d               ; 00A1B8 AA 
+    push   de              ; 00A1B9 D5 
+    jp     pe,$ead5        ; 00A1BA EA D5 EA 
+    push   af              ; 00A1BD F5 
+    nop                    ; 00A1BE 00 
+    nop                    ; 00A1BF 00 
+    nop                    ; 00A1C0 00 
+    nop                    ; 00A1C1 00 
+    add    a,b             ; 00A1C2 80 
+    nop                    ; 00A1C3 00 
+    add    a,b             ; 00A1C4 80 
+    ld     b,b             ; 00A1C5 40 
+    rrca                   ; 00A1C6 0F 
+    rlca                   ; 00A1C7 07 
+    inc    bc              ; 00A1C8 03 
+    inc    bc              ; 00A1C9 03 
+    ld     bc,$0000        ; 00A1CA 01 00 00 
+    nop                    ; 00A1CD 00 
+    ld     h,b             ; 00A1CE 60 
+    or     b               ; 00A1CF B0 
+    ret    nc              ; 00A1D0 D0 
+    ld     e,b             ; 00A1D1 58 
+    ret    z               ; 00A1D2 C8 
+    ld     l,h             ; 00A1D3 6C 
+    call   p,$0056         ; 00A1D4 F4 56 00 
+    nop                    ; 00A1D7 00 
+    nop                    ; 00A1D8 00 
+    nop                    ; 00A1D9 00 
+    nop                    ; 00A1DA 00 
+    nop                    ; 00A1DB 00 
+    nop                    ; 00A1DC 00 
+    nop                    ; 00A1DD 00 
+    inc    d               ; 00A1DE 14 
+    ld     hl,($3e15)      ; 00A1DF 2A 15 3E 
+    ccf                    ; 00A1E2 3F 
+    ld     a,a             ; 00A1E3 7F 
+    ccf                    ; 00A1E4 3F 
+    ld     c,$7f           ; 00A1E5 0E 7F 
+    ccf                    ; 00A1E7 3F 
+    ccf                    ; 00A1E8 3F 
+    ccf                    ; 00A1E9 3F 
+    ccf                    ; 00A1EA 3F 
+    rst    18h             ; 00A1EB DF 
+    adc    a,a             ; 00A1EC 8F 
+    inc    bc              ; 00A1ED 03 
+    jp     pe,$faf5        ; 00A1EE EA F5 FA 
+    db     $fd             ; 00A1F1 FD 
+    rst    38h             ; 00A1F2 FF 
+    rst    38h             ; 00A1F3 FF 
+    rst    38h             ; 00A1F4 FF 
+    rst    38h             ; 00A1F5 FF 
+    and    b               ; 00A1F6 A0 
+    ld     d,b             ; 00A1F7 50 
+    xor    b               ; 00A1F8 A8 
+    ld     d,l             ; 00A1F9 55 
+    xor    d               ; 00A1FA AA 
+    push   de              ; 00A1FB D5 
+    jp     m,$00ff         ; 00A1FC FA FF 00 
+    ld     bc,$1103        ; 00A1FF 01 03 11 
+    xor    h               ; 00A202 AC 
+    ld     d,h             ; 00A203 54 
+    cp     b               ; 00A204 B8 
+    ret    po              ; 00A205 E0 
+    ld     a,d             ; 00A206 7A 
+    or     d               ; 00A207 B2 
+    xor    d               ; 00A208 AA 
+    sub    e               ; 00A209 93 
+    xor    c               ; 00A20A A9 
+    sub    l               ; 00A20B 95 
+    ld     c,c             ; 00A20C 49 
+    ld     b,c             ; 00A20D 41 
+    nop                    ; 00A20E 00 
+    nop                    ; 00A20F 00 
+    nop                    ; 00A210 00 
+    nop                    ; 00A211 00 
+    nop                    ; 00A212 00 
+    nop                    ; 00A213 00 
+    nop                    ; 00A214 00 
+    nop                    ; 00A215 00 
+    nop                    ; 00A216 00 
+    nop                    ; 00A217 00 
+    nop                    ; 00A218 00 
+    inc    b               ; 00A219 04 
+    ld     (bc),a          ; 00A21A 02 
+    dec    d               ; 00A21B 15 
+    ld     hl,($0015)      ; 00A21C 2A 15 00 
+    djnz   $a231           ; 00A21F 10 10 
+    djnz   $a1c3           ; 00A221 10 A0 
+    and    b               ; 00A223 A0 
+    and    h               ; 00A224 A4 
+    ld     l,d             ; 00A225 6A 
+    nop                    ; 00A226 00 
+    nop                    ; 00A227 00 
+    nop                    ; 00A228 00 
+    nop                    ; 00A229 00 
+    nop                    ; 00A22A 00 
+    nop                    ; 00A22B 00 
+    nop                    ; 00A22C 00 
+    add    a,b             ; 00A22D 80 
+    nop                    ; 00A22E 00 
+    nop                    ; 00A22F 00 
+    nop                    ; 00A230 00 
+    nop                    ; 00A231 00 
+    nop                    ; 00A232 00 
+    nop                    ; 00A233 00 
+    nop                    ; 00A234 00 
+    nop                    ; 00A235 00 
+    nop                    ; 00A236 00 
+    nop                    ; 00A237 00 
+    nop                    ; 00A238 00 
+    nop                    ; 00A239 00 
+    nop                    ; 00A23A 00 
+    nop                    ; 00A23B 00 
+    nop                    ; 00A23C 00 
+    nop                    ; 00A23D 00 
+    ld     b,c             ; 00A23E 41 
+    ld     b,c             ; 00A23F 41 
+    ld     b,c             ; 00A240 41 
+    ld     b,c             ; 00A241 41 
+    and    c               ; 00A242 A1 
+    sub    e               ; 00A243 93 
+    xor    d               ; 00A244 AA 
+    sub    d               ; 00A245 92 
+    nop                    ; 00A246 00 
+    nop                    ; 00A247 00 
+    nop                    ; 00A248 00 
+    nop                    ; 00A249 00 
+    nop                    ; 00A24A 00 
+    nop                    ; 00A24B 00 
+    nop                    ; 00A24C 00 
+    nop                    ; 00A24D 00 
+    ld     a,(bc)          ; 00A24E 0A 
+    dec    d               ; 00A24F 15 
+    ld     a,(bc)          ; 00A250 0A 
+    inc    b               ; 00A251 04 
+    dec    b               ; 00A252 05 
+    inc    bc              ; 00A253 03 
+    inc    bc              ; 00A254 03 
+    ld     bc,$6a55        ; 00A255 01 55 6A 
+    push   af              ; 00A258 F5 
+    cp     $ff             ; 00A259 FE FF 
+    rst    38h             ; 00A25B FF 
+    rst    38h             ; 00A25C FF 
+    rst    38h             ; 00A25D FF 
+    ld     d,b             ; 00A25E 50 
+    xor    b               ; 00A25F A8 
+    ld     d,l             ; 00A260 55 
+    xor    d               ; 00A261 AA 
+    ld     d,l             ; 00A262 55 
+    jp     pe,$faf5        ; 00A263 EA F5 FA 
+    nop                    ; 00A266 00 
+    nop                    ; 00A267 00 
+    nop                    ; 00A268 00 
+    add    a,b             ; 00A269 80 
+    ld     b,b             ; 00A26A 40 
+    add    a,b             ; 00A26B 80 
+    ld     b,b             ; 00A26C 40 
+    and    b               ; 00A26D A0 
+    ld     bc,$0201        ; 00A26E 01 01 02 
+    ld     (bc),a          ; 00A271 02 
+    dec    b               ; 00A272 05 
+    dec    bc              ; 00A273 0B 
+    add    hl,bc           ; 00A274 09 
+    scf                    ; 00A275 37 
+    ld     hl,($a456)      ; 00A276 2A 56 A4 
+    call   z,$d868         ; 00A279 CC 68 D8 
+    ret    nc              ; 00A27C D0 
+    jr     nc,$a27f        ; 00A27D 30 00 
+    nop                    ; 00A27F 00 
+    nop                    ; 00A280 00 
+    nop                    ; 00A281 00 
+    nop                    ; 00A282 00 
+    nop                    ; 00A283 00 
+    nop                    ; 00A284 00 
+    nop                    ; 00A285 00 
+    nop                    ; 00A286 00 
+    nop                    ; 00A287 00 
+    nop                    ; 00A288 00 
+    nop                    ; 00A289 00 
+    inc    b               ; 00A28A 04 
+    ld     b,$03           ; 00A28B 06 03 
+    nop                    ; 00A28D 00 
+    ld     a,a             ; 00A28E 7F 
+    ccf                    ; 00A28F 3F 
+    rrca                   ; 00A290 0F 
+    inc    bc              ; 00A291 03 
+    nop                    ; 00A292 00 
+    dec    b               ; 00A293 05 
+    add    a,d             ; 00A294 82 
+    push   hl              ; 00A295 E5 
+    db     $fd             ; 00A296 FD 
+    jp     m,$fffd         ; 00A297 FA FD FF 
+    ccf                    ; 00A29A 3F 
+    ld     b,b             ; 00A29B 40 
+    xor    l               ; 00A29C AD 
+    ld     d,a             ; 00A29D 57 
+    ld     d,b             ; 00A29E 50 
+    xor    c               ; 00A29F A9 
+    ld     e,(hl)          ; 00A2A0 5E 
+    ld     sp,hl           ; 00A2A1 F9 
+    add    a,a             ; 00A2A2 87 
+    ld     e,a             ; 00A2A3 5F 
+    rst    30h             ; 00A2A4 F7 
+    ld     a,h             ; 00A2A5 7C 
+    ld     c,e             ; 00A2A6 4B 
+    cp     (hl)            ; 00A2A7 BE 
+    ld     a,l             ; 00A2A8 7D 
+    ei                     ; 00A2A9 FB 
+    or     $cc             ; 00A2AA F6 CC 
+    jr     c,$a28e         ; 00A2AC 38 E0 
+    ld     h,b             ; 00A2AE 60 
+    ret    nz              ; 00A2AF C0 
+    add    a,b             ; 00A2B0 80 
+    nop                    ; 00A2B1 00 
+    nop                    ; 00A2B2 00 
+    nop                    ; 00A2B3 00 
+    nop                    ; 00A2B4 00 
+    nop                    ; 00A2B5 00 
+    nop                    ; 00A2B6 00 
+    nop                    ; 00A2B7 00 
+    nop                    ; 00A2B8 00 
+    nop                    ; 00A2B9 00 
+    nop                    ; 00A2BA 00 
+    nop                    ; 00A2BB 00 
+    nop                    ; 00A2BC 00 
+    nop                    ; 00A2BD 00 
+    nop                    ; 00A2BE 00 
+    nop                    ; 00A2BF 00 
+    nop                    ; 00A2C0 00 
+    nop                    ; 00A2C1 00 
+    nop                    ; 00A2C2 00 
+    nop                    ; 00A2C3 00 
+    nop                    ; 00A2C4 00 
+    nop                    ; 00A2C5 00 
+    jr     c,$a2d7         ; 00A2C6 38 0F 
+    nop                    ; 00A2C8 00 
+    nop                    ; 00A2C9 00 
+    nop                    ; 00A2CA 00 
+    nop                    ; 00A2CB 00 
+    nop                    ; 00A2CC 00 
+    nop                    ; 00A2CD 00 
+    dec    l               ; 00A2CE 2D 
+    add    a,b             ; 00A2CF 80 
+    rst    38h             ; 00A2D0 FF 
+    nop                    ; 00A2D1 00 
+    nop                    ; 00A2D2 00 
+    nop                    ; 00A2D3 00 
+    nop                    ; 00A2D4 00 
+    nop                    ; 00A2D5 00 
+    jp     $e03e           ; 00A2D6 C3 3E E0 
+    nop                    ; 00A2D9 00 
+    nop                    ; 00A2DA 00 
+    nop                    ; 00A2DB 00 
+    nop                    ; 00A2DC 00 
+    nop                    ; 00A2DD 00 
+    add    a,b             ; 00A2DE 80 
+    nop                    ; 00A2DF 00 
+    nop                    ; 00A2E0 00 
+    nop                    ; 00A2E1 00 
+    nop                    ; 00A2E2 00 
+    nop                    ; 00A2E3 00 
+    nop                    ; 00A2E4 00 
+    nop                    ; 00A2E5 00 
+    nop                    ; 00A2E6 00 
+    nop                    ; 00A2E7 00 
+    nop                    ; 00A2E8 00 
+    nop                    ; 00A2E9 00 
+    nop                    ; 00A2EA 00 
+    nop                    ; 00A2EB 00 
+    nop                    ; 00A2EC 00 
+    nop                    ; 00A2ED 00 
+    nop                    ; 00A2EE 00 
+    nop                    ; 00A2EF 00 
+    nop                    ; 00A2F0 00 
+    nop                    ; 00A2F1 00 
+    nop                    ; 00A2F2 00 
+    nop                    ; 00A2F3 00 
+    nop                    ; 00A2F4 00 
+    nop                    ; 00A2F5 00 
+    nop                    ; 00A2F6 00 
+    nop                    ; 00A2F7 00 
+    nop                    ; 00A2F8 00 
+    nop                    ; 00A2F9 00 
+    nop                    ; 00A2FA 00 
+    nop                    ; 00A2FB 00 
+    nop                    ; 00A2FC 00 
+    nop                    ; 00A2FD 00 
+    nop                    ; 00A2FE 00 
+    nop                    ; 00A2FF 00 
+    nop                    ; 00A300 00 
+    nop                    ; 00A301 00 
+    nop                    ; 00A302 00 
+    nop                    ; 00A303 00 
+    nop                    ; 00A304 00 
+    nop                    ; 00A305 00 
+    nop                    ; 00A306 00 
+    nop                    ; 00A307 00 
+    nop                    ; 00A308 00 
+    nop                    ; 00A309 00 
+    nop                    ; 00A30A 00 
+    nop                    ; 00A30B 00 
+    nop                    ; 00A30C 00 
+    nop                    ; 00A30D 00 
+    nop                    ; 00A30E 00 
+    nop                    ; 00A30F 00 
+    nop                    ; 00A310 00 
+    nop                    ; 00A311 00 
+    nop                    ; 00A312 00 
+    nop                    ; 00A313 00 
+    nop                    ; 00A314 00 
+    nop                    ; 00A315 00 
+    nop                    ; 00A316 00 
+    nop                    ; 00A317 00 
+    nop                    ; 00A318 00 
+    nop                    ; 00A319 00 
+    nop                    ; 00A31A 00 
+    nop                    ; 00A31B 00 
+    nop                    ; 00A31C 00 
+    nop                    ; 00A31D 00 
+    nop                    ; 00A31E 00 
+    nop                    ; 00A31F 00 
+    nop                    ; 00A320 00 
+    nop                    ; 00A321 00 
+    nop                    ; 00A322 00 
+    nop                    ; 00A323 00 
+    nop                    ; 00A324 00 
+    nop                    ; 00A325 00 
+    jr     $a32d           ; 00A326 18 05 
+    nop                    ; 00A328 00 
+    nop                    ; 00A329 00 
+    nop                    ; 00A32A 00 
+    nop                    ; 00A32B 00 
+    nop                    ; 00A32C 00 
+    nop                    ; 00A32D 00 
+    nop                    ; 00A32E 00 
+    nop                    ; 00A32F 00 
+    nop                    ; 00A330 00 
+    nop                    ; 00A331 00 
+    nop                    ; 00A332 00 
+    nop                    ; 00A333 00 
+    nop                    ; 00A334 00 
+    nop                    ; 00A335 00 
+    nop                    ; 00A336 00 
+    nop                    ; 00A337 00 
+    nop                    ; 00A338 00 
+    nop                    ; 00A339 00 
+    nop                    ; 00A33A 00 
+    nop                    ; 00A33B 00 
+    nop                    ; 00A33C 00 
+    nop                    ; 00A33D 00 
+    nop                    ; 00A33E 00 
+    nop                    ; 00A33F 00 
+    nop                    ; 00A340 00 
+    nop                    ; 00A341 00 
+    nop                    ; 00A342 00 
+    nop                    ; 00A343 00 
+    nop                    ; 00A344 00 
+    nop                    ; 00A345 00 
+    nop                    ; 00A346 00 
+    ld     bc,$0000        ; 00A347 01 00 00 
+    nop                    ; 00A34A 00 
+    nop                    ; 00A34B 00 
+    nop                    ; 00A34C 00 
+    nop                    ; 00A34D 00 
+    nop                    ; 00A34E 00 
+    nop                    ; 00A34F 00 
+    nop                    ; 00A350 00 
+    nop                    ; 00A351 00 
+    nop                    ; 00A352 00 
+    nop                    ; 00A353 00 
+    nop                    ; 00A354 00 
+    nop                    ; 00A355 00 
+    nop                    ; 00A356 00 
+    nop                    ; 00A357 00 
+    ld     bc,$0001        ; 00A358 01 01 00 
+    cp     $fe             ; 00A35B FE FE 
+    jp     nz,$c1c0        ; 00A35D C2 C0 C1 
+    nop                    ; 00A360 00 
+    nop                    ; 00A361 00 
+    nop                    ; 00A362 00 
+    nop                    ; 00A363 00 
+    ret    p               ; 00A364 F0 
+    nop                    ; 00A365 00 
+    nop                    ; 00A366 00 
+    nop                    ; 00A367 00 
+    nop                    ; 00A368 00 
+    nop                    ; 00A369 00 
+    nop                    ; 00A36A 00 
+    nop                    ; 00A36B 00 
+    nop                    ; 00A36C 00 
+    nop                    ; 00A36D 00 
+    nop                    ; 00A36E 00 
+    nop                    ; 00A36F 00 
+    pop    bc              ; 00A370 C1 
+    ret    nz              ; 00A371 C0 
+    ret    nz              ; 00A372 C0 
+    ret    nz              ; 00A373 C0 
+    ret    nz              ; 00A374 C0 
+    nop                    ; 00A375 00 
+    nop                    ; 00A376 00 
+    nop                    ; 00A377 00 
+    nop                    ; 00A378 00 
+    nop                    ; 00A379 00 
+    nop                    ; 00A37A 00 
+    nop                    ; 00A37B 00 
+    nop                    ; 00A37C 00 
+    nop                    ; 00A37D 00 
+    nop                    ; 00A37E 00 
+    nop                    ; 00A37F 00 
+    nop                    ; 00A380 00 
+    nop                    ; 00A381 00 
+    nop                    ; 00A382 00 
+    nop                    ; 00A383 00 
+    nop                    ; 00A384 00 
+    nop                    ; 00A385 00 
+    nop                    ; 00A386 00 
+    nop                    ; 00A387 00 
+    nop                    ; 00A388 00 
+    nop                    ; 00A389 00 
+    nop                    ; 00A38A 00 
+    nop                    ; 00A38B 00 
+    nop                    ; 00A38C 00 
+    nop                    ; 00A38D 00 
+    nop                    ; 00A38E 00 
+    nop                    ; 00A38F 00 
+    nop                    ; 00A390 00 
+    nop                    ; 00A391 00 
+    nop                    ; 00A392 00 
+    nop                    ; 00A393 00 
+    nop                    ; 00A394 00 
+    nop                    ; 00A395 00 
+    nop                    ; 00A396 00 
+    nop                    ; 00A397 00 
+    nop                    ; 00A398 00 
+    nop                    ; 00A399 00 
+    nop                    ; 00A39A 00 
+    nop                    ; 00A39B 00 
+    nop                    ; 00A39C 00 
+    nop                    ; 00A39D 00 
+    nop                    ; 00A39E 00 
+    nop                    ; 00A39F 00 
+    jr     $a3a7           ; 00A3A0 18 05 
+    nop                    ; 00A3A2 00 
+    nop                    ; 00A3A3 00 
+    nop                    ; 00A3A4 00 
+    nop                    ; 00A3A5 00 
+    nop                    ; 00A3A6 00 
+    nop                    ; 00A3A7 00 
+    nop                    ; 00A3A8 00 
+    nop                    ; 00A3A9 00 
+    nop                    ; 00A3AA 00 
+    nop                    ; 00A3AB 00 
+    nop                    ; 00A3AC 00 
+    nop                    ; 00A3AD 00 
+    nop                    ; 00A3AE 00 
+    nop                    ; 00A3AF 00 
+    nop                    ; 00A3B0 00 
+    nop                    ; 00A3B1 00 
+    nop                    ; 00A3B2 00 
+    nop                    ; 00A3B3 00 
+    nop                    ; 00A3B4 00 
+    nop                    ; 00A3B5 00 
+    nop                    ; 00A3B6 00 
+    nop                    ; 00A3B7 00 
+    nop                    ; 00A3B8 00 
+    nop                    ; 00A3B9 00 
+    nop                    ; 00A3BA 00 
+    nop                    ; 00A3BB 00 
+    nop                    ; 00A3BC 00 
+    nop                    ; 00A3BD 00 
+    ld     bc,$0101        ; 00A3BE 01 01 01 
+    ld     bc,$0000        ; 00A3C1 01 00 00 
+    nop                    ; 00A3C4 00 
+    nop                    ; 00A3C5 00 
+    nop                    ; 00A3C6 00 
+    nop                    ; 00A3C7 00 
+    nop                    ; 00A3C8 00 
+    nop                    ; 00A3C9 00 
+    nop                    ; 00A3CA 00 
+    nop                    ; 00A3CB 00 
+    nop                    ; 00A3CC 00 
+    nop                    ; 00A3CD 00 
+    nop                    ; 00A3CE 00 
+    nop                    ; 00A3CF 00 
+    nop                    ; 00A3D0 00 
+    nop                    ; 00A3D1 00 
+    ld     bc,$0001        ; 00A3D2 01 01 00 
+    cp     $fe             ; 00A3D5 FE FE 
+    jp     nz,$c1c0        ; 00A3D7 C2 C0 C1 
+    nop                    ; 00A3DA 00 
+    nop                    ; 00A3DB 00 
+    ld     b,b             ; 00A3DC 40 
+    nop                    ; 00A3DD 00 
+    cp     $00             ; 00A3DE FE 00 
+    nop                    ; 00A3E0 00 
+    ld     b,b             ; 00A3E1 40 
+    nop                    ; 00A3E2 00 
+    nop                    ; 00A3E3 00 
+    nop                    ; 00A3E4 00 
+    nop                    ; 00A3E5 00 
+    nop                    ; 00A3E6 00 
+    nop                    ; 00A3E7 00 
+    nop                    ; 00A3E8 00 
+    nop                    ; 00A3E9 00 
+    pop    bc              ; 00A3EA C1 
+    pop    bc              ; 00A3EB C1 
+    pop    bc              ; 00A3EC C1 
+    pop    bc              ; 00A3ED C1 
+    ret    nz              ; 00A3EE C0 
+    nop                    ; 00A3EF 00 
+    nop                    ; 00A3F0 00 
+    nop                    ; 00A3F1 00 
+    nop                    ; 00A3F2 00 
+    nop                    ; 00A3F3 00 
+    nop                    ; 00A3F4 00 
+    nop                    ; 00A3F5 00 
+    nop                    ; 00A3F6 00 
+    nop                    ; 00A3F7 00 
+    nop                    ; 00A3F8 00 
+    nop                    ; 00A3F9 00 
+    nop                    ; 00A3FA 00 
+    nop                    ; 00A3FB 00 
+    nop                    ; 00A3FC 00 
+    nop                    ; 00A3FD 00 
+    nop                    ; 00A3FE 00 
+    nop                    ; 00A3FF 00 
+    nop                    ; 00A400 00 
+    nop                    ; 00A401 00 
+    nop                    ; 00A402 00 
+    nop                    ; 00A403 00 
+    nop                    ; 00A404 00 
+    nop                    ; 00A405 00 
+    nop                    ; 00A406 00 
+    nop                    ; 00A407 00 
+    nop                    ; 00A408 00 
+    nop                    ; 00A409 00 
+    nop                    ; 00A40A 00 
+    nop                    ; 00A40B 00 
+    nop                    ; 00A40C 00 
+    nop                    ; 00A40D 00 
+    nop                    ; 00A40E 00 
+    nop                    ; 00A40F 00 
+    nop                    ; 00A410 00 
+    nop                    ; 00A411 00 
+    nop                    ; 00A412 00 
+    nop                    ; 00A413 00 
+    nop                    ; 00A414 00 
+    nop                    ; 00A415 00 
+    nop                    ; 00A416 00 
+    nop                    ; 00A417 00 
+    nop                    ; 00A418 00 
+    nop                    ; 00A419 00 
+    jr     $a421           ; 00A41A 18 05 
+    nop                    ; 00A41C 00 
+    nop                    ; 00A41D 00 
+    nop                    ; 00A41E 00 
+    nop                    ; 00A41F 00 
+    nop                    ; 00A420 00 
+    nop                    ; 00A421 00 
+    nop                    ; 00A422 00 
+    nop                    ; 00A423 00 
+    nop                    ; 00A424 00 
+    nop                    ; 00A425 00 
+    nop                    ; 00A426 00 
+    nop                    ; 00A427 00 
+    nop                    ; 00A428 00 
+    nop                    ; 00A429 00 
+    nop                    ; 00A42A 00 
+    nop                    ; 00A42B 00 
+    nop                    ; 00A42C 00 
+    nop                    ; 00A42D 00 
+    nop                    ; 00A42E 00 
+    nop                    ; 00A42F 00 
+    nop                    ; 00A430 00 
+    nop                    ; 00A431 00 
+    nop                    ; 00A432 00 
+    nop                    ; 00A433 00 
+    nop                    ; 00A434 00 
+    nop                    ; 00A435 00 
+    ld     bc,$0101        ; 00A436 01 01 01 
+    ld     bc,$0101        ; 00A439 01 01 01 
+    nop                    ; 00A43C 00 
+    nop                    ; 00A43D 00 
+    nop                    ; 00A43E 00 
+    nop                    ; 00A43F 00 
+    nop                    ; 00A440 00 
+    nop                    ; 00A441 00 
+    nop                    ; 00A442 00 
+    nop                    ; 00A443 00 
+    nop                    ; 00A444 00 
+    nop                    ; 00A445 00 
+    nop                    ; 00A446 00 
+    nop                    ; 00A447 00 
+    nop                    ; 00A448 00 
+    nop                    ; 00A449 00 
+    nop                    ; 00A44A 00 
+    nop                    ; 00A44B 00 
+    ld     bc,$0011        ; 00A44C 01 11 00 
+    cp     $fe             ; 00A44F FE FE 
+    jp     nz,$c9c0        ; 00A451 C2 C0 C9 
+    nop                    ; 00A454 00 
+    jr     nz,$a497        ; 00A455 20 40 
+    nop                    ; 00A457 00 
+    rst    38h             ; 00A458 FF 
+    nop                    ; 00A459 00 
+    nop                    ; 00A45A 00 
+    ld     b,b             ; 00A45B 40 
+    nop                    ; 00A45C 00 
+    nop                    ; 00A45D 00 
+    nop                    ; 00A45E 00 
+    nop                    ; 00A45F 00 
+    add    a,b             ; 00A460 80 
+    nop                    ; 00A461 00 
+    nop                    ; 00A462 00 
+    nop                    ; 00A463 00 
+    pop    bc              ; 00A464 C1 
+    pop    bc              ; 00A465 C1 
+    pop    bc              ; 00A466 C1 
+    pop    bc              ; 00A467 C1 
+    pop    bc              ; 00A468 C1 
+    ld     bc,$0000        ; 00A469 01 00 00 
+    jr     nz,$a46e        ; 00A46C 20 00 
+    nop                    ; 00A46E 00 
+    nop                    ; 00A46F 00 
+    nop                    ; 00A470 00 
+    nop                    ; 00A471 00 
+    nop                    ; 00A472 00 
+    nop                    ; 00A473 00 
+    nop                    ; 00A474 00 
+    nop                    ; 00A475 00 
+    nop                    ; 00A476 00 
+    nop                    ; 00A477 00 
+    nop                    ; 00A478 00 
+    nop                    ; 00A479 00 
+    nop                    ; 00A47A 00 
+    nop                    ; 00A47B 00 
+    nop                    ; 00A47C 00 
+    nop                    ; 00A47D 00 
+    nop                    ; 00A47E 00 
+    nop                    ; 00A47F 00 
+    nop                    ; 00A480 00 
+    nop                    ; 00A481 00 
+    nop                    ; 00A482 00 
+    nop                    ; 00A483 00 
+    nop                    ; 00A484 00 
+    nop                    ; 00A485 00 
+    nop                    ; 00A486 00 
+    nop                    ; 00A487 00 
+    nop                    ; 00A488 00 
+    nop                    ; 00A489 00 
+    nop                    ; 00A48A 00 
+    nop                    ; 00A48B 00 
+    nop                    ; 00A48C 00 
+    nop                    ; 00A48D 00 
+    nop                    ; 00A48E 00 
+    nop                    ; 00A48F 00 
+    nop                    ; 00A490 00 
+    nop                    ; 00A491 00 
+    nop                    ; 00A492 00 
+    nop                    ; 00A493 00 
+    jr     $a49b           ; 00A494 18 05 
+    nop                    ; 00A496 00 
+    nop                    ; 00A497 00 
+    nop                    ; 00A498 00 
+    nop                    ; 00A499 00 
+    nop                    ; 00A49A 00 
+    nop                    ; 00A49B 00 
+    ld     bc,$0001        ; 00A49C 01 01 00 
+    nop                    ; 00A49F 00 
+    nop                    ; 00A4A0 00 
+    nop                    ; 00A4A1 00 
+    nop                    ; 00A4A2 00 
+    nop                    ; 00A4A3 00 
+    nop                    ; 00A4A4 00 
+    nop                    ; 00A4A5 00 
+    nop                    ; 00A4A6 00 
+    nop                    ; 00A4A7 00 
+    nop                    ; 00A4A8 00 
+    nop                    ; 00A4A9 00 
+    nop                    ; 00A4AA 00 
+    nop                    ; 00A4AB 00 
+    nop                    ; 00A4AC 00 
+    nop                    ; 00A4AD 00 
+    ld     bc,$0101        ; 00A4AE 01 01 01 
+    ld     bc,$0101        ; 00A4B1 01 01 01 
+    ld     bc,$0001        ; 00A4B4 01 01 00 
+    nop                    ; 00A4B7 00 
+    nop                    ; 00A4B8 00 
+    nop                    ; 00A4B9 00 
+    nop                    ; 00A4BA 00 
+    nop                    ; 00A4BB 00 
+    nop                    ; 00A4BC 00 
+    nop                    ; 00A4BD 00 
+    nop                    ; 00A4BE 00 
+    nop                    ; 00A4BF 00 
+    nop                    ; 00A4C0 00 
+    nop                    ; 00A4C1 00 
+    nop                    ; 00A4C2 00 
+    nop                    ; 00A4C3 00 
+    nop                    ; 00A4C4 00 
+    nop                    ; 00A4C5 00 
+    ld     hl,$0011        ; 00A4C6 21 11 00 
+    cp     $fe             ; 00A4C9 FE FE 
+    jp     nz,$c9c0        ; 00A4CB C2 C0 C9 
+    djnz   $a4f0           ; 00A4CE 10 20 
+    ld     b,b             ; 00A4D0 40 
+    nop                    ; 00A4D1 00 
+    rst    38h             ; 00A4D2 FF 
+    nop                    ; 00A4D3 00 
+    nop                    ; 00A4D4 00 
+    ld     b,b             ; 00A4D5 40 
+    nop                    ; 00A4D6 00 
+    nop                    ; 00A4D7 00 
+    nop                    ; 00A4D8 00 
+    nop                    ; 00A4D9 00 
+    ret    p               ; 00A4DA F0 
+    nop                    ; 00A4DB 00 
+    nop                    ; 00A4DC 00 
+    nop                    ; 00A4DD 00 
+    pop    de              ; 00A4DE D1 
+    pop    bc              ; 00A4DF C1 
+    pop    bc              ; 00A4E0 C1 
+    pop    bc              ; 00A4E1 C1 
+    pop    bc              ; 00A4E2 C1 
+    ld     bc,$0101        ; 00A4E3 01 01 01 
+    jr     nz,$a4f8        ; 00A4E6 20 10 
+    nop                    ; 00A4E8 00 
+    nop                    ; 00A4E9 00 
+    nop                    ; 00A4EA 00 
+    nop                    ; 00A4EB 00 
+    nop                    ; 00A4EC 00 
+    nop                    ; 00A4ED 00 
+    nop                    ; 00A4EE 00 
+    nop                    ; 00A4EF 00 
+    nop                    ; 00A4F0 00 
+    nop                    ; 00A4F1 00 
+    nop                    ; 00A4F2 00 
+    nop                    ; 00A4F3 00 
+    nop                    ; 00A4F4 00 
+    nop                    ; 00A4F5 00 
+    ld     bc,$0000        ; 00A4F6 01 00 00 
+    nop                    ; 00A4F9 00 
+    nop                    ; 00A4FA 00 
+    nop                    ; 00A4FB 00 
+    nop                    ; 00A4FC 00 
+    nop                    ; 00A4FD 00 
+    nop                    ; 00A4FE 00 
+    nop                    ; 00A4FF 00 
+    nop                    ; 00A500 00 
+    nop                    ; 00A501 00 
+    nop                    ; 00A502 00 
+    nop                    ; 00A503 00 
+    nop                    ; 00A504 00 
+    nop                    ; 00A505 00 
+    nop                    ; 00A506 00 
+    nop                    ; 00A507 00 
+    nop                    ; 00A508 00 
+    nop                    ; 00A509 00 
+    nop                    ; 00A50A 00 
+    nop                    ; 00A50B 00 
+    nop                    ; 00A50C 00 
+    nop                    ; 00A50D 00 

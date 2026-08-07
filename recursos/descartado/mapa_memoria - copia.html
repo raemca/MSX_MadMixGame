@@ -1,0 +1,440 @@
+﻿<!DOCTYPE html>
+<!-- Ingeniería inversa, herramientas y documentación: Rafael Eduardo Martín Candial -->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Mad Mix Game — mapa de memoria</title>
+<style>
+  :root {
+    --bg: #f5f3ef;
+    --fg: #2a2621;
+    --panel: #ffffff;
+    --border: #ddd6cc;
+    --muted: #7a7266;
+    --c-codigo: #6a86ae;
+    --c-recursos: #8a6ab0;
+    --c-graficos: #7fae6a;
+    --c-nivel: #d69a3a;
+    --c-variables: #4aa89a;
+    --c-sinexplorar: #cbc3b6;
+    --c-sistema: #e4dfd4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1a17;
+      --fg: #ece6da;
+      --panel: #262320;
+      --border: #3a352e;
+      --muted: #a39a8a;
+      --c-codigo: #7f9bc4;
+      --c-recursos: #a17fd0;
+      --c-graficos: #8fc27a;
+      --c-nivel: #e6b25a;
+      --c-variables: #5ec2b2;
+      --c-sinexplorar: #4a453c;
+      --c-sistema: #322e28;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 2rem clamp(1rem, 4vw, 3rem);
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; margin-bottom: 0.2rem; }
+  h2 { font-size: 1.15rem; margin: 2.5rem 0 0.6rem 0; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+  .subtitle { color: var(--muted); margin-top: 0; }
+  .note {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--c-recursos);
+    border-radius: 6px;
+    padding: 0.8rem 1rem;
+    margin: 1rem 0 2rem 0;
+    font-size: 0.92rem;
+  }
+  .note code { font-family: "SFMono-Regular", Consolas, monospace; }
+  code { font-family: "SFMono-Regular", Consolas, monospace; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem 1.4rem;
+    margin: 0.6rem 0 1.6rem 0;
+    font-size: 0.85rem;
+  }
+  .legend span.swatch {
+    display: inline-block;
+    width: 0.8em;
+    height: 0.8em;
+    border-radius: 3px;
+    margin-right: 0.4em;
+    vertical-align: middle;
+  }
+
+  /* --- barra principal de memoria --- */
+  .mem-outer {
+    position: relative;
+    margin-top: 2.5rem;
+  }
+  .mem-bar {
+    position: relative;
+    height: 64px;
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--c-sistema);
+  }
+  .mem-seg {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-right: 1px solid rgba(0,0,0,0.15);
+    cursor: default;
+  }
+  .mem-seg-label {
+    position: absolute;
+    top: 0; bottom: 0; left: 2px; right: 2px;
+    display: flex;
+    align-items: center;
+    font-size: 0.65rem;
+    color: #14110d;
+    overflow: hidden;
+    white-space: nowrap;
+    pointer-events: none;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.35);
+  }
+
+  /* --- marcas de direccion debajo de la barra --- */
+  .mem-ticks {
+    position: relative;
+    height: 90px;
+    margin-top: 2px;
+  }
+  .tick {
+    position: absolute;
+    top: 0;
+    width: 1px;
+    height: 8px;
+    background: var(--muted);
+  }
+  .tick-label {
+    position: absolute;
+    top: 10px;
+    font-size: 0.68rem;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    color: var(--muted);
+    white-space: nowrap;
+    transform-origin: top left;
+    transform: rotate(55deg);
+  }
+
+  /* --- seccion de ficheros --- */
+  .files-outer {
+    position: relative;
+    margin-top: 3rem;
+  }
+  .files-scale {
+    position: relative;
+    height: 1px;
+    background: var(--border);
+    margin-bottom: 0.6rem;
+  }
+  .file-row {
+    position: relative;
+    height: 40px;
+    margin-bottom: 2.6rem;
+  }
+  .file-block {
+    position: absolute;
+    top: 0;
+    height: 32px;
+    border-radius: 4px;
+    border: 1px solid rgba(0,0,0,0.25);
+    display: flex;
+    align-items: center;
+    padding: 0 6px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    overflow: hidden;
+    color: #14110d;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.35);
+  }
+  .file-block.temp { opacity: 0.55; border-style: dashed; }
+  .file-tag {
+    position: absolute;
+    top: 34px;
+    font-size: 0.72rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .file-arrow-svg { position: absolute; top: -1px; left: 0; width: 100%; height: 40px; overflow: visible; pointer-events: none; }
+
+  footer {
+    margin-top: 3rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+  }
+</style>
+</head>
+<body>
+
+<h1>Mad Mix Game — mapa de memoria</h1>
+<p class="attribution-line" style="color:var(--muted);font-size:0.85rem;margin:-0.3rem 0 1.2rem 0;">Ingeniería inversa, herramientas y documentación: Rafael Eduardo Martín Candial</p>
+<p class="subtitle">Estructura de la RAM del Z80 (0x0000-0xFFFF) y de dónde viene cada zona — ver <code>src/FINDINGS.md</code> para el detalle técnico completo de cada hallazgo.</p>
+
+<div class="note">
+  Documento vivo: se irá completando y corrigiendo según avance la
+  ingeniería inversa. Pasa el ratón por encima de cualquier bloque
+  de la barra de memoria para ver el detalle exacto (dirección,
+  tamaño, descripción). La sección de ficheros de abajo usa la
+  <strong>misma escala de direcciones</strong> que la barra de
+  memoria, así que un fichero alineado bajo un tramo de la barra es,
+  literalmente, el que aporta ese contenido.
+</div>
+
+<h2>Distribución de la RAM (0x0000 - 0xFFFF)</h2>
+
+<div class="legend">
+  <span><span class="swatch" style="background:var(--c-codigo)"></span>código del motor (confirmado)</span>
+  <span><span class="swatch" style="background:var(--c-recursos)"></span>gestor de recursos / intérprete de bytecode</span>
+  <span><span class="swatch" style="background:var(--c-graficos)"></span>datos gráficos (losetas, portada, decoración)</span>
+  <span><span class="swatch" style="background:var(--c-nivel)"></span>datos de nivel/laberinto</span>
+  <span><span class="swatch" style="background:var(--c-variables)"></span>variables / estado en RAM (no viene de un fichero)</span>
+  <span><span class="swatch" style="background:var(--c-sinexplorar)"></span>sin explorar todavía</span>
+  <span><span class="swatch" style="background:var(--c-sistema)"></span>sin analizar (fuera de alcance / sistema)</span>
+</div>
+
+<div class="mem-outer">
+  <div class="mem-bar" id="mem-bar"></div>
+  <div class="mem-ticks" id="mem-ticks"></div>
+</div>
+
+<h2>Ficheros del disco y dónde aterriza cada uno</h2>
+<p style="color:var(--muted); font-size:0.9rem; max-width:60rem;">
+  Los bloques con borde discontinuo son posiciones <strong>temporales</strong>
+  (el contenido se sobrescribe o se reubica después). La flecha indica
+  reubicación real hecha por código del juego, no solo un salto de fichero.
+</p>
+
+<div class="files-outer" id="files-outer"></div>
+
+<footer>
+  Generado a partir de las cabeceras BLOAD reales de
+  <code>MADMIX.SCR</code>, <code>MADMIX0.BIN</code> y
+  <code>MADMIX1.BIN</code>, y de todo lo desensamblado/confirmado en
+  <code>src/FINDINGS.md</code>. <code>AUTOEXEC.BAS</code>,
+  <code>MADMIX.BAS</code> y <code>MADMIX</code> (versión "cracked")
+  son programas BASIC tokenizados que solo orquestan la carga — no
+  ocupan una dirección fija dentro del rango analizado, así que no
+  se dibujan en la escala de memoria.
+</footer>
+
+<script>
+// ============================================================
+// SEGMENTOS DE MEMORIA -- ir ampliando/corrigiendo aqui segun se
+// descubra mas. start/end en direcciones reales del Z80 (0x0000-
+// 0xFFFF). category referencia una de las variables --c-* de CSS.
+// ============================================================
+const SEGMENTS = [
+  { start: 0x0000, end: 0x1000, label: "sin analizar", detail: "0x0000-0x0FFF: no analizado todavia. Posible zona de BIOS/sistema y pila (SP arranca en 0x0FFF segun INIT).", category: "sistema" },
+
+  { start: 0x1000, end: 0x104C, label: "VDP: nombres identidad", detail: "0x1000-0x104C: codigo que escribe la tabla de nombres IDENTIDAD en VRAM 0x1800 (el truco ya conocido: nombre=indice de patron). Parte del bloque reubicado desde MADMIX.SCR.", category: "codigo" },
+  { start: 0x104C, end: 0x10AC, label: "descompresion color", detail: "0x104C-0x10AC: codigo que reconstruye la tabla de color de la portada desde datos comprimidos a nibble (ver 0x28F0).", category: "codigo" },
+  { start: 0x10AC, end: 0x10BC, label: "tabla 16 (color)", detail: "0x10AC-0x10BC: tabla de 16 bytes usada para expandir los indices de color de 4 bits de la portada.", category: "graficos" },
+  { start: 0x10BC, end: 0x10ED, label: "espera VDP", detail: "0x10BC-0x10ED: codigo auxiliar de espera/registro del VDP.", category: "codigo" },
+  { start: 0x10ED, end: 0x28ED, label: "bitmap portada (6144 B)", detail: "0x10ED-0x28ED: bitmap crudo de la pantalla de portada (tabla de patrones completa, sin comprimir). Ver recursos/portada.html.", category: "graficos" },
+  { start: 0x28ED, end: 0x28F0, label: "relleno", detail: "0x28ED-0x28F0: 3 bytes sin explicar, probablemente relleno/alineacion.", category: "sinexplorar" },
+  { start: 0x28F0, end: 0x2BF0, label: "color comprimido (768 B)", detail: "0x28F0-0x2BF0: datos de color de la portada comprimidos (1 byte de control = 2 indices de color de 4 bits via tabla 0x10AC).", category: "graficos" },
+  { start: 0x2BF0, end: 0x335C, label: "sin explorar", detail: "0x2BF0-0x335C: sin explorar todavia (~1900 bytes). Incluye probablemente variables de trabajo en RAM de la zona $2Bxx/$2Cxx referenciadas por el cargador de nivel y otras rutinas.", category: "sinexplorar" },
+
+  { start: 0x335C, end: 0x511C, label: "datos de los 14 niveles", detail: "0x335C-0x511C (aprox): matrices de losetas en bruto de los 14 niveles jugables (tamano variable, 18 a 26 filas x 32 columnas cada uno). Ver recursos/niveles.html.", category: "nivel" },
+  { start: 0x511C, end: 0x5904, label: "sin explorar", detail: "0x511C-0x5904: sin explorar todavia.", category: "sinexplorar" },
+  { start: 0x5904, end: 0x59A9, label: "cargador de nivel", detail: "0x5904-0x59A9: codigo que lee la tabla de niveles, copia la cabecera fija (96 bytes) y el cuerpo (tamano variable) al buffer de RAM 0xFC60.", category: "codigo" },
+  { start: 0x59A9, end: 0x5AD5, label: "tabla de niveles (300 B)", detail: "0x59A9-0x5AD5: tabla de 15 registros de 20 bytes (14 niveles jugables + 1 registro muerto/duplicado, confirmado por el usuario).", category: "nivel" },
+  { start: 0x5AD5, end: 0x6500, label: "sin explorar", detail: "0x5AD5-0x6500: cola del bloque reubicado desde MADMIX.SCR, sin explorar.", category: "sinexplorar" },
+
+  { start: 0x6500, end: 0x8400, label: "sin analizar", detail: "0x6500-0x8400: fuera del bloque reubicado y de MADMIX1.BIN, sin analizar.", category: "sistema" },
+
+  { start: 0x8400, end: 0x8430, label: "jump table", detail: "0x8400-0x8430: tabla de saltos publica del motor (12 entradas: INIT, ACTOR_ENGINE, ISR, WAIT_VBLANK, MAP_COORD_TO_ADDR, TILE_TYPE_LOOKUP...).", category: "codigo" },
+  { start: 0x8430, end: 0x8440, label: "variables", detail: "0x8430-0x8440: variables residentes (FRAME_FLAG y otras sin identificar del todo).", category: "variables" },
+  { start: 0x8440, end: 0x8800, label: "ACTOR_ENGINE (960 B)", detail: "0x8440-0x8800: motor de actores/render sub-pixel de personajes. Transcrito byte a byte, 0 diferencias contra el original.", category: "codigo" },
+  { start: 0x8800, end: 0x882A, label: "sin identificar", detail: "0x8800-0x882A: sin identificar.", category: "sinexplorar" },
+  { start: 0x882A, end: 0x8860, label: "ISR", detail: "0x882A-0x8860: rutina de interrupcion (ISR), confirmada.", category: "codigo" },
+  { start: 0x8860, end: 0x8931, label: "housekeeping + hueco", detail: "0x8860-0x8931: housekeeping de la ISR confirmado, con parte todavia sin identificar.", category: "codigo" },
+  { start: 0x8931, end: 0x89A0, label: "FILVRM/LDIRVM/SETVRAM...", detail: "0x8931-0x89A0: API de VDP (FILVRM, LDIRVM, SETVRAM) + LOOKUP_8978, DIRBITS_TABLE, ADDR_FROM_DC00, RESET_8437. Confirmado.", category: "codigo" },
+  { start: 0x89A0, end: 0x89AD, label: "WAIT_VBLANK", detail: "0x89A0-0x89AD: espera de sincronismo vertical. Confirmado.", category: "codigo" },
+  { start: 0x89AD, end: 0x8C34, label: "JT_SLOT8 + hueco", detail: "0x89AD-0x8C34: JT_SLOT8 confirmado (disparador de scroll al cruzar borde de loseta), resto del tramo con huecos sin identificar.", category: "codigo" },
+  { start: 0x8C34, end: 0x8CB6, label: "JT_SLOT9 + hueco", detail: "0x8C34-0x8CB6: JT_SLOT9 confirmado (limpia VRAM y refresca marcador/HUD con la fuente de iconos), resto sin identificar.", category: "codigo" },
+  { start: 0x8CB6, end: 0x8CDA, label: "MAP_COORD_TO_ADDR", detail: "0x8CB6-0x8CDA: convierte coordenada de camara/comecocos en direccion dentro de la matriz de nivel (stride de 32 columnas). Confirmado byte a byte.", category: "codigo" },
+  { start: 0x8CDA, end: 0x8D1B, label: "TILE_TYPE_LOOKUP + hueco", detail: "0x8CDA-0x8D1B: busqueda de tipo de loseta, con parte sin identificar.", category: "codigo" },
+  { start: 0x8D1B, end: 0x8E3C, label: "REDRAW_STRIP + hueco", detail: "0x8D1B-0x8E3C: redibuja franja de 2x16 losetas, con parte sin identificar.", category: "codigo" },
+  { start: 0x8E3C, end: 0x8EC4, label: "JT_SLOT6 + hueco", detail: "0x8E3C-0x8EC4: JT_SLOT6 confirmado (logica de colision/entrada, bitmask de 5 comprobaciones), resto sin identificar.", category: "codigo" },
+  { start: 0x8EC4, end: 0x8F24, label: "TILE_TYPES (96 B)", detail: "0x8EC4-0x8F24: tabla de tipos de loseta (colision), indexada por el mismo numero que el grafico. Confirmado.", category: "graficos" },
+  { start: 0x8F24, end: 0x9135, label: "INIT", detail: "0x8F24-0x9135: arranque del motor, incluye bucle de scroll sincronizado a VBLANK. Confirmado hasta 0x9134 (RET limpio).", category: "codigo" },
+  { start: 0x9135, end: 0x9300, label: "sin explorar", detail: "0x9135-0x9300: el desensamblado lineal se desincroniza aqui -- zona de datos sin explorar.", category: "sinexplorar" },
+  { start: 0x9300, end: 0xB940, label: "graficos decorativos", detail: "0x9300-0xB940: fuente/iconos 8x8 (0x9300-0x9700), marco de caramelo a rayas (~0x9600-0xB700) y 53 bloques candidatos a sprite de personaje (0x9D40-0xA3E0, SIN identificar -- 3 formatos probados, ninguno dio forma reconocible).", category: "graficos" },
+  { start: 0xB940, end: 0xC4A0, label: "tile_gfx.bin (91 losetas)", detail: "0xB940-0xC4A0: las 91 losetas del laberinto, todas identificadas visualmente. Ver recursos/graficos.html.", category: "graficos" },
+  { start: 0xC4A0, end: 0xC900, label: "gestor de recursos + interprete", detail: "0xC4A0-0xC900: gestor de ranuras de recurso e interprete de bytecode (tabla de despacho 0xC99E, subprogramas reutilizables en 0xCB72). Codigo real, confirmado.", category: "recursos" },
+  { start: 0xC900, end: 0xC9C9, label: "sin explorar", detail: "0xC900-0xC9C9: sin explorar.", category: "sinexplorar" },
+  { start: 0xC9C9, end: 0xCDCB, label: "estado de ranuras (RAM)", detail: "0xC9C9-0xCDCB: zona de trabajo en RAM para hasta varias ranuras de recurso activas (cursor/contador por programa de bytecode). Vacia (ceros) en el .BIN de fabrica -- el usuario vio esta zona variar al ritmo de la musica en vivo.", category: "variables" },
+  { start: 0xCDCB, end: 0xCF8B, label: "programas de bytecode", detail: "0xCDCB-0xCF8B: 3 cabeceras/programas de bytecode conocidos (0xCDCB, 0xCDFF, 0xCE0C), cargados 3 veces en INIT via CALL 0xC4A0 -- probablemente paleta/marco/titulo.", category: "recursos" },
+  { start: 0xCF8B, end: 0xD000, label: "codigo sin trazar del todo", detail: "0xCF8B-0xD000: codigo llamado repetidamente desde INIT (CALL 0xCF8B, 8 veces), no trazado linea a linea todavia.", category: "codigo" },
+  { start: 0xD000, end: 0xD500, label: "maze_data.bin (1 nivel, 40 filas)", detail: "0xD000-0xD500: matriz completa de 32x40 de UN nivel (formato identico a los niveles reales). Tambien referenciada directamente por los niveles 13 y 14 de la tabla real. Posible copia de desarrollo o nivel de demostracion -- sin confirmar su proposito exacto.", category: "nivel" },
+  { start: 0xD500, end: 0xD8FB, label: "sin explorar", detail: "0xD500-0xD8FB: sin explorar todavia (~1KB).", category: "sinexplorar" },
+  { start: 0xD8FB, end: 0xDD7B, label: "mascaras de render de actores", detail: "0xD8FB-0xDD7B: tabla de 1152 bytes de patrones/mascaras de bits, usada por el render sub-pixel de actores (JTS2_RENDER_A/B).", category: "graficos" },
+  { start: 0xDD7B, end: 0xDDA0, label: "cola/relleno", detail: "0xDD7B-0xDDA0: cola final de MADMIX1.BIN, sin explorar (~37 bytes).", category: "sinexplorar" },
+
+  { start: 0xDDA0, end: 0xFA00, label: "sin analizar", detail: "0xDDA0-0xFA00: fuera de MADMIX1.BIN y del bloque reubicado, sin analizar (probable zona de sistema/BASIC).", category: "sistema" },
+  { start: 0xFA00, end: 0xFA32, label: "MADMIX0.BIN (relocador)", detail: "0xFA00-0xFA32: MADMIX0.BIN completo (58 bytes incl. cabecera). Hace el LDIR que reubica 0x5500 bytes de MADMIX.SCR desde 0x8800 a 0x1000.", category: "codigo" },
+  { start: 0xFA32, end: 0xFC60, label: "sin analizar", detail: "0xFA32-0xFC60: sin analizar.", category: "sistema" },
+  { start: 0xFC60, end: 0xFE60, label: "buffer de nivel activo (RAM)", detail: "0xFC60-0xFE60: matriz de trabajo del nivel actualmente cargado (hasta 1280 bytes, 32 columnas de stride). NO viene de ningun fichero directamente -- la rellena en tiempo de ejecucion el cargador de 0x5904 cada vez que arranca/cambia de nivel.", category: "variables" },
+  { start: 0xFE60, end: 0x10000, label: "sin analizar", detail: "0xFE60-0xFFFF: sin analizar.", category: "sistema" },
+];
+
+// ============================================================
+// FICHEROS DEL DISCO -- direccion real de carga (cabecera BLOAD)
+// y, si aplica, reubicacion posterior hecha por codigo del juego.
+// ============================================================
+const FILES = [
+  {
+    name: "MADMIX.SCR", size: 21768,
+    loadStart: 0x8800, loadEnd: 0xDD00,
+    temp: true,
+    note: "Carga temporal en 0x8800-0xDD00 (cabecera BLOAD tipo codigo, NO es una imagen de pantalla pese al nombre)",
+    relocation: { toStart: 0x1000, toEnd: 0x6500, via: "MADMIX0.BIN hace LDIR de 0x5500 bytes" }
+  },
+  {
+    name: "MADMIX0.BIN", size: 58,
+    loadStart: 0xFA00, loadEnd: 0xFA32,
+    temp: false,
+    note: "Reside en 0xFA00-0xFA32. Se ejecuta nada mas cargarse (BLOAD...,R) y hace el LDIR de arriba."
+  },
+  {
+    name: "MADMIX1.BIN", size: 22952,
+    loadStart: 0x8400, loadEnd: 0xDDA0,
+    temp: false,
+    note: "El motor de juego. Se carga DESPUES de MADMIX.SCR/MADMIX0.BIN y sobrescribe la zona temporal 0x8800-0xDD00."
+  }
+];
+
+const TOTAL = 0x10000;
+const pct = (addr) => (addr / TOTAL) * 100;
+
+const CATEGORY_VAR = {
+  codigo: "--c-codigo",
+  recursos: "--c-recursos",
+  graficos: "--c-graficos",
+  nivel: "--c-nivel",
+  variables: "--c-variables",
+  sinexplorar: "--c-sinexplorar",
+  sistema: "--c-sistema",
+};
+
+function fmtAddr(a) { return "0x" + a.toString(16).toUpperCase().padStart(4, "0"); }
+
+// --- barra de memoria ---
+const bar = document.getElementById("mem-bar");
+SEGMENTS.forEach((seg) => {
+  const div = document.createElement("div");
+  div.className = "mem-seg";
+  div.style.left = pct(seg.start) + "%";
+  div.style.width = (pct(seg.end) - pct(seg.start)) + "%";
+  div.style.background = "var(" + CATEGORY_VAR[seg.category] + ")";
+  div.title = fmtAddr(seg.start) + " - " + fmtAddr(seg.end) + "  (" + (seg.end - seg.start) + " bytes)\n" + seg.detail;
+  const widthPx = (pct(seg.end) - pct(seg.start)) / 100 * bar.clientWidth || 0;
+  if (widthPx > 40) {
+    const lbl = document.createElement("div");
+    lbl.className = "mem-seg-label";
+    lbl.textContent = seg.label;
+    div.appendChild(lbl);
+  }
+  bar.appendChild(div);
+});
+
+// --- marcas de direccion (limites de segmento, con nombre corto) ---
+const ticks = document.getElementById("mem-ticks");
+const seen = new Set();
+SEGMENTS.forEach((seg) => {
+  if (!seen.has(seg.start)) {
+    seen.add(seg.start);
+    const t = document.createElement("div");
+    t.className = "tick";
+    t.style.left = pct(seg.start) + "%";
+    ticks.appendChild(t);
+    const l = document.createElement("div");
+    l.className = "tick-label";
+    l.style.left = pct(seg.start) + "%";
+    l.textContent = fmtAddr(seg.start) + " " + seg.label;
+    ticks.appendChild(l);
+  }
+});
+
+// --- seccion de ficheros, alineada a la MISMA escala de direcciones ---
+const filesOuter = document.getElementById("files-outer");
+FILES.forEach((f) => {
+  const row = document.createElement("div");
+  row.className = "file-row";
+
+  const block = document.createElement("div");
+  block.className = "file-block" + (f.temp ? " temp" : "");
+  block.style.left = pct(f.loadStart) + "%";
+  block.style.width = Math.max(pct(f.loadEnd) - pct(f.loadStart), 0.3) + "%";
+  block.style.background = "var(--c-nivel)";
+  block.title = f.name + " (" + f.size + " bytes) -> " + fmtAddr(f.loadStart) + "-" + fmtAddr(f.loadEnd) + (f.note ? "\n" + f.note : "");
+  block.textContent = f.name;
+  row.appendChild(block);
+
+  const tag = document.createElement("div");
+  tag.className = "file-tag";
+  tag.style.left = pct(f.loadStart) + "%";
+  tag.textContent = f.name + " -- " + f.size + " B -- " + fmtAddr(f.loadStart) + (f.temp ? " (temporal)" : "");
+  row.appendChild(tag);
+
+  filesOuter.appendChild(row);
+
+  if (f.relocation) {
+    const relRow = document.createElement("div");
+    relRow.className = "file-row";
+
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("class", "file-arrow-svg");
+    svg.setAttribute("viewBox", "0 0 100 40");
+    svg.setAttribute("preserveAspectRatio", "none");
+    const x1 = pct(f.loadStart), x2 = pct(f.relocation.toStart);
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("x1", x1); line.setAttribute("y1", "0");
+    line.setAttribute("x2", x2); line.setAttribute("y2", "34");
+    line.setAttribute("stroke", "var(--muted)");
+    line.setAttribute("stroke-width", "0.3");
+    line.setAttribute("vector-effect", "non-scaling-stroke");
+    svg.appendChild(line);
+    relRow.appendChild(svg);
+
+    const relBlock = document.createElement("div");
+    relBlock.className = "file-block";
+    relBlock.style.left = pct(f.relocation.toStart) + "%";
+    relBlock.style.width = Math.max(pct(f.relocation.toEnd) - pct(f.relocation.toStart), 0.3) + "%";
+    relBlock.style.background = "var(--c-nivel)";
+    relBlock.title = f.name + " reubicado -> " + fmtAddr(f.relocation.toStart) + "-" + fmtAddr(f.relocation.toEnd) + "\n" + f.relocation.via;
+    relBlock.textContent = f.name + " (reubicado)";
+    relRow.appendChild(relBlock);
+
+    const relTag = document.createElement("div");
+    relTag.className = "file-tag";
+    relTag.style.left = pct(f.relocation.toStart) + "%";
+    relTag.textContent = f.relocation.via + " -> " + fmtAddr(f.relocation.toStart) + "-" + fmtAddr(f.relocation.toEnd);
+    relRow.appendChild(relTag);
+
+    filesOuter.appendChild(relRow);
+  }
+});
+</script>
+</body>
+</html>

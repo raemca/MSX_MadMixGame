@@ -1,0 +1,16 @@
+; !!! AVISO -- LEE ESTO ANTES DE EDITAR !!!
+; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+; Rejilla de losetas de header_4b5c.bin -- 3 filas x 32 columnas.
+; Cada celda es el byte crudo en hex (2 digitos): bits 0-6 = indice de
+; loseta (ver data/tiles/*.til, 00-90), bit 7 = flag sin confirmar en
+; tiempo de ejecucion (LEVEL_LOADER lo borra al cargar el nivel, ver
+; FINDINGS.md) pero presente de verdad en el binario original.
+; NO añadas ni quites filas ni columnas: el tamaño es FIJO. Si cambia,
+; todo lo que va detras en madmix_scr.asm/madmix1.asm se desplaza de
+; direccion -- el juego compilaria sin error pero cargaria niveles o
+; datos incorrectos en tiempo de ejecucion. Ver FINDINGS.md/README.md.
+; filas=3 columnas=32
+
+20 54 55 20 46 46 46 46 46 46 46 46 46 46 20 54 55 20 46 46 46 46 46 46 46 46 46 46 20 54 55 20
+20 56 57 20 46 46 46 46 46 46 46 46 46 24 26 56 57 24 26 46 46 46 46 46 46 46 46 46 20 56 57 20
+20 20 20 20 46 46 46 46 46 46 46 46 46 46 20 20 20 20 46 46 46 46 46 46 46 46 46 46 20 20 20 20

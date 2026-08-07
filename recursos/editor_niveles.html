@@ -1,0 +1,763 @@
+﻿<!DOCTYPE html>
+<!-- Ingeniería inversa, herramientas y documentación: Rafael Eduardo Martín Candial -->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Mad Mix Game — editor visual de niveles</title>
+<style>
+  :root {
+    --bg: #f5f3ef;
+    --fg: #2a2621;
+    --panel: #ffffff;
+    --border: #ddd6cc;
+    --muted: #7a7266;
+    --accent-unknown: #b08a3e;
+    --accent-bad: #c0463d;
+    --accent-ok: #4a8f5c;
+    --pixel-on: #2a2621;
+    --pixel-off: #f5f3ef;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1a17;
+      --fg: #ece6da;
+      --panel: #262320;
+      --border: #3a352e;
+      --muted: #a39a8a;
+      --accent-unknown: #cf9f4e;
+      --accent-bad: #e0655c;
+      --accent-ok: #7fc492;
+      --pixel-on: #ece6da;
+      --pixel-off: #262320;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 2rem clamp(1rem, 4vw, 3rem);
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; margin-bottom: 0.2rem; }
+  .subtitle { color: var(--muted); margin-top: 0; }
+  .note {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent-unknown);
+    border-radius: 6px;
+    padding: 0.8rem 1rem;
+    margin: 1rem 0;
+    font-size: 0.92rem;
+  }
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.8rem;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    margin: 1rem 0;
+  }
+  .toolbar label { font-size: 0.85rem; color: var(--muted); }
+  select, button, input[type=file] {
+    font: inherit;
+    padding: 0.35rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--fg);
+  }
+  button { cursor: pointer; }
+  button:hover { border-color: var(--accent-unknown); }
+  #ballCounter {
+    font-weight: 600;
+    padding: 0.3rem 0.7rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+  #ballCounter.ok { color: var(--accent-ok); border-color: var(--accent-ok); }
+  #ballCounter.bad { color: var(--accent-bad); border-color: var(--accent-bad); }
+  #ballCounter.na { color: var(--muted); }
+  .layout {
+    display: flex;
+    gap: 1.2rem;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .palette {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 0.3rem;
+    max-width: 340px;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  .palette canvas {
+    image-rendering: pixelated;
+    width: 100%;
+    aspect-ratio: 1/1;
+    background: var(--pixel-off);
+    border: 2px solid transparent;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .palette canvas.active { border-color: var(--accent-ok); }
+  .gridwrap {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.8rem;
+    overflow: auto;
+    max-height: 75vh;
+  }
+  #gridCanvas {
+    image-rendering: pixelated;
+    display: block;
+    cursor: crosshair;
+  }
+  #gridCanvas.readonly {
+    cursor: not-allowed;
+    opacity: 0.75;
+  }
+  button:disabled, input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+</style>
+</head>
+<body>
+
+<h1>Mad Mix Game — editor visual de niveles</h1>
+<p class="attribution-line" style="color:var(--muted);font-size:0.85rem;margin:-0.3rem 0 1.2rem 0;">Ingeniería inversa, herramientas y documentación: Rafael Eduardo Martín Candial</p>
+<p class="subtitle">Pinta losetas del catálogo real sobre la rejilla de un nivel, y exporta/importa el mismo formato de texto que <code>tools/mmlvl_tool.py</code>.</p>
+
+<div class="note">
+  <b>Cómo se usa (sin servidor, todo en el navegador):</b> elige un
+  fichero, pinta con clic/arrastre (la loseta activa es la
+  seleccionada en la paleta de la izquierda), y pulsa <b>"Descargar
+  .txt"</b> para generar el fichero de texto editado. Muévelo a mano a
+  <code>data/niveles/</code> (sustituyendo al que ya había) y corre
+  <code>py tools/mmlvl_tool.py asm fichero.txt fichero.bin</code> antes
+  de recompilar. También puedes abrir un <code>.txt</code> ya existente
+  (de <code>data/niveles/</code> o descargado antes) con <b>"Abrir
+  .txt"</b> para seguir editándolo. <b>El tamaño (filas × columnas) es
+  FIJO</b> — este editor solo permite repintar celdas existentes, igual
+  que la herramienta de línea de comandos: cambiar el número de filas o
+  columnas desplazaría direcciones en <code>madmix_scr.asm</code>.
+  <br><br>
+  <b>Las 3 cabeceras compartidas (<code>header_*.bin</code>) son de
+  SOLO LECTURA</b> aquí: son puramente decorativas (relleno fuera de
+  la zona jugable) y las comparte más de un nivel, así que este editor
+  bloquea pintar/abrir/descargar sobre ellas.
+  <br><br>
+  <b>Límite de esta pasada</b>: el contador de bolitas se recalcula en
+  vivo contra el objetivo real guardado en <code>TABLA_NIVELES</code>
+  (offsets 18-19) -- cuenta losetas "suelo con bola" Y las 4 flechas
+  (también dan bola al pisarlas, confirmado en el código real); con
+  esto los 12 niveles coinciden EXACTO, así que cualquier desajuste
+  que veas aquí es una señal real (probablemente de una edición).
+  Las posiciones de ítems/enemigos NO se validan aquí
+  — viven en tablas de coordenadas aparte (<code>ITEM_TABLE_1</code>/
+  <code>ITEM_TABLE_2</code>, <code>madmix_scr.asm</code>), no en la
+  rejilla de losetas.
+  <br><br>
+  <b>Nivel 13</b>: rejilla completa (21×32) en un único fichero
+  (<code>body_l13.bin</code>). Antes partido en dos (uno de ellos
+  parecía "contexto prestado" de una tabla de sonido) — descartado del
+  todo (ver <code>FINDINGS.md</code>): esos 92 bytes nunca fueron
+  sonido, siempre fueron nivel 13, así que se unificó en un solo
+  fichero como el resto de niveles.
+  <br><br>
+  <b>Nivel 14</b>: rejilla completa (23×32) en un único fichero
+  (<code>body_l14.bin</code>). Antes se pensaba que sus últimos 36
+  bytes eran el arranque de un guion de demo reasignado — descartado
+  (ver <code>FINDINGS.md</code>): esos bytes nunca fueron guion de
+  demo, siempre fueron parte del nivel 14, así que se unificó en un
+  solo fichero como el resto de niveles.
+  <br><br>
+  <b>Nivel 15</b>: es <code>body_l15.bin</code> (renombrado, antes
+  <code>body_hidden_48bc.bin</code>) — RESUELTO: SÍ es un nivel real y
+  jugable, con registro propio en <code>TABLA_NIVELES</code> (el
+  registro 15, el último) y objetivo real de 165 bolitas, alcanzable
+  en partida normal completando los 14 niveles anteriores sin agotar
+  el ciclo (ver <code>FINDINGS.md</code>).
+</div>
+
+<div class="toolbar">
+  <label for="fileSelect">Fichero:</label>
+  <select id="fileSelect"></select>
+  <label for="openInput">Abrir .txt:</label>
+  <input type="file" id="openInput" accept=".txt">
+  <button id="downloadBtn">Descargar .txt</button>
+  <label><input type="checkbox" id="bit7Check"> pintar con bit 7 puesto</label>
+  <span id="ballCounter" class="na">sin objetivo de bolitas</span>
+  <span id="dimsLabel" style="color:var(--muted); font-size:0.85rem;"></span>
+</div>
+<div id="contextNote" class="note" style="display:none; font-size:0.85rem;"></div>
+
+<div class="layout">
+  <div class="palette" id="palette"></div>
+  <div class="gridwrap">
+    <canvas id="gridCanvas"></canvas>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// Catálogo de las 91 losetas -- copiado de recursos/graficos.html
+// (mismo array TILE_GFX, mismo decodificador -- ver ese fichero para
+// el detalle de cómo se identificó cada una).
+// ============================================================
+const TILE_GFX = [
+"80014002e0047008f8107fe0fd607ca0fd607c20fbe077f0eff85ffcbffe5555",
+"80014002e0047008f8107fe0fd607ca0fd607ca0fd607ca0fd607ca0fd607ca0",
+"fd607ca0fd607ca0fd607ca0fd607ca0fd607ca0fd607ca0fd607ca0fd607ca0",
+"fd607ca0fd607ca0fd607ca0fd607ca0fd607c20fbe077f0eff85ffcbffe5555",
+"80004000e0007000f8007ffffd557caafd557c00fbff77ffefff5fffbfff5555",
+"00000000000000000000ffff5555aaaa55550000ffffffffffffffffffff5555",
+"00010002000400080010ffe05560aaa055600020ffe0fff0fff8fffcfffe5555",
+"fd617ca2fd647ca8fd707cbffd557caafd557c00fbff77ffefff5fffbfff5555",
+"fd607ca03d601ca00d60fea05560aaa055600020ffe0fff0fff8fffcfffe5555",
+"80004000e0007000f8007ffffd557caafd557c80fd7f7cbffd6f7ca7fd637ca1",
+"00010002000400080010ffe05560aaa0556000a0fd60f4a0ed60dca0bd607ca0",
+"00000000000000000000ffff5555aaaa55550080fd7ff4bfed6fdca7bd637ca1",
+"7d613ca21d640ca80570fcbf5555aaaa55550000ffffffffffffffffffff5555",
+"fd617ca2fd647ca8fd707cbffd557caafd557c80fd7f7cbffd6f7ca7fd637ca1",
+"fd607ca03d601ca00d60fca05560aaa0556000a0fd60f4a0ed60dca0bd607ca0",
+"fd617ca23d641ca80d70fcbf5555aaaa55550080fd7ff4bfed6fdca7bd637ca1",
+"83c0dff4bd4afa04f402f802f401e801f401f801f402fa8abd56dfacaffaffff",
+"83c0dff4bd4afa04f402fa02f401fa01f401fa01fd01fa01fd01fa01f401fa01",
+"f401fa01f401fa01fd01fa01f401fa01fc01fa01fd01fa01f401fa01f501fa01",
+"f401fa01f401fa01fd01fa01f401fa01fc03fa03fd46feaebffedffcaffaffff",
+"83ffde00b800f000f000e800f000e800f440faaaf555ffaebfffdfffafffffff",
+"ffff00000000000000000000000000004410aaaa5555baaeffffffffffffffff",
+"ffc00034000a000400060002000300034007a80f5556babefffefffcfffaffff",
+"f400fa00f400fa00fd00fa00f500fa00fd00fa82fd55feaabfdfdfffafffffff",
+"f40108010001000100010003000100034007aa2b5556babefffefffcfffaffff",
+"03ff2fe05f003e007c007a00fc00f800f400f801f402fa01f401f801fc01fa01",
+"ffc00034000a000400020002000100014001a8015401aa01f401fa01fd01fa01",
+"ffff0000000000000000000000000000000080005001a8027401fa01f401fa01",
+"f40108000000000000000000000000004410aaaa5555baaeffffffffffffffff",
+"f400fa00f400fa00fd00fa00f400fa00fc00fa00fd01fa02f401fa03f503fa03",
+"f4010001000100010001000100010001000100014001a801d401fa01f401fa01",
+"f4000800000000000000000000000000000000004001a802d401fa01f401fa01",
+"8001c002fffce004eaa5f556fffce084eaa5f4d6fffce004eaacfffcbffeffff",
+"8000c001e002fffce104f554e9a4f555e9a6fffce004f554eaa4f555eaa6fffc",
+"e004eaa4f555eaa6fffce104e9a4f554e9a5f556fffce004eaa4f555eaa6fffc",
+"e004eaa4f555eaa6f554fffce9a4f554e9a5f556e9acf554fffcdffcbffe7fff",
+"8400c200ffffe100e9aaf555e9aaffffe008f54deaaaf54deaaadfffbfffffff",
+"04000200ffffc000aaaad554aaaaffff008054d5aaaa54d5aaaaffffffffffff",
+"04010202fffc8004aaa4d554aaa4fffc008454d4aaa454d4aaa4fffcfffeffff",
+"e005eaa6f557eaa0f554eaaaf554ffffe080f4d5eaaaf4d5eaaadfffbfffffff",
+"e0047554eaa49554aaa4d555aaa6fffc010455aca95455aca954fffcfffeffff",
+"8000c000ffffe000f554eaaaf554ffffe001f555eaa9f555eaa9f557eaa7fff5",
+"00010002fffc8004aaa4d555aaa6fffc20042aa4b5542aa4b554eaa4f554fffc",
+"04000200ffffc000aaaad554aaaaffff00045555aaa45554aaa4f557eaa7fffd",
+"e0046aa4f557aaa0d554aaaad554ffff00405555aa6a5555aa6affffffffffff",
+"8000d554aaaad7d4ac6ad9b4acaadc34ae6ad7d4aaaad7d4afead7d4aaaaffff",
+"2aa99553caa667cdb45a59b5a8aa5835ac6a57d5a6ca4fe59ff237d96aacd556",
+"aaaa9595aaaa97d4cc4969a3b8a6582dac4a57d9aeea4fe99ffc37f66b6bd5d5",
+"8000b654cbfaa5f44bfa87fc08fa937c117ad07488fac7f482fad1d4aaaaffff",
+"2aa99553cba66ffdb5fa5bf5847a49bda8be4835a47a73a5907231596a2cd556",
+"aaaa9595aa2a94d4c2f9717ba3f6423d84da545fa41e523999fc30b66b7bd5d5",
+"ffff8001a0059c01b211ba39be7d9cff80399c39be399c018001a0058001ffff",
+"ffff8001a0059c01b239ba39be399cff807d9c39be119c018001a0058001ffff",
+"ffff8001a0059c01b221ba61befd9dfd80fd9c61be219c018001a0058001ffff",
+"ffff8001a0059c01b211ba19befd9cff80fd9c19be119c018001a0058001ffff",
+"d57f7fffffff4063d5637fe3ffeb405dd55d7febffeb4077d5777fffffff407f",
+"9000fd5caabaeddccb76cd55477705220200e011b139d3a9bbbbdaeaad5afffe",
+"9000fd5caabaeddccb76cd55477705220200e011b139d3a9bbbbdaeaad5afffe",
+"ffff0101ffff9999ccccffffffff07070707ffffffffcccc9999ffff8040ffff",
+"80017ffefc0e740ee8027186c98e503ee9fe54fee87a7406fa0e7d3efffe5555",
+"80017ffefc1e700eeb027182c98a502ee9fe54fae8527406fa0e7d3efffe5555",
+"80017ffef1ce6086e9966c36c3c24832d6ca56cae0066386ec6e7b3efffe5555",
+"80017ffef83e701ee6ce66cefffe5556caae455ec2be401ec00e6006fffe5555",
+"8000d554aaaad554aaaad554aaaad554aaaad554aaaad554aaaad554aaaaffff",
+"2aa99553caa6654db29a5935ac6a5455a92a5395a6ca4d659ab235596aacd556",
+"aaaa9595aaaa9494c9c96363b6b65d5daaaa5959aaaa49499c9c36366b6bd5d5",
+"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+"847cd4beac7cd4bead7cd4bfad7cd4bcac7cd4bcac7cd4bcacfcd55caeacfd5c",
+"804880ac804a802c804a802c004a00ac004a00ac004a00ac004a002c004a00af",
+"3e207d343e2a7d343eaafd343eaa3d343e2a3d343e2a3d343f2a3ab4356a3abf",
+"ffff8000aaaad554aaaaffff008054d5aaaa54d5ffff8000aaaad554aaaaffff",
+"00000000ffffc000aaaad554aaaaffff008054d5aaaa54d5affff800f200f501",
+"00000000ffffc640ae2add34ae2afc3f1e205d35beaa7d35feaa3d3f3ebffd3f",
+"9201d501b201d401b201d401b200d500b200d500b200d500b200d400b200f500",
+"00000000ffffc260ac7ad4b4ac7afc3f047854bdad7a54bdad7ffcbcfd7cfcbf",
+"00000000ffffc000aaaad554aaaaffff01005555a9aa5555fffa001f004f80af",
+"00000000ffffc000aaaadf54abaaf4ff68607415e80a7405e803f418e815f413",
+"00000000ffffc000aaaad57caae2ffd201a15751aea15d51baa1fd51caa1ad51",
+"e815f411e815f40de803f401e801f401e801f401e801f401e801f401d801ac01",
+"8aa1ad518aa1b551eaa1d551aaa1d551aaa1d551aaa1d551aaa1d55daab7d56b",
+"8000d5546aaa55546aab3d5527ee64307fed7d57eaaad554eaaad554aaaafffe",
+"8001d553aaaad556aaaef57cdbe48e261beef57eaaafd557aaabd557aaa9ffff",
+"ffff8101bfffb799bfccbfffb7ffbf07bf07b7ffbfffbfccb799bfff8040ffff",
+"ffff0081fffd99edccfdfffdffede0fde0fdffedfffdccfd99edfffd0201ffff",
+"ffff8000eaaad555f2aad557eabed570eae1d5c1eb81d781eb80d700ef00d700",
+"ffff0001aaa95555aab1fd550ea9c35521a920d561a96355c6a90d551aa93555",
+"ef00d700ef80d780eb80d7c0ebe0d5f0eafed57feabfd557f2aad555ffffffff",
+"6aa935551aa90d5506a9035501a9015507a9ff55fea9f555aab15555fffdffff",
+"fffffffffffffffffffffffffffffffffeffffffffffffffffffffffffffffff",
+"ffffffffffffffffffffffffff7ffe3fff7fffffffffffffffffffffffffffff",
+"ffffff7fff7ffffffb6ffd5ffe3fa409fe3ffd5fff7ffbf7ff7fff7fffffff7f"
+];
+
+const TILE_LABELS = {
+  0: "muro hierro individual", 1: "muro hierro limite sup. vert.", 2: "muro hierro pared vert.",
+  3: "muro hierro limite inf. vert.", 4: "muro hierro limite izq. horiz.", 5: "muro hierro pared horiz.",
+  6: "muro hierro limite der. horiz.", 7: "muro hierro esq. inf. izq.", 8: "muro hierro esq. inf. der.",
+  9: "muro hierro esq. sup. izq.", 10: "muro hierro esq. sup. der.", 11: "muro hierro union abajo",
+  12: "muro hierro union arriba", 13: "muro hierro union derecha", 14: "muro hierro union izquierda",
+  15: "muro hierro cruce", 16: "muro cemento individual", 17: "muro cemento limite sup. vert.",
+  18: "muro cemento pared vert.", 19: "muro cemento limite inf. vert.", 20: "muro cemento limite izq. horiz.",
+  21: "muro cemento pared horiz.", 22: "muro cemento limite der. horiz.", 23: "muro cemento esq. inf. izq.",
+  24: "muro cemento esq. inf. der.", 25: "muro cemento esq. sup. izq.", 26: "muro cemento esq. sup. der.",
+  27: "muro cemento union abajo", 28: "muro cemento union arriba", 29: "muro cemento union derecha",
+  30: "muro cemento union izquierda", 31: "muro cemento cruce", 32: "muro ladrillo individual",
+  33: "muro ladrillo limite sup. vert.", 34: "muro ladrillo pared vert.", 35: "muro ladrillo limite inf. vert.",
+  36: "muro ladrillo limite izq. horiz.", 37: "muro ladrillo pared horiz.", 38: "muro ladrillo limite der. horiz.",
+  39: "muro ladrillo esq. inf. izq.", 40: "muro ladrillo esq. inf. der.", 41: "muro ladrillo esq. sup. izq.",
+  42: "muro ladrillo esq. sup. der.", 43: "muro ladrillo union abajo", 44: "muro ladrillo union arriba",
+  45: "suelo con bola (1/3)", 46: "suelo con bola (2/3)", 47: "suelo con bola (3/3)",
+  48: "suelo con bola CLAVADA (1/3)", 49: "suelo con bola CLAVADA (2/3)", 50: "suelo con bola CLAVADA (3/3)",
+  63: "suelo sin bola (1/3)", 64: "suelo sin bola (2/3)", 65: "suelo sin bola (3/3)",
+  55: "pista tanque vertical", 74: "trampilla A arriba-izq", 75: "trampilla A arriba-der",
+  67: "trampilla A abajo-izq", 68: "trampilla A abajo-der", 71: "trampilla B arriba-izq",
+  72: "trampilla B arriba-der", 73: "trampilla B abajo-izq", 69: "trampilla B abajo-der",
+  76: "trampilla transicion arriba-izq", 77: "trampilla transicion arriba-der",
+  78: "trampilla transicion abajo-izq", 79: "trampilla transicion abajo-der",
+  80: "puerta fantasmas inicio izq.", 81: "puerta fantasmas inicio der.",
+  56: "linea electrica puerta fantasmas A", 57: "linea electrica puerta fantasmas B",
+  51: "flecha arriba", 52: "flecha abajo", 53: "flecha izquierda", 54: "flecha derecha",
+  58: "pista avion recto", 82: "pista avion remate izq.", 83: "pista avion remate der.",
+  59: "item suelo (sin confirmar)", 60: "item bola de poder", 61: "item hipopotamo",
+  62: "item herramienta", 66: "loseta solida negra", 70: "muro ladrillo suelto",
+  88: "estrella pequeña", 89: "estrella mediana", 90: "estrella grande",
+  84: "mosaico comecocos (1/4)", 85: "mosaico comecocos (2/4)", 86: "mosaico comecocos (3/4)", 87: "mosaico comecocos (4/4)",
+};
+
+// 0x2D/0x2E/0x2F: suelo con bola normal. 0x33-0x36: las 4 flechas
+// TAMBIEN cuentan -- confirmado en madmix_scr.asm: HANDLER_2F18/2F50/
+// 2F88/2FC0 incrementan ($2C08) igual que la loseta normal (ver
+// FINDINGS.md). Con esto, los 12 niveles coinciden EXACTO.
+const BALL_TILES = new Set([0x2D, 0x2E, 0x2F, 0x33, 0x34, 0x35, 0x36]);
+const ZOOM = 2; // factor de escala visual (loseta nativa = 16x16 px)
+
+// ============================================================
+// Datos de los ficheros de data/niveles/ (cuerpos + cabeceras),
+// extraidos de los .bin reales -- 18 entradas: 12 niveles normales +
+// cabecera oculta + 3 cabeceras compartidas + nivel 13 (body_l13.bin)
+// + nivel 14 (body_l14.bin), ambos ficheros unicos tras la
+// consolidacion de esta sesion (antes cada uno partido en 2 ficheros
+// por deducciones erroneas de sesiones antiguas, ver FINDINGS.md).
+// ballTarget viene de
+// TABLA_NIVELES (madmix_scr.asm) en el momento de generar este HTML;
+// si TABLA_NIVELES cambia hay que regenerar este fichero (igual que
+// TILE_GFX/LEVELS en los otros visores de recursos/).
+// ============================================================
+const LEVEL_FILES = [{"name":"body_l15.bin","rows":18,"cols":32,"hex":"42424209050505050505050505050505050505050505050b050505050b0a4242424242022dbf2dbf2dbf2dbf2d363636363636342dbf2d070b050b050e02424242424202bf09050b062dbf36363309050b050a363634bf2d022d022d03024242424242022d023c022dbf3633090b08bf03bf07050a3634bf02bf03bf2d02424242424202bf02bf03bf3633090802bf2dbf2dbf2d0d06342d032dbf2d090e4242424242022d032dbf2d3309082d032d0906bf2d09083435bf2dbf2d040e02424242424202bf2d3f2d3633022dbf2dbf03002d09083435bf2d002dbf2d070e4242424242070abf01bf330908bf09062dbf2d09083435bf2dbf2dbf2dbf2d02424205050505082d022dbf02bf2d022dbf2d04083435bf2d095038510a2d848c85852d3f2d3f2dbf02bf2d022dbf02bf2dbf2dbf34bf2dbf02bfbfbf02bf2dbf2dbf050505050a2d022d33070a2d0706bf2d040a3634bf2d07050505882d040b05854242420908bf03bf333502bf2dbf2dbf2d070a3634bf2dbf2dbf2dbf2d02424242424202bf2dbf2dbf33070abf2d0406bf2d070a3636342d812d812d040e4242424242022d012d012d3335070abf2dbf003f2d070b0634bf82bf82bf2d02424242424202bf020408bf2d333507050a2dbf2d09050834352d822d0d8abf024242424242022d07050506bf2d33353507050505083435352dbf822d82822d024242424242023e2dbf2dbf2dbf2dbf33353535353535bf2dbf848c8588822d0242424242420705050505050505050505050505050505050505050505050c05084242","levels":[15],"ballTarget":165,"segments":[{"name":"body_l15.bin","start":0,"length":576}],"hiddenUnwired":false},{"name":"body_l01.bin","rows":22,"cols":32,"hex":"0905050505050505050505050b05050505050505050505050a42424242424242022dbf2dbf2dbf2dbf2dbf2d022dbf2dbf2dbf2dbf2dbf2d024242424242424202bf09050abf090505050abf02bf090505050abf09050abf0242424254554242023c0705082d07050505082d032d07050505082d0705083c024242425657424202bf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf0242424242424242022d0405062d090abf0405050b050506bf090a2d0405062d024242424242424202bf2dbf2dbf02022dbf2dbf02bf2dbf2d0202bf2dbf2dbf0242424242424242070505050a2d020d0505062d032d0405050e022d090505050842090505050a424242424202bf02022dbf2dbf2dbf2dbf2d0202bf02424242424202bfbfbf024205050505082d0708bf0905503851050abf07082d07050505050508bf00bf0705bfbfbfbfbfbf2dbf2d02bfbfbfbfbf022dbf2dbfbfbfbfbfbfbfbfbfbfbfbfbf050505050a2d090abf07050505050508bf090a2d0905050505050505050505054242424202bf02022dbf2dbfbfbf2dbf2d0202bf02424242424242424242424209050505082d0708bf0405050b050506bf07082d070505050a4242424242424202bf2dbf2dbf2dbf2dbf2dbf02bf2dbf2dbf2dbf2dbf2dbf0242424242424242022d04050a2d04050505062d032d04050505062d0905062d0242424242424242023c2dbf02bf2dbf2dbf2dbf2dbf2dbf2dbf2dbf02bf2d3c02424242424242420d05062d032d090abf0405050b050506bf090a2d032d04050e4242424242424202bf2dbf2dbf02022dbf2dbf02bf2dbf2d0202bf2dbf2dbf0242424254554242022d0405050508070505062d032d0405050807050505062d024242425657424202bf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf02424242424242420705050505050505050505050505050505050505050505050842424242424242","levels":[0,1],"ballTarget":114,"segments":[{"name":"body_l01.bin","start":0,"length":704}],"hiddenUnwired":false},{"name":"body_l10.bin","rows":17,"cols":32,"hex":"252525252525252525252525252525252b252525252525252525252525252525203cbf2dbf2dbf2dbf2dbf2dbf2dbf2d222dbf2dbf2dbf2dbf2dbf2dbf2dbf3c25262d202d21372925262d2426bf2dbf22bf292526bf24262d2137212d202d24203d3f2dbf223722bf2dbf2dbf2d212d222d232dbf2dbf2dbf223722bfbfbf3e25262d202d2237222d2426bf242528bf22bf2dbf24262d24262237222d202d24203ebf2dbf223722bf2dbf2dbf2dbf2d222dbf2dbf2dbf2dbf223722bfbfbf3d25262d202d223722292525252a3f2dbf23bf2dbf292525252a2237222d202d24203cbf2dbf22372222212121222dbf2dbf2dbf2d2221212122223722bfbfbf3c25262d202d2337232322222222bf295038512abf22222222232337232d202d24bf2dbf2dbf2dbf2dbf232222222d22bfbfbf222d22222223bf2dbf2dbf2dbf3f25262d202d212d212dbf232222bf27252b2528bf222223bf2d212d212d202d24203dbf2dbf22bf22212dbf23222dbf2d222dbf2d2223bf2d2122bf22bfbfbf3e25262d202d232d2222212dbf23bf21bf22bf21bf23bf2d2122222d232d202d24203ebf2dbf2dbf222323202dbf2d222d222d222dbf2d20232322bf2dbfbfbf3d25262d202d212d272547482526bf23bf22bf23bf24254a4b25282d212d202d24203cbf2dbf22bf2dbf49453fbf2dbf2d222dbf2dbf3f4344bf2dbf22bf2dbf3c25252525252c252525252525252525252c252525252525252525252c25252525","levels":[10],"ballTarget":116,"segments":[{"name":"body_l10.bin","start":0,"length":544}],"hiddenUnwired":false},{"name":"body_l11.bin","rows":21,"cols":32,"hex":"0b050505050505050505050505050505050b0505050505050505050505050505022e402e402e402e402e402e402e402e40033c2e402e402e402e402e402e402e02400905050a2e0905050a400905050a2e4001402e402e402e402e402e402e40022e024040024002402e032e02bfbf02402e022e402e0906503851040a2e402e02400d050b082e022e402e400d050b082e4002402e4002bfbfbfbfbf02402e40022e022e0340400240040a2e022e032e402e022e402e070505050505082e402e024003402e002e070505084003402e002e4003402e402e402e402e402e402e40022e402e402e402e402e402e402e402e402e402e402e402e402e402e402e402e02400905050a2e402e3634402e4036342e343535353535402e40353535353540022e02404002400140333634403633344036404040403335403440404040333502400d0505082e022e332e3636332e342e363636363634332e34404040403633022e022e402e40024033402e402e40344033402e402e34334034404040403335024003402e402e023c332e402e402e362e332e402e4036332e36363636363633022e402e402e4002402e402e402e402e402e402e402e402e402e402e402e402e02402e0406402e022e3634402e4036342e402e3435402e402e3435402e403535022e0140400140024033363440363334402e4034332e402e403636363436363302400d05050e2e022e332e3636332e342e402e3433402e402e402e3636332e40022e022e400240024033402e402e4034402e4036332e402e4034363336363433024003402e032e023c332e402e402e362e402e3633402e402e3633402e403633022e402e402e4002402e402e402e402e402e402e402e402e402e402e402e402e0c0505050505050c050505050505050505050505050505050505050505050505","levels":[11],"ballTarget":287,"segments":[{"name":"body_l11.bin","start":0,"length":672}],"hiddenUnwired":false},{"name":"body_l12.bin","rows":19,"cols":32,"hex":"292525252525252525252525252525252525252525252525252525252525252a222fc12fc12fc12fc12fc12fc12fc12fc12fc12fc12fc12fc12fc12fc12fc12222c12fc12fc12f412fc12fc12fc12fc12fc12fc12fc12fc12fc12fc12fc12f22222fc12f2137212fc12fc12fc12fc12fc12fc12fc12fc12fc1213721412f412222412f41223722c12fc12fc12fc12fc12fc12fc12fc12fc12f2237222f412f22222f412f2237222fc12fc12fc12fc12fc1c1c12fc12fc12fc1223722412f412222412f41223722c12fc12fc12fc12f242a3829262fc12fc12f2237222f412f22222f412f2237222fc12fc12fc12fc12f233f232fc12fc12fc1223722412f412222412f41223722c12fc12fc12fc12f233f3f3f232fc12fc12f2237222f412f22222f412f2237222fc12fc12fc12f213f3f3f3f3f212fc12fc1223722412f412222412f41223722412fc12fc12fc1233f3f3f3f3f23c12fc12f2237222f412f22222f412f2237222fc12fc12fc12fc1203f3f3f20c12fc12fc1223722412f412222412f41223722c12fc12fc12fc12fc1242526c12fc12fc12f2237222f412f22222f412f2237222fc12fc12fc12fc12fc12fc12fc12fc12fc1223722412f412222412f41233723c12fc12fc12fc12fc12fc12fc12fc12fc12f2337232fc12f22232fc12fc12fc12fc12fc12fc12fc12fc12fc12fc12fc12fc12fc12fc12fc123252525252525252525252525252526c12f3e2fc12425252525252525252525253a3a3a3a3a3a3a3a3a3a3a3a3a53c12fc12fc12fc1523a3a3a3a3a3a3a3a3a3a2525252525252525252525252525252525252525252525252525252525252525","levels":[12],"ballTarget":176,"segments":[{"name":"body_l12.bin","start":0,"length":608}],"hiddenUnwired":false},{"name":"body_l2.bin","rows":15,"cols":32,"hex":"2b2525252525252525252525252525252525252525252525252525252525252522343535352e3d2ec02e343535352ec0c0c02e36363634c02ec02e3d343535352234292a33292ac0292a34292a2e292ac0292a2e292a34292a2e292a34292a33223427283327282e2728342728c027282e2728c02728342728c02728342728332236363633c02e343535352ec02ec02ec02ec02ec02e36363634c02e36363633222e292ac0292a34292a2e292ac0292a2e292ac0292a2e292a34292a2e292ac022c027282e2728342728c027282e2728c027282e2728c02728342728c027282e222ec02e3c3535352ec02ec02ec02ec02ec02ec02ec02ec02e3636363cc02ec022c0292a2e292a2e292ac0292a2e292ac0292a2e292ac0292a2e292ac0292a2e222e2728c02728c027282e2728c027282e2728c027282e2728c027282e2728c022363636342ec02ec02ec02ec02ec02e3c2ec02ec02ec02ec02ec02e343535352233292ac02425252525252526c0295038512ac0292a2e292ac0292a34292a3322332728c0523a3a3a3a3a3a53c022bfbfbf222e2728c027282e272834272833223335353529252525252525252622bfbfbf22c02ec02ec02ec02ec0363636332c25252525284242424242424242272525252c25252525252525252525252525","levels":[2],"ballTarget":147,"segments":[{"name":"body_l2.bin","start":0,"length":480}],"hiddenUnwired":false},{"name":"body_l3.bin","rows":16,"cols":32,"hex":"2b2525254748252525252525252525252b252525252525252525254a4b252525222dbfbf4945bf2dbf2dbf2dbf2dbf2d222dbf2dbf2dbf2dbf2dbf4344bfbf2d22bf292525252525252526bf242526bf23bf242526bf24252525252525252abf222d222dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2d222d22bf22bf292526bf2425252525252525252525252525252526bf24252abf22bf222d222d222dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2d222d222d22bf22bf22bf29262d242526bf242b5038512b262d2425262d242abf22bf22bf232d232d222d223cbf2dbf2dbf2d22bfbfbf222dbf2dbf2dbf3c222d222d232d2dbf2dbf22bf27262d24474826bf2725252528bf244a4b262d2428bf22bf2dbf2525262d222dbf2dbfbf4945bf2dbf2dbf2dbf2dbf4344bfbf2dbf2d222d24252dbf2dbf223d2425252525252525252525252525252525252525263d22bf2dbf212d212d27263c2dbf2dbf2dbf2dbf363634bf2dbf2dbf2dbf2d3c24282d212d22bf22bf2dbf2d29252a2d2925252a3321342925252a2d29252a2dbf2dbf22bf222d27252526bf272528bf2725252833223427252528bf272528bf242525282d22bf2dbf2dbf2dbf2dbf2dbf2dbf3633223636bf2dbf2dbf2dbf2dbf2dbf2dbf2c2525252525252525252525252525252c252525252525252525252525252525","levels":[3],"ballTarget":120,"segments":[{"name":"body_l3.bin","start":0,"length":512}],"hiddenUnwired":false},{"name":"body_l4.bin","rows":15,"cols":32,"hex":"2b25254a4b25252547482525254a4b25252547482525254a4b2525254748252522bf3f43443fbf3f49453fbf3f43443fbf3f49453fbf3f43442dbf3f49453fbf222d2925252a2d2925252a2d2925252a2d2925252a2d2925252a2d2925252a2d23bf272525283f27252528bf27252528bf27252528bf27252528bf27252528bfbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2d3f2dbf2dbf2d3c343535292525252526372425252525252abf21545521bf2925252a2d2925252a34203327252525252a3729252525252528bf23565723bf27252528bf272525283420332dbf2dbf3d223722bf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf3435353633252abf29262237222425252abf2925252abf2925252abf2925252a342033292525282d272528372725252528bf27252528bf27252528bf2725252834203327252dbfbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf3636343633bf2dbf2925252abf2925252abf29255038383851252abf2925252a3321342925252a2d274748282d274a4b282d22bfbfbfbfbfbfbf222d2747482833223427474828bf3f49453fbf3f4344bfbf22bfbfbfbfbfbfbf22bfbf4945bf332236bf4945bf25252525252525252525252c252525252525252c2525252525252c2525252525","levels":[4],"ballTarget":79,"segments":[{"name":"body_l4.bin","start":0,"length":480}],"hiddenUnwired":false},{"name":"body_l5.bin","rows":16,"cols":32,"hex":"1915151515151515151515151b15151515151b15151515151515151515151a42122dbf2d3f2d3f2dbf2dbf2d132d3d3e3d2d132dbf2dbf2dbf2dbf2dbf2d125812bf191a3f191abf19151abf2dbf141516bf2dbf19151abf191a2d191abf1259182d12122d17182d12bf122d112dbf3fbf2d112d12bf122d1718bf12122d17152dbf17182dbf2dbf171518bf13bf141516bf13bf171518bf2dbf2d1718bf2dbf1a2dbf2dbf191a3cbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf3c191abf2dbf2d191517151515151c1c151515151515151a3419151515151515151c1c151515151858425842585a5842425942424258421234124242595842425a424258424259584242425842424242424258425a425912341258424242584242584242425842425a1915151515151515151515151515183417151515151515151515151515151a58122dbf2dbf2dbf2dbf2dbf2d363636363636342dbf2dbf2dbf2dbf2dbf2d124212bfbfbfbfbfbfbfbfbfbfbf33195038511a34bfbfbfbfbfbfbfbfbfbfbf1258182d5455bf2dbf2dbf2dbf2d3312bfbfbf12342dbf2dbf2dbf2dbf54552d17153dbf5657bfbfbfbfbfbfbfbf33171515151834bfbfbfbfbfbfbfbf5657bfbf3d1a2dbf2dbf2dbf2dbf2dbf2d333535353535352dbf2dbf2dbf2dbf2dbf2d19151715151515151515151515151515151515151515151515151515151515151858","levels":[5],"ballTarget":101,"segments":[{"name":"body_l5.bin","start":0,"length":512}],"hiddenUnwired":false},{"name":"body_l6.bin","rows":18,"cols":32,"hex":"0b05050505050505050505050b050505050505050b0505050505050505050505023cc02ec02ec02ec02ec02e0234353535353535022ec02ec02ec02ec02e3d2e02c000c0040b06c001c001c00334095039510a3303c001c001c0040b06c000c0022e002ec002c02e022e022e343502bfbfbf0233352e022e022ec002c02e002e02c000002e032e0408c0070634040c0505050c06330408c007062e032e0000c0022ec02ec02ec02ec02ec02e36363634c0363636332ec02ec02ec02ec02ec02e02c0040a2e0405050ac001c004050ac000c0090506c001c0090505062e0906c0022ec002c02ec02e032e022ec02e032e3c2e032ec02e022e032ec02ec002c02e0c062e022e0406c02ec003c001c02ec000c02ec001c003c02ec004062e022e042ec0c002c02ec02e002ec02e0705062e3e2e0405082ec02e002ec02ec002c0c00b062e022e0406c02ec001c02ec02ec001c02ec02ec001c02ec004062e022e0402c0c002c02ec02e012e022e00c004050c0506c0002e022e012ec02ec002c0c0022e04082e04050508c003c02ec0523a3a3a53c02ec003c0070505062e07062e02c02ec0c02ec02ec02ec02e0405050b050b050506c02ec02ec02ec02ec02ec0022e000000c0000000c001c0c02ec0070b08c02ec02e01c0000000c00000002e023d000000c0000000c0070505062ec003c02e04050508c0000000c0000000c0022ec02ec02ec02ec02ec02ec02ec02ec02ec02ec02ec02ec02ec02ec02ec03c0705050505050505050505050505050505050505050505050505050505050505","levels":[6],"ballTarget":151,"segments":[{"name":"body_l6.bin","start":0,"length":576}],"hiddenUnwired":false},{"name":"body_l7.bin","rows":19,"cols":32,"hex":"1915151515151515151515151515151515151a42581915151515151515151a4212bf2dbf2dbf2dbf2d3f2dbf2dbf2dbf2dbf124242122dbf2dbf2dbf2dbf1242123f112d112d19151a2d1415151b1515162d125a4212bf19162d14151a2d1242123712bf13bf123f12bf363634133636363f124242122d122dbf2dbf12bf12421237122d3f2d1715182d1416343e3314162d12425812bf171516bf14182d1242123712bf11bf2dbf2dbf353535113335353f124242122dbf2dbf2dbf2dbf12421237122d132d111916bf1415151c1515162d12424212112d112d141abf111242123712bf2dbf12122dbf523a3a3a3a3a53bf1259421212bf12bf2d122d1212421237122d112d1212bf19151515151515151518424212132d1716bf13bf13124212bf13bf13bf17182d124242425a4242425942425a122dbf2dbf2dbf2dbf1242122dbf2dbf2dbf2dbf12584219151515151515151518bf11bf1415151a2d12421c15151515162d112d12424212bf2dbf2dbf2dbf2dbf2d122d34353513bf17153f2dbf2dbf2dbf12bf124259122d1415151b1515162d141c16341133352d3f2d1b15151515162d132d125a4212bf2d3f2d132dbf2dbf2dbf2d341d1516bf1915122dbf2dbf2dbf2dbf124258122d1416bf2dbf14162d141b1634133636bf12421d5038511abf191a2d12424212bf2dbf2d112dbf2dbf2d122d36363311bf124212bfbfbf122d17183d125a4212bf1415151c151516bfbf13bf141515182d124212bfbfbf12bf2dbf2d12425a12bf523a3a3a3a3a53bf2dbf2dbf2dbf2d3d1242171515151c151515151842421715151515151515151515151515151515151842","levels":[7],"ballTarget":126,"segments":[{"name":"body_l7.bin","start":0,"length":608}],"hiddenUnwired":false},{"name":"body_l8.bin","rows":15,"cols":32,"hex":"1b15151515151515151515151515151515151515151515151515151515151515122dbf2dbf2dbf2dbf2dbf2dbf2dbf3d3f3ebf2dbf2dbf2dbf2dbf2dbf2dbf2d12bf1416bf11bf1416bf11bf1416bf11bf1416bf11bf1416bf11bf1416bf11bf122dbf2dbf122dbf2dbf122dbf2dbf122dbf2dbf122dbf2dbf122dbf2dbf122d12bf14151518bf14151518bf14151518bf14151518bf14151518bf14151518bf123dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf3d1f151515151515151515151515151516bf141515151515151515151515151515122dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf2d12bf1416bf11bf113f1416bf1416bf11bf11bf1416bf1416bf11bf11bf1416bf123c2dbf2d122d122dbf2dbf2dbf2d12bf122dbf2dbf2dbf2d122d122dbf2d3c122d14151518bf171515162d14151518bf17151516bf14151518bf17151516bf12bf2dbf2dbf2dbf2dbf2dbf2dbf2dbfbfbf2dbf2dbf2dbf2dbf2d3f2dbf2dbf1c151515151515151515162d2447485038514a4b262d141515151515151515153a3a3a3a3a3a3a3a3a533fbf3f4945bf2dbf4344bfbfbf523a3a3a3a3a3a3a3a1515151515151515151515151515151515151515151515151515151515151515","levels":[8],"ballTarget":90,"segments":[{"name":"body_l8.bin","start":0,"length":480}],"hiddenUnwired":false},{"name":"body_l9.bin","rows":18,"cols":32,"hex":"0b0505050505050505050b05050505050505050505050b050505050505050505023c2ec02ec02ec02ec002c02ec02ec000c02ec02ec002c02ec02ec02ec02e3c022e0905050ac0090a2e032e0406c0003c00c004062e032e090ac00905050a2e03c0070505082e0708c02ec02ec02e002e002ec02ec02ec007082e07050508c03435352ec02ec02ec02e0405050ac02ec02ec0090505062ec02ec02ec02ec02e37013304050506c001c02ec02e032e0405062e032ec02ec001c0040505062e013702332ec02ec02e022e0406c02ec02ec02ec02ec004062e022ec02ec02ec00237023304050506c003c02ec001c0095038510ac001c02ec003c0040505062e023702332ec02ec02ec02e012e032e02bfbfbf022e032e012ec02ec02ec02ec002370d06c00406c00406c002343535070505050836363402c00406c00406c0040e3702c02ec02ec02ec02e023401333535c03636330134022ec02ec02ec02e350237022e04050506c001c003340706c0040506c004083403c001c00405050633023702c02ec02ec02e02343535c02ec02ec02ec02ec0363634022ec02ec02e330237032e04050506c0033409050ac0090a33090ac009050a3403c0040505063303c02ec02ec02ec02ec0340200022e07083307082e02000234c02ec02ec02e333501c0040505062e04063407050836363633353535070508340406c004050506c0023cc02ec02ec02ec03636363633090505050a3335353535c02ec02ec02ec03c0c050505050505050505050505050c0505050c05050505050505050505050505","levels":[9],"ballTarget":168,"segments":[{"name":"body_l9.bin","start":0,"length":576}],"hiddenUnwired":false},{"name":"header_4afc.bin","rows":3,"cols":32,"hex":"4258594242425842425842594242585942424259424258584242425a42584259584242425a4242425842424242424242425a424242424242594258424242584242594242584242424259425a425842424242584242425942425a424258594242","levels":null,"ballTarget":null,"segments":[{"name":"header_4afc.bin","start":0,"length":96}],"hiddenUnwired":false},{"name":"header_4b5c.bin","rows":3,"cols":32,"hex":"205455204646464646464646464620545520464646464646464646462054552020565720464646464646464646242656572426464646464646464646205657202020202046464646464646464646202020204646464646464646464620202020","levels":null,"ballTarget":null,"segments":[{"name":"header_4b5c.bin","start":0,"length":96}],"hiddenUnwired":false},{"name":"header_50bc.bin","rows":3,"cols":32,"hex":"424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242424242","levels":null,"ballTarget":null,"segments":[{"name":"header_50bc.bin","start":0,"length":96}],"hiddenUnwired":false},{"name":"body_l13.bin","rows":21,"cols":32,"hex":"58421915151515151515151a4242424242424258421915151515151515151a594259123c2dbf2dbf2dbf2d12424258425942424259122dbf2dbf2dbf2d3c12584258122d1416bf2d1416bf125942425a425842425812bf14162dbf14162d1242151518bf2dbf10bf2dbf2d17151515151515151515182dbf2dbf10bf2dbf1715bf2dbf2d112dbf11bf11bf2dbf2dbf2dbf2dbf2dbf2dbf11bf11bf2d112dbf2d15151abf17162d132d132d191515151a2d191515151a2d132d132d1418bf19154259123dbf2dbf2dbf2dbf1242585912bf1242425812bf2dbf2dbf2dbf3d125858421715151a2d1915151518425a42122d124242421715151abf191515151842424258425812bf124258424258425812bf12425842425842122d124258424259425a424242122d1715151515151515182d1715151515151518bf1242424242425842594258123f2dbf2dbf2dbf2dbf2d3e2dbf2dbf2dbf2dbf2d1258425942584242425842122d191515151515151b5038511b15151515151abf124242424242425942425912bf12425942584259171abf19184258424258122d12425958425a4242191515182d171515151a424258122d1242584219151518bf171515151a58585a123dbf2dbf2dbf2dbf1242425812bf125a425912bf2dbf2dbf2dbf3d1242151518bf19162d112d112d17151515182d17151515182d112d112d141abf1715bf2dbf2d132dbf13bf13bf2dbf2dbf2dbf2dbf2dbf2dbf13bf13bf2d132dbf2d15151abf2dbf10bf2dbf2d191515151515151515151a2d3f2d3f10bf2dbf19155842122d1416bf2d1416bf1242584242425842424212bf14162dbf14162d1258425a123c2dbf2dbf2dbf2d12594242425842425a58122dbf2dbf2dbf2d3c1242425817151515151515151518425a584242425942421715151515151515151858","levels":[13],"ballTarget":105,"segments":[{"name":"body_l13.bin","start":0,"length":672}],"hiddenUnwired":false},{"name":"body_l14.bin","rows":23,"cols":32,"hex":"42424204050505050505050505050505050505050505050505050505050642424242002dbf2dbf2dbf2dbf2dbf2d04050505062dbf2dbf2dbf2dbf2dbf2d004242003cbf09062d3f2d3f2d3f2dbf2d0405062dbf2d3f2d3f2d3f2dbf2dbf3c00012dbf09082d013301340133012d3fbfbfbfbf2d013401330134012dbf2dbf3502bf09082dbf03330334033303bf2d332d332d3f03340333033403bf2dbf0133022d032dbf2dbf2dbf2dbf2dbf2d3509050a362dbf2d3f2dbf2dbf2dbf2d023302bf2dbf2dbf2dbf2dbf2dbf2d3f040e000d063f2dbf2dbf2dbf2dbf2dbf023302244a4b262dbf2dbf2d332d332d35070508362d332d332d3f2d3f2dbf01023302bf4344bf3f2dbf2d3509050a362d342d342d3509050a362dbf2dbf2d02023302bf040b0506bf2dbf2d0200022dbf2dbf2d3f2d0200022dbf2dbf2d01020233022dbf032dbf2dbf0035070508362dbf2dbf2d35070508362dbf2d00020202330d062dbf012dbf2dbf2d342d342d3f2d3f2dbf2d342d342dbf2dbf2d03020233022d002d03bf2dbf00bf2dbf2dbf2dbf2dbf2dbf2dbf2d3f00bf2dbf2d03023302bf2dbf2d00bf2d3f2dbf2dbf2dbf2dbf2dbf2dbf2dbf2d3f2dbf2dbf2d0233022dbf2dbf0134012dbf2dbf2dbf2dbf2dbf2dbf2d3f2dbf2dbf013401bf023302bf2dbf2d023402012dbf2dbf2dbf2dbf2dbf2dbf2dbf2dbf010234022d02330201bf01bf02340302012d3f2dbf2dbf2dbf2dbf2dbf2dbf0102033402bf023302032d032d0236340302012dbf2dbf2dbf2dbf2dbf2dbf0102033435022d0233022dbf2dbf070a36340302040abf2dbf2d3c2dbf2d0906020334350908bf023302bf2dbf2dbf070a3634033f0706bf2dbf2dbf2d0408bf03343509083f2d02330d06bf04062dbf070a36342447482550383851254a4b2634350908bf2d040e3302bf2dbf2dbf2dbf070a36bf4945bfbf3e3ebfbf4344bf350908bf2dbf2d02bf0c05050505050505050c05050505050505050505050505050c05050505050c05","levels":[14],"ballTarget":267,"segments":[{"name":"body_l14.bin","start":0,"length":736}],"hiddenUnwired":false}];
+
+function hexToBytes(hex) {
+  const out = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < hex.length; i += 2) out[i / 2] = parseInt(hex.substr(i, 2), 16);
+  return out;
+}
+
+function hexToGrid16(hex) {
+  const bytes = hexToBytes(hex);
+  const grid = [];
+  for (let r = 0; r < 16; r++) grid.push(new Array(16).fill(false));
+  for (let row = 0; row < 16; row++) {
+    const bits = (bytes[row * 2] << 8) | bytes[row * 2 + 1];
+    for (let col = 0; col < 16; col++) grid[row][col] = !!((bits >> (15 - col)) & 1);
+  }
+  return grid;
+}
+
+function drawTile(canvas, hex) {
+  canvas.width = 16;
+  canvas.height = 16;
+  const ctx = canvas.getContext("2d");
+  const grid = hexToGrid16(hex);
+  const style = getComputedStyle(document.documentElement);
+  ctx.fillStyle = style.getPropertyValue("--pixel-off").trim();
+  ctx.fillRect(0, 0, 16, 16);
+  ctx.fillStyle = style.getPropertyValue("--pixel-on").trim();
+  for (let row = 0; row < 16; row++)
+    for (let col = 0; col < 16; col++)
+      if (grid[row][col]) ctx.fillRect(col, row, 1, 1);
+}
+
+// ---- estado ----
+let activeTile = 0;
+let currentFile = null;
+let grid = null; // Uint8Array, un byte crudo por celda (bit7 incluido)
+let painting = false;
+
+// Los 12 niveles coinciden EXACTO con el objetivo de TABLA_NIVELES una vez se
+// cuentan tambien las 4 flechas como "bola" (ver FINDINGS.md, "Descifrados
+// offsets 18-19" + correccion posterior). Cualquier desajuste ahora SI es
+// una senal real (p.ej. tras una edicion que descuadra el nivel).
+const CONFIRMED_EXACT_LEVELS = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+
+function isHeaderFile(file) {
+  return file.segments.length === 1 && file.segments[0].name.startsWith("header_");
+}
+// Los niveles 13 y 14 estuvieron partidos en 2 ficheros propios cada
+// uno (ver FINDINGS.md) por deducciones erroneas de sesiones antiguas
+// (solape con sonido / guion de demo reasignado) -- ambos se
+// consolidaron despues en un unico fichero, asi que ahora son casos
+// normales de un solo segmento como el resto. El mecanismo de
+// multiples segmentos (segmentFor, exportacion "plana") se mantiene
+// generico por si algun fichero futuro lo necesitara, pero ningun
+// nivel actual lo usa ya.
+function isCellEditable(file) {
+  return !isHeaderFile(file);
+}
+function segmentFor(file, linearIndex) {
+  return file.segments.find((s) => linearIndex >= s.start && linearIndex < s.start + s.length);
+}
+
+// ---- paleta ----
+const paletteEl = document.getElementById("palette");
+TILE_GFX.forEach((hex, idx) => {
+  const c = document.createElement("canvas");
+  c.title = `${idx} - ${TILE_LABELS[idx] || "sin nombre"}`;
+  drawTile(c, hex);
+  c.addEventListener("click", () => {
+    document.querySelectorAll(".palette canvas.active").forEach((el) => el.classList.remove("active"));
+    c.classList.add("active");
+    activeTile = idx;
+  });
+  if (idx === 0) c.classList.add("active");
+  paletteEl.appendChild(c);
+});
+
+// ---- selector de fichero ----
+const fileSelect = document.getElementById("fileSelect");
+LEVEL_FILES.forEach((f, i) => {
+  const opt = document.createElement("option");
+  opt.value = i;
+  let suffix = "";
+  if (f.hiddenUnwired) suffix = ` (nivel ${f.levels.join("/")} -- oculto, numeracion solo de referencia, sin enganchar a TABLA_NIVELES)`;
+  else if (f.levels) suffix = ` (nivel ${f.levels.join("/")})`;
+  else if (isHeaderFile(f)) suffix = " (cabecera, solo lectura)";
+  const displayName = f.segments.length > 1 ? f.segments.map((s) => s.name).join(" + ") : f.name;
+  opt.textContent = displayName + suffix;
+  fileSelect.appendChild(opt);
+});
+fileSelect.addEventListener("change", () => loadFile(parseInt(fileSelect.value, 10)));
+
+function loadFile(idx) {
+  currentFile = LEVEL_FILES[idx];
+  grid = hexToBytes(currentFile.hex).slice(); // copia editable
+  const readonly = isHeaderFile(currentFile);
+  const multi = currentFile.segments.length > 1;
+  const dims = document.getElementById("dimsLabel");
+  let extra = "";
+  if (readonly) extra = " -- SOLO LECTURA: cabecera compartida por varios niveles, no se edita aqui";
+  dims.textContent = `${currentFile.rows} filas x ${currentFile.cols} columnas${extra}`;
+  dims.style.color = readonly ? "var(--accent-bad)" : "var(--muted)";
+  canvas.classList.toggle("readonly", readonly);
+  document.getElementById("openInput").disabled = readonly;
+  document.getElementById("downloadBtn").disabled = readonly;
+  document.getElementById("bit7Check").disabled = readonly;
+  const noteEl = document.getElementById("contextNote");
+  if (multi) {
+    const parts = currentFile.segments.map((s) => `${s.name} (${s.length} bytes)`).join(" + ");
+    noteEl.textContent = `Esta rejilla combina 2 ficheros propios, ambos editables por separado: ${parts}. `
+      + `La línea de color marca dónde termina uno y empieza el otro. "Descargar .txt" genera un fichero por cada uno.`;
+    noteEl.style.display = "block";
+  } else {
+    noteEl.style.display = "none";
+  }
+  resizeCanvas();
+  renderGrid();
+  updateBallCounter();
+}
+
+// ---- rejilla principal ----
+const canvas = document.getElementById("gridCanvas");
+const ctx = canvas.getContext("2d");
+
+function resizeCanvas() {
+  const cell = 16 * ZOOM;
+  canvas.width = currentFile.cols * cell;
+  canvas.height = currentFile.rows * cell;
+}
+
+function paintCell(ctx, row, col, tileByte) {
+  const cell = 16 * ZOOM;
+  const idx = tileByte & 0x7F;
+  const bit7 = !!(tileByte & 0x80);
+  const hex = TILE_GFX[idx];
+  const tgrid = hex ? hexToGrid16(hex) : null;
+  const style = getComputedStyle(document.documentElement);
+  const off = style.getPropertyValue("--pixel-off").trim();
+  const on = style.getPropertyValue("--pixel-on").trim();
+  const x0 = col * cell, y0 = row * cell;
+  ctx.fillStyle = off;
+  ctx.fillRect(x0, y0, cell, cell);
+  if (tgrid) {
+    ctx.fillStyle = on;
+    const px = cell / 16;
+    for (let r = 0; r < 16; r++)
+      for (let c = 0; c < 16; c++)
+        if (tgrid[r][c]) ctx.fillRect(x0 + c * px, y0 + r * px, px, px);
+  }
+  if (bit7) {
+    ctx.fillStyle = "#c0463d";
+    ctx.beginPath();
+    ctx.arc(x0 + cell - 4, y0 + 4, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function renderGrid() {
+  for (let r = 0; r < currentFile.rows; r++) {
+    for (let c = 0; c < currentFile.cols; c++) {
+      paintCell(ctx, r, c, grid[r * currentFile.cols + c]);
+    }
+  }
+  if (currentFile.segments.length > 1) {
+    const cell = 16 * ZOOM;
+    // linea de separacion en el limite de cada segmento (no bloquea nada, solo orienta)
+    for (let s = 1; s < currentFile.segments.length; s++) {
+      const boundary = currentFile.segments[s].start;
+      const y = Math.floor(boundary / currentFile.cols) * cell;
+      const xOffset = (boundary % currentFile.cols) * cell;
+      ctx.strokeStyle = "#b08a3e";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      if (xOffset > 0) {
+        // el limite cae a mitad de fila
+        ctx.moveTo(xOffset, y);
+        ctx.lineTo(xOffset, y + cell);
+        ctx.moveTo(0, y + cell);
+        ctx.lineTo(canvas.width, y + cell);
+      } else {
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+      }
+      ctx.stroke();
+    }
+  }
+}
+
+function cellFromEvent(e) {
+  const rect = canvas.getBoundingClientRect();
+  const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+  const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+  const cell = 16 * ZOOM;
+  const col = Math.floor(x / cell);
+  const row = Math.floor(y / cell);
+  if (row < 0 || row >= currentFile.rows || col < 0 || col >= currentFile.cols) return null;
+  return { row, col };
+}
+
+function paintAt(e) {
+  if (!isCellEditable(currentFile)) return; // cabecera compartida: solo lectura
+  const pos = cellFromEvent(e);
+  if (!pos) return;
+  const i = pos.row * currentFile.cols + pos.col;
+  const bit7 = document.getElementById("bit7Check").checked ? 0x80 : 0;
+  const value = (activeTile & 0x7F) | bit7;
+  if (grid[i] === value) return;
+  grid[i] = value;
+  paintCell(ctx, pos.row, pos.col, value);
+  if (currentFile.segments.length > 1) renderGrid(); // repinta tambien la linea de separacion
+  updateBallCounter();
+}
+
+canvas.addEventListener("mousedown", (e) => { painting = true; paintAt(e); });
+canvas.addEventListener("mousemove", (e) => { if (painting) paintAt(e); });
+window.addEventListener("mouseup", () => { painting = false; });
+canvas.addEventListener("mouseleave", () => {});
+
+// ---- contador de bolitas ----
+function updateBallCounter() {
+  const el = document.getElementById("ballCounter");
+  const count = grid.reduce((acc, b) => acc + (BALL_TILES.has(b & 0x7F) ? 1 : 0), 0);
+  if (currentFile.ballTarget === null || currentFile.ballTarget === undefined) {
+    el.textContent = `bolitas contadas: ${count} (sin objetivo -- cabecera o nivel sin registro)`;
+    el.className = "na";
+  } else {
+    const ok = count === currentFile.ballTarget;
+    const confirmedExact = (currentFile.levels || []).some((n) => CONFIRMED_EXACT_LEVELS.has(n));
+    let suffix = "";
+    if (!ok && !confirmedExact) {
+      suffix = " (desajuste ESPERADO en este nivel incluso sin editar -- comodines/items especiales, ver FINDINGS.md)";
+    }
+    el.textContent = `bolitas: ${count} / objetivo ${currentFile.ballTarget}${suffix}`;
+    el.className = ok ? "ok" : (confirmedExact ? "bad" : "na");
+  }
+}
+
+// ---- exportar / importar texto (mismo formato que mmlvl_tool.py) ----
+// Ficheros de un solo segmento: formato "rejilla" (; filas=/columnas=).
+// Ficheros de mas de 1 segmento (ninguno actualmente, ver FINDINGS.md
+// "consolidado" -- los niveles 13 y 14 lo fueron hasta unificarse en
+// un solo fichero cada uno): cada segmento seria en si mismo un
+// fragmento sin alinear a 32 columnas, asi que se exportaria/
+// importaria por separado en formato "plano" (; bytes=N) -- el mismo
+// formato que entiende mmlvl_tool.py para fragmentos de ese tipo.
+function segmentToFlatText(name, slice) {
+  const banner = [
+    "; !!! AVISO -- LEE ESTO ANTES DE EDITAR !!!",
+    `; Fragmento de ${name} -- ${slice.length} bytes SIN alinear a fila de 32 columnas`,
+    "; (empieza/termina a mitad de una fila real del nivel al que",
+    "; pertenece -- es un trozo compartido de memoria, ver FINDINGS.md).",
+    "; Por eso NO se representa como rejilla de filas, solo como lista",
+    "; plana de bytes en el mismo orden. Puedes cambiar el VALOR de",
+    "; cualquier byte; NO añadas ni quites ninguno: el tamaño es FIJO,",
+    "; cambiar la cuenta desplazaria direcciones.",
+    `; bytes=${slice.length}`,
+  ];
+  const wrapped = [];
+  for (let i = 0; i < slice.length; i += 16) {
+    const chunk = Array.from(slice.slice(i, i + 16)).map((b) => b.toString(16).toUpperCase().padStart(2, "0"));
+    wrapped.push(chunk.join(" "));
+  }
+  return banner.join("\n") + "\n" + wrapped.join("\n") + "\n";
+}
+
+function gridToTexts() {
+  if (currentFile.segments.length > 1) {
+    return currentFile.segments.map((s) => ({
+      filename: s.name.replace(/\.bin$/, ".txt"),
+      text: segmentToFlatText(s.name, grid.slice(s.start, s.start + s.length)),
+    }));
+  }
+  const banner = [
+    "; !!! AVISO -- LEE ESTO ANTES DE EDITAR !!!",
+    `; Rejilla de losetas de ${currentFile.name} -- ${currentFile.rows} filas x ${currentFile.cols} columnas.`,
+    "; Cada celda es el byte crudo en hex (2 digitos): bits 0-6 = indice de",
+    "; loseta (ver data/tiles/*.til, 00-90), bit 7 = flag sin confirmar en",
+    "; tiempo de ejecucion (CARGAR_NIVEL lo borra al cargar el nivel, ver",
+    "; FINDINGS.md) pero presente de verdad en el binario original.",
+    "; NO añadas ni quites filas ni columnas: el tamaño es FIJO. Si cambia,",
+    "; todo lo que va detras en madmix_scr.asm/madmix1.asm se desplaza de",
+    "; direccion -- el juego compilaria sin error pero cargaria niveles o",
+    "; datos incorrectos en tiempo de ejecucion. Ver FINDINGS.md/README.md.",
+    `; filas=${currentFile.rows} columnas=${currentFile.cols}`,
+  ];
+  const rows = [];
+  for (let r = 0; r < currentFile.rows; r++) {
+    const tokens = [];
+    for (let c = 0; c < currentFile.cols; c++) {
+      tokens.push(grid[r * currentFile.cols + c].toString(16).toUpperCase().padStart(2, "0"));
+    }
+    rows.push(tokens.join(" "));
+  }
+  const text = banner.join("\n") + "\n" + rows.join("\n") + "\n";
+  return [{ filename: currentFile.name.replace(/\.bin$/, ".txt"), text }];
+}
+
+function downloadText(filename, text) {
+  const blob = new Blob([text], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById("downloadBtn").addEventListener("click", () => {
+  for (const { filename, text } of gridToTexts()) downloadText(filename, text);
+});
+
+function loadFlatSegmentFromText(text) {
+  const lines = text.split("\n");
+  let declaredBytes = null;
+  const tokens = [];
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line) continue;
+    const m = line.match(/^;\s*bytes=(\d+)/);
+    if (m) { declaredBytes = parseInt(m[1], 10); continue; }
+    if (line.startsWith(";")) continue;
+    tokens.push(...line.split(/\s+/));
+  }
+  if (declaredBytes === null) throw new Error("no se encontro la cabecera '; bytes=N' -- ¿es un .txt de rejilla en vez de un fragmento plano?");
+  const seg = currentFile.segments.find((s) => s.length === declaredBytes);
+  if (!seg) {
+    const opciones = currentFile.segments.map((s) => `${s.name} (${s.length} bytes)`).join(" o ");
+    throw new Error(`este fichero declara ${declaredBytes} bytes, que no coincide con ningun segmento de esta rejilla (se esperaba ${opciones})`);
+  }
+  if (tokens.length !== declaredBytes) throw new Error(`hay ${tokens.length} celdas en el texto, se esperaban ${declaredBytes}`);
+  for (let i = 0; i < declaredBytes; i++) grid[seg.start + i] = parseInt(tokens[i], 16) & 0xFF;
+  renderGrid();
+  updateBallCounter();
+}
+
+function loadGridFromText(text) {
+  if (isHeaderFile(currentFile)) throw new Error("las cabeceras compartidas son de solo lectura en este editor");
+
+  if (currentFile.segments.length > 1) {
+    loadFlatSegmentFromText(text);
+    return;
+  }
+
+  const lines = text.split("\n");
+  let declaredRows = null, declaredCols = null;
+  const gridLines = [];
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line) continue;
+    const m = line.match(/^;\s*filas=(\d+)\s+columnas=(\d+)/);
+    if (m) { declaredRows = parseInt(m[1], 10); declaredCols = parseInt(m[2], 10); continue; }
+    if (line.startsWith(";")) continue;
+    gridLines.push(line);
+  }
+  if (declaredRows === null) throw new Error("no se encontro la cabecera '; filas=N columnas=N' (¿es un fragmento plano de body_l13/14_maze? esos no se editan aqui)");
+  if (declaredRows !== currentFile.rows || declaredCols !== currentFile.cols) {
+    throw new Error(`dimensiones ${declaredRows}x${declaredCols} no coinciden con las del fichero actual (${currentFile.rows}x${currentFile.cols}) -- ¿es el fichero correcto?`);
+  }
+  if (gridLines.length !== declaredRows) {
+    throw new Error(`se declaran ${declaredRows} filas pero hay ${gridLines.length} lineas de rejilla`);
+  }
+  const newGrid = new Uint8Array(declaredRows * declaredCols);
+  gridLines.forEach((line, r) => {
+    const tokens = line.split(/\s+/);
+    if (tokens.length !== declaredCols) {
+      throw new Error(`fila ${r}: ${tokens.length} celdas, se esperaban ${declaredCols}`);
+    }
+    tokens.forEach((tok, c) => { newGrid[r * declaredCols + c] = parseInt(tok, 16) & 0xFF; });
+  });
+  grid = newGrid;
+  renderGrid();
+  updateBallCounter();
+}
+
+document.getElementById("openInput").addEventListener("change", (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      loadGridFromText(reader.result);
+    } catch (err) {
+      alert("Error cargando el fichero:\n" + err.message);
+    }
+    e.target.value = "";
+  };
+  reader.readAsText(f);
+});
+
+// ---- arranque ----
+loadFile(0);
+</script>
+
+</body>
+</html>

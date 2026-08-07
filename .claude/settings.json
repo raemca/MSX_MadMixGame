@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(\\(Get-Content \"c:\\\\Users\\\\User\\\\Documents\\\\Programacion\\\\MSX\\\\proyectos\\\\madmixgame\\\\src\\\\FINDINGS.md\" -Encoding UTF8 | Measure-Object -Line\\).Lines)",
+      "PowerShell(\\(Get-Content \"c:\\\\Users\\\\User\\\\Documents\\\\Programacion\\\\MSX\\\\proyectos\\\\madmixgame\\\\src\\\\FINDINGS.md\" -Raw -Encoding UTF8\\).Split\\(\"`n\"\\).Count)",
+      "PowerShell(Get-Command mtools -ErrorAction SilentlyContinue)",
+      "PowerShell(Get-Command mcopy -ErrorAction SilentlyContinue)",
+      "PowerShell(Get-Command mformat -ErrorAction SilentlyContinue)",
+      "PowerShell(py \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User-Documents-Programacion-MSX-proyectos-madmixgame\\\\64af8c43-e34c-4a8d-ada7-025cec0632b1\\\\scratchpad\\\\rename_handlers.py\")"
+    ]
+  }
+}

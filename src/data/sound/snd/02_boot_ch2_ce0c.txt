@@ -1,0 +1,53 @@
+; !!! AVISO -- LEE ESTO ANTES DE EDITAR !!!
+; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+; Este fichero se compila con INCBIN a una direccion FIJA, calcada del
+; binario original de 1987. Puedes cambiar valores de una instruccion ya
+; existente (otra nota, duracion, instrumento...) sin ningun problema.
+; NO añadas ni quites lineas, y NO cambies la cuenta de un
+; SET_DURATION_MULTI: si el numero de bytes total cambia al reensamblar,
+; TODO lo que va detras en madmix1.asm se desplaza de direccion, y
+; LEVELCYCLE_RESOURCE_TABLE (madmix_scr.asm) sigue apuntando a la
+; direccion VIEJA -- el juego compilaria sin error pero saltaria a sitios
+; incorrectos en tiempo de ejecucion. Ver FINDINGS.md / README.md.
+; 02_boot_ch2_ce0c.snd (78 bytes)
+SET_TEMPO 0x64
+SET_VOLUME 0x0E
+SET_DURATION 0xC0
+HOLD
+HOLD
+HOLD
+SET_CHANNEL_STATE 0x0F
+CALL_SUBPATTERN 0x02
+CALL_SUBPATTERN 0x02
+SET_CHANNEL_STATE 0x16
+CALL_SUBPATTERN 0x02
+CALL_SUBPATTERN 0x02
+SET_CHANNEL_STATE 0xF7
+CALL_SUBPATTERN 0x04
+CALL_SUBPATTERN 0x05
+CALL_SUBPATTERN 0x04
+CALL_SUBPATTERN 0x06
+CALL_SUBPATTERN 0x04
+CALL_SUBPATTERN 0x05
+CALL_SUBPATTERN 0x04
+CALL_SUBPATTERN 0x06
+SET_CHANNEL_STATE 0x03
+CALL_SUBPATTERN 0x01
+SET_CHANNEL_STATE 0x0F
+CALL_SUBPATTERN 0x01
+SET_CHANNEL_STATE 0x0F
+SET_VOLUME 0x0A
+CALL_SUBPATTERN 0x07
+CALL_SUBPATTERN 0x08
+CALL_SUBPATTERN 0x07
+CALL_SUBPATTERN 0x09
+SET_VOLUME 0x0B
+CALL_SUBPATTERN 0x07
+CALL_SUBPATTERN 0x08
+CALL_SUBPATTERN 0x07
+CALL_SUBPATTERN 0x09
+CALL_SUBPATTERN 0x0A
+CALL_SUBPATTERN 0x0A
+CALL_SUBPATTERN 0x0A
+CALL_SUBPATTERN 0x0A
+LOOP

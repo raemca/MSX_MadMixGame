@@ -1,0 +1,155 @@
+﻿z80dasm: Portable Z80 disassembler
+Copyright (C) Marcel de Kogel 1996,1997
+    di                     ; 00C350 F3 
+    ld     a,($8000)       ; 00C351 3A 00 80 
+    push   af              ; 00C354 F5 
+    call   $c395           ; 00C355 CD 95 C3 
+    ld     hl,$0024        ; 00C358 21 24 00 
+    ld     ($c3b3),hl      ; 00C35B 22 B3 C3 
+    ld     hl,$4000        ; 00C35E 21 00 40 
+    call   $c3a7           ; 00C361 CD A7 C3 
+    ld     hl,$8000        ; 00C364 21 00 80 
+    call   $c3a7           ; 00C367 CD A7 C3 
+    ld     hl,$c3d2        ; 00C36A 21 D2 C3 
+    ld     de,$afc8        ; 00C36D 11 C8 AF 
+    ld     bc,$007a        ; 00C370 01 7A 00 
+    ldir                   ; 00C373 ED B0 
+    ld     hl,$afc8        ; 00C375 21 C8 AF 
+    ld     ($c3b3),hl      ; 00C378 22 B3 C3 
+    ld     hl,$0000        ; 00C37B 21 00 00 
+    call   $c3a7           ; 00C37E CD A7 C3 
+    call   $c39a           ; 00C381 CD 9A C3 
+    ld     a,($e290)       ; 00C384 3A 90 E2 
+    out    ($a8),a         ; 00C387 D3 A8 
+    ld     a,($e291)       ; 00C389 3A 91 E2 
+    ld     ($ffff),a       ; 00C38C 32 FF FF 
+    pop    af              ; 00C38F F1 
+    ld     ($8000),a       ; 00C390 32 00 80 
+    ei                     ; 00C393 FB 
+    ret                    ; 00C394 C9 
+    ld     hl,$e290        ; 00C395 21 90 E2 
+    jr     $c39d           ; 00C398 18 03 
+    ld     hl,$e292        ; 00C39A 21 92 E2 
+    in     a,($a8)         ; 00C39D DB A8 
+    ld     (hl),a          ; 00C39F 77 
+    inc    hl              ; 00C3A0 23 
+    ld     a,($ffff)       ; 00C3A1 3A FF FF 
+    cpl                    ; 00C3A4 2F 
+    ld     (hl),a          ; 00C3A5 77 
+    ret                    ; 00C3A6 C9 
+    ld     a,$80           ; 00C3A7 3E 80 
+    ld     c,$04           ; 00C3A9 0E 04 
+    and    $83             ; 00C3AB E6 83 
+    ld     b,$04           ; 00C3AD 06 04 
+    push   af              ; 00C3AF F5 
+    push   bc              ; 00C3B0 C5 
+    push   hl              ; 00C3B1 E5 
+    call   $0024           ; 00C3B2 CD 24 00 
+    pop    hl              ; 00C3B5 E1 
+    ld     (hl),$20        ; 00C3B6 36 20 
+    ld     a,(hl)          ; 00C3B8 7E 
+    cp     $20             ; 00C3B9 FE 20 
+    jr     nz,$c3c4        ; 00C3BB 20 07 
+    ld     (hl),$fa        ; 00C3BD 36 FA 
+    ld     a,(hl)          ; 00C3BF 7E 
+    cp     $fa             ; 00C3C0 FE FA 
+    jr     z,$c3cf         ; 00C3C2 28 0B 
+    pop    bc              ; 00C3C4 C1 
+    pop    af              ; 00C3C5 F1 
+    add    a,$04           ; 00C3C6 C6 04 
+    djnz   $c3af           ; 00C3C8 10 E5 
+    inc    a               ; 00C3CA 3C 
+    dec    c               ; 00C3CB 0D 
+    jr     nz,$c3ab        ; 00C3CC 20 DD 
+    ret                    ; 00C3CE C9 
+    pop    bc              ; 00C3CF C1 
+    pop    af              ; 00C3D0 F1 
+    ret                    ; 00C3D1 C9 
+    call   $afe8           ; 00C3D2 CD E8 AF 
+    jp     m,$afd5         ; 00C3D5 FA D5 AF 
+    in     a,($a8)         ; 00C3D8 DB A8 
+    and    c               ; 00C3DA A1 
+    or     b               ; 00C3DB B0 
+    out    ($a8),a         ; 00C3DC D3 A8 
+    ret                    ; 00C3DE C9 
+    push   hl              ; 00C3DF E5 
+    call   $b00c           ; 00C3E0 CD 0C B0 
+    ld     c,a             ; 00C3E3 4F 
+    ld     b,$00           ; 00C3E4 06 00 
+    ld     a,l             ; 00C3E6 7D 
+    and    h               ; 00C3E7 A4 
+    or     d               ; 00C3E8 B2 
+    ld     hl,$fcc5        ; 00C3E9 21 C5 FC 
+    add    hl,bc           ; 00C3EC 09 
+    ld     (hl),a          ; 00C3ED 77 
+    pop    hl              ; 00C3EE E1 
+    ld     a,c             ; 00C3EF 79 
+    jr     $c3d2           ; 00C3F0 18 E0 
+    push   af              ; 00C3F2 F5 
+    ld     a,h             ; 00C3F3 7C 
+    rlca                   ; 00C3F4 07 
+    rlca                   ; 00C3F5 07 
+    and    $03             ; 00C3F6 E6 03 
+    ld     e,a             ; 00C3F8 5F 
+    ld     a,$c0           ; 00C3F9 3E C0 
+    rlca                   ; 00C3FB 07 
+    rlca                   ; 00C3FC 07 
+    dec    e               ; 00C3FD 1D 
+    jp     p,$aff1         ; 00C3FE F2 F1 AF 
+    ld     e,a             ; 00C401 5F 
+    cpl                    ; 00C402 2F 
+    ld     c,a             ; 00C403 4F 
+    pop    af              ; 00C404 F1 
+    push   af              ; 00C405 F5 
+    and    $03             ; 00C406 E6 03 
+    inc    a               ; 00C408 3C 
+    ld     b,a             ; 00C409 47 
+    ld     a,$ab           ; 00C40A 3E AB 
+    add    a,$55           ; 00C40C C6 55 
+    djnz   $c40c           ; 00C40E 10 FC 
+    ld     d,a             ; 00C410 57 
+    and    e               ; 00C411 A3 
+    ld     b,a             ; 00C412 47 
+    pop    af              ; 00C413 F1 
+    and    a               ; 00C414 A7 
+    ret                    ; 00C415 C9 
+    push   af              ; 00C416 F5 
+    ld     a,d             ; 00C417 7A 
+    and    $c0             ; 00C418 E6 C0 
+    ld     c,a             ; 00C41A 4F 
+    pop    af              ; 00C41B F1 
+    push   af              ; 00C41C F5 
+    ld     d,a             ; 00C41D 57 
+    in     a,($a8)         ; 00C41E DB A8 
+    ld     b,a             ; 00C420 47 
+    and    $3f             ; 00C421 E6 3F 
+    or     c               ; 00C423 B1 
+    out    ($a8),a         ; 00C424 D3 A8 
+    ld     a,d             ; 00C426 7A 
+    rrca                   ; 00C427 0F 
+    rrca                   ; 00C428 0F 
+    and    $03             ; 00C429 E6 03 
+    ld     d,a             ; 00C42B 57 
+    ld     a,$ab           ; 00C42C 3E AB 
+    add    a,$55           ; 00C42E C6 55 
+    dec    d               ; 00C430 15 
+    jp     p,$b024         ; 00C431 F2 24 B0 
+    and    e               ; 00C434 A3 
+    ld     d,a             ; 00C435 57 
+    ld     a,e             ; 00C436 7B 
+    cpl                    ; 00C437 2F 
+    ld     h,a             ; 00C438 67 
+    ld     a,($ffff)       ; 00C439 3A FF FF 
+    cpl                    ; 00C43C 2F 
+    ld     l,a             ; 00C43D 6F 
+    and    h               ; 00C43E A4 
+    or     d               ; 00C43F B2 
+    ld     ($ffff),a       ; 00C440 32 FF FF 
+    ld     a,b             ; 00C443 78 
+    out    ($a8),a         ; 00C444 D3 A8 
+    pop    af              ; 00C446 F1 
+    and    $03             ; 00C447 E6 03 
+    ret                    ; 00C449 C9 
+    rst    38h             ; 00C44A FF 
+    rst    38h             ; 00C44B FF 
+    pop    hl              ; 00C44C E1 

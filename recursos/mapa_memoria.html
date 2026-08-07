@@ -1,0 +1,587 @@
+﻿<!DOCTYPE html>
+<!-- Ingeniería inversa, herramientas y documentación: Rafael Eduardo Martín Candial -->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Mad Mix Game — mapa de memoria</title>
+<style>
+  :root {
+    --bg: #f5f3ef;
+    --fg: #2a2621;
+    --panel: #ffffff;
+    --border: #ddd6cc;
+    --muted: #7a7266;
+    --c-codigo: #6a86ae;
+    --c-recursos: #8a6ab0;
+    --c-graficos: #7fae6a;
+    --c-nivel: #d69a3a;
+    --c-variables: #4aa89a;
+    --c-sinexplorar: #cbc3b6;
+    --c-sistema: #e4dfd4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1a17;
+      --fg: #ece6da;
+      --panel: #262320;
+      --border: #3a352e;
+      --muted: #a39a8a;
+      --c-codigo: #7f9bc4;
+      --c-recursos: #a17fd0;
+      --c-graficos: #8fc27a;
+      --c-nivel: #e6b25a;
+      --c-variables: #5ec2b2;
+      --c-sinexplorar: #4a453c;
+      --c-sistema: #322e28;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 2rem clamp(1rem, 4vw, 3rem);
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; margin-bottom: 0.2rem; }
+  h2 { font-size: 1.15rem; margin: 2.5rem 0 0.6rem 0; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+  .subtitle { color: var(--muted); margin-top: 0; }
+  .note {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--c-recursos);
+    border-radius: 6px;
+    padding: 0.8rem 1rem;
+    margin: 1rem 0 2rem 0;
+    font-size: 0.92rem;
+  }
+  .note code { font-family: "SFMono-Regular", Consolas, monospace; }
+  code { font-family: "SFMono-Regular", Consolas, monospace; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem 1.4rem;
+    margin: 0.6rem 0 1.6rem 0;
+    font-size: 0.85rem;
+  }
+  .legend span.swatch {
+    display: inline-block;
+    width: 0.8em;
+    height: 0.8em;
+    border-radius: 3px;
+    margin-right: 0.4em;
+    vertical-align: middle;
+  }
+
+  /* --- barra principal de memoria --- */
+  .mem-outer {
+    position: relative;
+    margin-top: 2.5rem;
+  }
+  /* --- llaves encima de la barra: que fichero ocupa cada bloque
+     en su posicion FINAL/permanente (no la de carga temporal) --- */
+  .file-brackets {
+    position: relative;
+    height: 34px;
+    margin-bottom: 4px;
+  }
+  .file-bracket {
+    position: absolute;
+    top: 14px;
+    bottom: 6px;
+    border-left: 1.5px solid var(--muted);
+    border-right: 1.5px solid var(--muted);
+    border-top: 1.5px solid var(--muted);
+    border-radius: 3px 3px 0 0;
+  }
+  .file-bracket-label {
+    position: absolute;
+    top: -2px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--fg);
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .mem-bar {
+    position: relative;
+    height: 64px;
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--c-sistema);
+  }
+  .mem-seg {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-right: 1px solid rgba(0,0,0,0.15);
+    overflow: hidden;
+    cursor: default;
+  }
+  .mem-seg-label {
+    position: absolute;
+    top: 0; bottom: 0; left: 2px; right: 2px;
+    display: flex;
+    align-items: center;
+    font-size: 0.65rem;
+    color: #14110d;
+    overflow: hidden;
+    white-space: nowrap;
+    pointer-events: none;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.35);
+  }
+
+  /* --- regla simple bajo la barra: solo direcciones redondas --- */
+  .mem-ticks {
+    position: relative;
+    height: 22px;
+    margin-top: 2px;
+  }
+  .tick {
+    position: absolute;
+    top: 0;
+    width: 1px;
+    height: 6px;
+    background: var(--muted);
+  }
+  .tick-label {
+    position: absolute;
+    top: 8px;
+    font-size: 0.68rem;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    color: var(--muted);
+    white-space: nowrap;
+    transform: translateX(-2px);
+  }
+
+  /* --- tabla de detalle (segmentos / ficheros) -- reemplaza las
+     etiquetas amontonadas: una fila por entrada, sin limite de
+     ancho, así que nunca se solapa nada --- */
+  .detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-size: 0.85rem;
+  }
+  .detail-table th, .detail-table td {
+    text-align: left;
+    padding: 0.45rem 0.6rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .detail-table th {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  .detail-table td.addr {
+    font-family: "SFMono-Regular", Consolas, monospace;
+    white-space: nowrap;
+    color: var(--muted);
+  }
+  .detail-table td.cat {
+    white-space: nowrap;
+  }
+  .detail-table tr:hover td {
+    background: var(--panel);
+  }
+  .row-swatch {
+    display: inline-block;
+    width: 0.8em;
+    height: 0.8em;
+    border-radius: 3px;
+    margin-right: 0.4em;
+    vertical-align: middle;
+  }
+
+  /* --- seccion de ficheros --- */
+  .files-outer {
+    position: relative;
+    margin-top: 3rem;
+  }
+  .files-scale {
+    position: relative;
+    height: 1px;
+    background: var(--border);
+    margin-bottom: 0.6rem;
+  }
+  .file-row {
+    position: relative;
+    height: 40px;
+    margin-bottom: 2.6rem;
+  }
+  .file-block {
+    position: absolute;
+    top: 0;
+    height: 32px;
+    border-radius: 4px;
+    border: 1px solid rgba(0,0,0,0.25);
+    display: flex;
+    align-items: center;
+    padding: 0 6px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    overflow: hidden;
+    color: #14110d;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.35);
+  }
+  .file-block.temp { opacity: 0.55; border-style: dashed; }
+  .file-tag {
+    position: absolute;
+    top: 34px;
+    font-size: 0.72rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .file-arrow-svg { position: absolute; top: -1px; left: 0; width: 100%; height: 40px; overflow: visible; pointer-events: none; }
+
+  footer {
+    margin-top: 3rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+  }
+</style>
+</head>
+<body>
+
+<h1>Mad Mix Game — mapa de memoria</h1>
+<p class="attribution-line" style="color:var(--muted);font-size:0.85rem;margin:-0.3rem 0 1.2rem 0;">Ingeniería inversa, herramientas y documentación: Rafael Eduardo Martín Candial</p>
+<p class="subtitle">Estructura de la RAM del Z80 (0x0000-0xFFFF) y de dónde viene cada zona — ver <code>src/FINDINGS.md</code> para el detalle técnico completo de cada hallazgo.</p>
+
+<div class="note">
+  Documento vivo: se irá completando y corrigiendo según avance la
+  ingeniería inversa. La barra de colores es solo un resumen visual
+  a escala (con tooltip al pasar el ratón); el detalle legible de
+  verdad, dirección por dirección, está en la tabla de debajo — así
+  no hay forma de que dos tramos próximos entre sí se solapen. La
+  sección de ficheros usa la <strong>misma escala de direcciones</strong>
+  que la barra de memoria, así que un fichero alineado bajo un tramo
+  de la barra es, literalmente, el que aporta ese contenido.
+</div>
+
+<h2>Distribución de la RAM (0x0000 - 0xFFFF)</h2>
+
+<div class="legend">
+  <span><span class="swatch" style="background:var(--c-codigo)"></span>código del motor (confirmado)</span>
+  <span><span class="swatch" style="background:var(--c-recursos)"></span>gestor de recursos / intérprete de bytecode</span>
+  <span><span class="swatch" style="background:var(--c-graficos)"></span>datos gráficos (losetas, portada, decoración)</span>
+  <span><span class="swatch" style="background:var(--c-nivel)"></span>datos de nivel/laberinto</span>
+  <span><span class="swatch" style="background:var(--c-variables)"></span>variables / estado en RAM (no viene de un fichero)</span>
+  <span><span class="swatch" style="background:var(--c-sinexplorar)"></span>sin explorar todavía</span>
+  <span><span class="swatch" style="background:var(--c-sistema)"></span>sin analizar (fuera de alcance / sistema)</span>
+</div>
+
+<p style="color:var(--muted); font-size:0.9rem; max-width:60rem; margin-bottom:0.3rem;">
+  Las llaves de abajo marcan la posición <strong>final/permanente</strong>
+  de cada uno de los 3 ficheros del disco (no su posición de carga
+  temporal — <code>MADMIX.SCR</code> aterriza primero en <code>0x8800</code>,
+  pero acaba reubicado en <code>0x1000</code>; ver la sección de
+  ficheros más abajo para el detalle completo).
+</p>
+<div class="mem-outer">
+  <div class="file-brackets" id="file-brackets"></div>
+  <div class="mem-bar" id="mem-bar"></div>
+  <div class="mem-ticks" id="mem-ticks"></div>
+</div>
+
+<table class="detail-table" id="mem-table">
+  <thead><tr><th>Rango</th><th>Tamaño</th><th>Categoría</th><th>Descripción</th></tr></thead>
+  <tbody id="mem-table-body"></tbody>
+</table>
+
+<h2>Ficheros del disco y dónde aterriza cada uno</h2>
+<p style="color:var(--muted); font-size:0.9rem; max-width:60rem;">
+  Los bloques con borde discontinuo son posiciones <strong>temporales</strong>
+  (el contenido se sobrescribe o se reubica después). La flecha indica
+  reubicación real hecha por código del juego, no solo un salto de fichero.
+</p>
+
+<div class="files-outer" id="files-outer"></div>
+
+<table class="detail-table" id="files-table">
+  <thead><tr><th>Fichero</th><th>Tamaño</th><th>Destino</th><th>Notas</th></tr></thead>
+  <tbody id="files-table-body"></tbody>
+</table>
+
+<footer>
+  Generado a partir de las cabeceras BLOAD reales de
+  <code>MADMIX.SCR</code>, <code>MADMIX0.BIN</code> y
+  <code>MADMIX1.BIN</code>, y de todo lo desensamblado/confirmado en
+  <code>src/FINDINGS.md</code>. <code>AUTOEXEC.BAS</code>,
+  <code>MADMIX.BAS</code> y <code>MADMIX</code> (versión "cracked")
+  son programas BASIC tokenizados que solo orquestan la carga — no
+  ocupan una dirección fija dentro del rango analizado, así que no
+  se dibujan en la escala de memoria.
+</footer>
+
+<script>
+// ============================================================
+// SEGMENTOS DE MEMORIA -- ir ampliando/corrigiendo aqui segun se
+// descubra mas. start/end en direcciones reales del Z80 (0x0000-
+// 0xFFFF). category referencia una de las variables --c-* de CSS.
+// ============================================================
+const SEGMENTS = [
+  { start: 0x0000, end: 0x0038, label: "sistema (vectores RST/BIOS)", detail: "0x0000-0x0037: tabla de ganchos de bajo nivel de MSX (vectores RST + huecos de BIOS), confirmado estatico en 6 volcados de RAM reales. Mayoria a cero, con 5 saltos (JP) a direcciones $DDxx/$DExx que caen dentro de la zona de sistema MSX-DOS/Disk-BASIC ya identificada (0xDDA0-0xF004) -- ganchos heredados del arranque, no del juego.", category: "sistema" },
+  { start: 0x0038, end: 0x003B, label: "vector de interrupcion (JP a ENTRADA_INTERRUPCION_VBLANK del juego)", detail: "0x0038 (RST 38h, el vector de interrupcion real del Z80): JP $882A. CONFIRMADO EN VIVO -- $882A es ENTRADA_INTERRUPCION_VBLANK, la rutina de interrupcion del propio juego (ya transcrita en madmix1.asm), instalada aqui en caliente por ACTIVAR_INTERRUPCION_MODO_1 al arrancar. A diferencia del resto de este bloque, esto SI es el juego.", category: "codigo" },
+  { start: 0x003B, end: 0x0055, label: "sistema (rutina de cambio de slot)", detail: "0x003B-0x0054: rutina completa de cambio de configuracion de slot usando $FFFF como variable de trabajo (OUT ($A8),A / LD A,($FFFF) / ... / RET). Confirmado que NINGUN sitio de madmix1.asm ni madmix_scr.asm la llama -- es codigo de sistema/BIOS, no del juego.", category: "sistema" },
+  { start: 0x0055, end: 0x0100, label: "sin usar (a cero)", detail: "0x0055-0x00FF: todo a cero en los 6 volcados de RAM reales.", category: "sistema" },
+  { start: 0x0100, end: 0x0500, label: "reservado sin usar (relleno $FF)", detail: "0x0100-0x04FF: relleno solido $FF, 100% estatico en los 6 volcados de RAM reales. NO es el buffer de actores -- ese esta confirmado que empieza justo despues, en 0x0500 (ver segmento siguiente). Memoria reservada sin usar.", category: "sistema" },
+  { start: 0x0500, end: 0x1000, label: "buffer de render de actores (RAM)", detail: "0x0500 en adelante: buffer de trabajo en RAM para el render sub-pixel de actores (comecocos, fantasmas). Confirmado por codigo real: el cursor arranca aqui la primera vez (CAPTURAR_MASCARAS_ACTOR/RESET_CONTADOR_ACTORES) y se retoma despues via $8438. DIBUJAR_FILA_DESPLAZADA_DERECHA/IZQUIERDA hacen LD (HL),A -- lectura/escritura de RAM normal, NO puertos del VDP, confirma que el render de actores tambien pasa por un buffer de RAM antes de llegar a VRAM. Tamano exacto de la zona todavia sin acotar.", category: "variables" },
+
+  { start: 0x1000, end: 0x104C, label: "VDP: nombres identidad", detail: "0x1000-0x104C: codigo que escribe la tabla de nombres IDENTIDAD en VRAM 0x1800 (el truco ya conocido: nombre=indice de patron). Parte del bloque reubicado desde MADMIX.SCR.", category: "codigo" },
+  { start: 0x104C, end: 0x10AC, label: "descompresion color", detail: "0x104C-0x10AC: codigo que reconstruye la tabla de color de la portada desde datos comprimidos a nibble (ver 0x28F0).", category: "codigo" },
+  { start: 0x10AC, end: 0x10BC, label: "tabla 16 (color)", detail: "0x10AC-0x10BC: tabla de 16 bytes usada para expandir los indices de color de 4 bits de la portada.", category: "graficos" },
+  { start: 0x10BC, end: 0x10ED, label: "espera VDP", detail: "0x10BC-0x10ED: codigo auxiliar de espera/registro del VDP.", category: "codigo" },
+  { start: 0x10ED, end: 0x28ED, label: "bitmap portada (6144 B)", detail: "0x10ED-0x28ED: bitmap crudo de la pantalla de portada (tabla de patrones completa, sin comprimir). Ver recursos/portada.html.", category: "graficos" },
+  { start: 0x28ED, end: 0x28F0, label: "relleno", detail: "0x28ED-0x28F0: 3 bytes sin explicar, probablemente relleno/alineacion.", category: "sinexplorar" },
+  { start: 0x28F0, end: 0x2BF0, label: "color comprimido (768 B)", detail: "0x28F0-0x2BF0: datos de color de la portada comprimidos (1 byte de control = 2 indices de color de 4 bits via tabla 0x10AC).", category: "graficos" },
+  { start: 0x2BF0, end: 0x2BF3, label: "codigo muerto (POP HL/EI/RET)", detail: "0x2BF0-0x2BF3: 3 bytes de codigo real pero MUERTO -- verificado con busqueda exhaustiva, ningun JP/JR/CALL en todo el codigo fuente reconstruido apunta aqui. Mismo patron exacto que 0xDD93 en MADMIX1.BIN.", category: "codigo" },
+  { start: 0x2BF3, end: 0x2C07, label: "REGISTRO_NIVEL: registro de nivel (copia de trabajo, 20 bytes)", detail: "0x2BF3-0x2C06: copia de trabajo del registro de 20 bytes de TABLA_NIVELES (LDIR al cargar cada nivel). Los 20 campos estan descifrados con codigo real y tienen etiqueta propia (REGISTRO_NIVEL_CUERPO_PTR, REGISTRO_NIVEL_CABECERA_PTR/PIE_PTR, REGISTRO_NIVEL_FILAS, REGISTRO_NIVEL_VIDA_EXTRA_FLAG, REGISTRO_NIVEL_CONTADOR_PELMAZOIDES/MARICOCOS/REPUGNANTOSOS, REGISTRO_NIVEL_DURACION_PARPADEO, REGISTRO_NIVEL_LOSETA_COMODIN, REGISTRO_NIVEL_FILA_COLUMNA, REGISTRO_NIVEL_POSICION_INICIAL/REGISTRO_NIVEL_POSICION_COMECOCOS, REGISTRO_NIVEL_ICONO_HUD, REGISTRO_NIVEL_OBJETIVO_BOLAS) -- ver FINDINGS.md 'Descifrados offsets 8/11/18/19 del registro de nivel'.", category: "dato" },
+  { start: 0x2C07, end: 0x2C36, label: "variables de estado de partida", detail: "0x2C07-0x2C35: ~45 bytes de variables de estado de la partida en curso, casi todas identificadas cruzando codigo real de MADMIX.SCR Y MADMIX1.BIN (comparten direcciones porque MADMIX.SCR se reubica a memoria baja): NIVEL_ACTUAL, CONTADOR_BOLAS_COMIDAS (antes BALLS_EATEN_COUNT), POSICION_PARPADEO_BOLA (antes BALL_BLINK_POS)/TIMER, MODO_ESPECIAL_FLAG/CUENTA_ATRAS (antes COUNTDOWN)/ACTIVO (antes ACTIVE)/(enum), DIRECCION_DE_MOVIMIENTO, SELECTOR_SPRITE_COMECOCOS, CACHE_TIPO_LOSETA (antes TILE_TYPE_CACHE), CACHE_COLUMNA_LOSETA (antes TILE_COL_CACHE), INDICE_SUBTABLA_DIRECCION (antes DIR_TABLE_INDEX), DIRECCION_SIN_PROCESAR (antes RAW_DIRECTION), POSICION_ACTUAL_CAMARA (antes CAMERA_POS), COLOR_GUARDADO (antes SAVED_COLOR)/COLOR_ACTUAL, FLAG_NIVEL_RECIEN_CARGADO, DIRECCION_FORZADA/TEMPORIZADOR_DIRECCION_FORZADA, FLAG_DIRECCION_NUEVA (antes DIR_INPUT_LATCH), COPIA_FLAG_DIRECCION_NUEVA (antes INPUT_EDGE_FLAG), LADO_APERTURA_TRAMPILLA (antes TRAPDOOR_PHASE), PUNTO_REFERENCIA_CAMARA (antes REFERENCE_POINT), SEMILLA_ALEATORIA (antes RNG_SEED), PARAMETRO_DESPLAZAMIENTO_SCROLL, VIDAS_RESTANTES, PUNTUACION, FLAG_VIDA_EXTRA, CONTADOR_VUELTAS_NIVELES, TABLA_PISTA_TANQUE_AVION (antes HINT_POS_TABLE -- RESUELTO: no son trampillas, son posiciones de pista de tanque/avion, ver AVISAR_PROXIMIDAD_PISTA, antes GHOST_HINT_HANDLER). Solo 4 bytes (0x2C21, 0x2C28, 0x2C34-35) siguen genuinamente sin ninguna referencia encontrada. Ver FINDINGS.md, ronda de 'variables de estado de partida' y su correccion posterior (cruce con MADMIX1.BIN).", category: "dato" },
+  { start: 0x2C36, end: 0x2C38, label: "ENLACE_MOTOR_MOVIMIENTO_COLISION (antes RAM_HOOK_2C36, trampolin autopatchable)", detail: "0x2C36-0x2C37: 'gancho' llamado directamente (CALL a RAM, no codigo estatico) desde 3 sitios (2 en MADMIX1.BIN, 1 en el ciclador de demo). Su contenido por defecto SI es codigo real y coherente: decodifica exacto como 'JR MOTOR_MOVIMIENTO_COLISION' (bytes 18,68), aterriza en 0x2CA0. Probable trampolin autopatchable, mecanismo de parcheo en tiempo de ejecucion aun sin identificar.", category: "codigo" },
+  { start: 0x2C38, end: 0x2CA0, label: "tablas del motor de colision/loseta", detail: "0x2C38-0x2CA0: TABLA_CLASE_ALINEAMIENTO (antes TILE_DISPATCH_TABLE, 16 bytes, indexada por nibble bajo de direccion -- RESUELTO: clasifica la posicion en 5 clases 0-4, reutilizada en 2 contextos: alineamiento sub-loseta del comecocos (selector de sprite, via BUCLE_SUBTABLA_DIRECCION) y compactacion de bitmask de direccion de fantasmas/items a codigo 1-4), PUNTEROS_SUBTABLA_DIRECCION (antes TILE_DISPATCH_PTRS, 4 punteros) hacia 4 sub-tablas de 20 bytes cada una (SUBTABLA_DIRECCION_A/B/C/D, antes SUBTABLE_A/B/C/D, en 0x2C50/64/78/8C, formato '4x FE + 4 grupos de 4 bytes'). Alimentan al motor de colision/movimiento (MOTOR_MOVIMIENTO_COLISION, antes MAIN_LOOP) de justo despues. Ya no vive en data/mainloop_tables.bin (eliminado) -- todo el bloque 0x2BF0-0x2CA0 es ahora datos/codigo nativo con etiquetas en madmix_scr_body.asm.", category: "codigo" },
+  { start: 0x2CA0, end: 0x335C, label: "motor de colision/movimiento (bucle principal)", detail: "0x2CA0-0x335C: motor central de reglas por tipo de loseta. Preambulo (0x2CA0-0x2E3C): decide la direccion valida del frame (input real o guion de demo), respeta el alineamiento a loseta para permitir giros, comprueba con CONSULTAR_PROXIMA_LOSETA_EN_ESTA_DIRECCION (antes CHECK_TILE_DELTA) la loseta un paso por delante, y calcula el indice de tipo para el despacho; si hay un 'modo especial' en curso ($2C0F!=0: bola de poder/hipopotamo/etc.) el despacho normal por tipo queda SUSPENDIDO (se fuerza tipo 0) y en su lugar se gestiona la cuenta atras del modo (parpadeo de icono HUD, fin de modo) en el propio preambulo. Despachador de 20 entradas (tabla de punteros en 0x2E3C, verificada byte a byte, CORREGIDA de una primera lectura de 16) que salta a un manejador segun el tipo de loseta: flechas (fuerzan direccion), varios tipos de pared/item (marcan loseta comida, activan HUD, llaman a los manejadores de items especiales de 0x5478-0x5904 y a MOTOR_ACTORES), trampillas (itera tabla de posiciones activas en $2C2E) y bola de poder real = tipo 12 (HNDLR_BOLA_PODER, antes HANDLER_311B, bucle de 12 llamadas a MOTOR_ACTORES -- CORREGIDO: una hipotesis anterior lo situaba en tipo 9/HANDLER_3067, que en realidad es tipo 10 = pista de avion, HNDLR_PISTA_COCONAVE). El tramo final dibuja variantes de la animacion de trampilla volteandose. TRANSCRITO COMPLETO a madmix_scr.asm y VERIFICADO 0 diferencias byte a byte contra el original (1724 bytes). Preambulo documentado linea a linea en la sesion que anadio este parrafo (ver FINDINGS.md).", category: "codigo" },
+
+  { start: 0x335C, end: 0x511C, label: "cuerpos de 12 niveles + el nivel 15 (13 de los 15 niveles jugables)", detail: "0x335C-0x511C: matrices de losetas en bruto de los cuerpos de nivel, PERFECTAMENTE CONTIGUAS entre si, incluido el cuerpo del nivel 15 en 0x48BC-0x4AFC (576 bytes, CUERPO_L15/antes body_hidden_48bc.bin). RESUELTO (antes documentado como 'nivel oculto/sin usar'): el nivel 15 SI tiene registro real en TABLA_NIVELES (el registro 15, el ultimo) y SI se alcanza en partida normal completando los 14 niveles anteriores sin agotar el ciclo -- ver FINDINGS.md. Este bloque contiene el cuerpo de 13 de los 15 niveles jugables (niveles 1-12 + el 15; el nivel 0 reutiliza el puntero del 1) -- los niveles 13 y 14 NO tienen cuerpo aqui: sus punteros de TABLA_NIVELES (0xCFA4 y 0xD244) caen dentro del rango ESTATICO de MADMIX1.BIN, asi que sus cuerpos se leen en vivo directamente de alli (body_l13.bin/body_l14.bin), no de este bloque. TRANSCRITO COMPLETO, 0 diferencias byte a byte en los 7616 bytes. Ver recursos/niveles.html.", category: "nivel" },
+  { start: 0x511C, end: 0x5154, label: "TABLA_ITEMS_PELMAZOIDE", detail: "0x511C-0x5154: tabla activa de items TIPO 3 = FANTASMA (8 entradas x 7 bytes: posicion X/Y, modo/comportamiento, direccion de movimiento, subposicion X/Y, fase de animacion -- CORREGIDO: el ultimo campo se penso 'tipo 0-3' en una ronda antigua, es la fase de animacion rotativa). IDENTIDAD CONFIRMADA cruzando sprites (SPR27-32_FANTASMA_*): esta tabla (antes ITEM_TABLE_PELMAZOIDE/ITEM_TABLE_FANTASMA) y HNDLR_PELMAZOIDE (antes HNDLR_FANTASMA) son la IA de movimiento de los fantasmas (maximo 8 simultaneos, cuantos activos lo decide REGISTRO_NIVEL_CONTADOR_PELMAZOIDES, antes LEVEL_REC_FANTASMA_COUNT). TRANSCRITO COMPLETO.", category: "nivel" },
+  { start: 0x5154, end: 0x51FE, label: "TABLA_ANIMACION_PELMAZOIDE + TABLA_ELECCION_DIRECCION", detail: "0x5154-0x51FE (170 bytes): RESUELTO POR COMPLETO (antes 'sin decodificar campo a campo'). TABLA_ANIMACION_PELMAZOIDE (antes ITEM_ANIM_TABLE_PELMAZOIDE/ITEM_ANIM_TABLE_FANTASMA, 32 bytes): un puntero AUTORREFERENCIAL (palabra 0) seguido de los sprites reales de las 4 direcciones del fantasma (2 fotogramas cada una) -- CONFIRMA el volteo horizontal (bit7): 'izquierda' es 'derecha' con el bit7 puesto, sin sprite propio. 10 bytes finales candidatos a sprite huerfano (sin consumidor). TABLA_ELECCION_DIRECCION (antes ITEM_DIR_CHOICE_TABLE, 128 bytes, $517E): indexada por (direcciones libres)<<3 | (direccion previa)<<1 | (bit aleatorio) -> tabla de 'mantener direccion si se puede, si no elegir otra libre' (sesgo de continuidad de movimiento). Ver FINDINGS.md.", category: "nivel" },
+  { start: 0x51FE, end: 0x5478, label: "HNDLR_PELMAZOIDE + helpers de alcanzabilidad", detail: "0x51FE-0x5478: HNDLR_PELMAZOIDE (antes HNDLR_FANTASMA/R51FE_MAIN, IA de movimiento de los fantasmas, llamada desde el bucle principal), mas MOTOR_MOVIMIENTO_ITEM (antes HELPER_5278/MOVER_ITEM_MOVIL, decide direccion y mueve al item) /CALCULAR_POSICION_VRAM_ITEM (antes HELPER_53A2, comprueba visibilidad y calcula la posicion VRAM), compartidos por fantasma/mariquita/repugnante, y CONSULTAR_LOSETA_LIBRE_DIRECCION (antes HELPER_5414, comprobacion de loseta libre en las 4 direcciones, usa MAPEAR_LOSETA_RELATIVA_A_ABSOLUTA/CONSULTAR_TIPO_LOSETA). TRANSCRITO COMPLETO, 0 diferencias en los 835 bytes de 0x511C-0x545F.", category: "codigo" },
+  { start: 0x5478, end: 0x5904, label: "MARIQUITA + REPUGNANTE + efecto de destello", detail: "0x5478-0x5904: subsistema de activacion de items tipo 1 (MARIQUITA, repone bolitas ya comidas) y tipo 2 ('REPUGNANTOSO'/apisonadora, convierte bolitas normales en bolas clavadas) -- IDENTIDAD CONFIRMADA cruzando sprites (SPR37-39_MARIQUITA_*, SPR45-53_REPUGNANTE_*). HNDLR_MARICOCO/HNDLR_REGPUNANTOSO (antes HNDLR_MARIQUITA/HNDLR_REPUGNANTE; tablas propias TABLA_ITEMS_MARICOCO (antes ITEM_TABLE_MARICOCO) en 0x549B, 2 entradas; TABLA_ITEMS_REGPUNANTOSO (antes ITEM_TABLE_REGPUNANTOSO) en 0x5588, 8 entradas) comprueban la posicion del comecocos contra sus items activos y si coincide llaman a MOTOR_ACTORES, decrementan el contador $2C08, y disparan HUD/variables asociadas. Incluye tambien ITEM_TABLE_EFECTOS_DESTELLO (0x56F5, antes ITEM_EXTRA_TABLE): 3 secuencias de 'flash' visual (aviso de pista, activar modo especial, sumar puntos), RESUELTO el mecanismo completo de puntos de entrada -- ver FINDINGS.md. Referencia una zona de trabajo en RAM compartida con MADMIX1.BIN en 0x5773 (limpiada desde alli en 0x58D9), y una copia local de la formula de MAPEAR_LOSETA_RELATIVA_A_ABSOLUTA (MAPEAR_COORDENADA_A_DIRECCION_LOCAL, antes COORD_TO_ADDR_LOCAL, 0x5559-0x5573). TRANSCRITO COMPLETO, 0 diferencias byte a byte en los 1164 bytes.", category: "codigo" },
+  { start: 0x5904, end: 0x59A9, label: "cargador de nivel (INICIALIZAR_ITEMS_NIVEL + CARGAR_NIVEL)", detail: "0x5904-0x59A9: INICIALIZAR_ITEMS_NIVEL (reinicializa las 3 tablas de items moviles cada nivel) y CARGAR_NIVEL (lee TABLA_NIVELES, copia cabecera+cuerpo+PIE -- CORREGIDO/ampliado: el 'pie' es una segunda copia de la cabecera despues del cuerpo, no solo cabecera+cuerpo -- al buffer de RAM 0xFC50; CORREGIDO: la v1.0 original usaba 0xFC60, bug de buffer insuficiente para el nivel 14, esta reconstruccion aplica el fix real).", category: "codigo" },
+  { start: 0x59A9, end: 0x5AE9, label: "TABLA_NIVELES (320 B, 16 registros)", detail: "0x59A9-0x5AE9: tabla de 16 registros de 20 bytes (15 niveles jugables + 1 registro muerto/duplicado). RESUELTO: el registro 15 (el ultimo) no era un hueco sin registro como se penso -- es el registro real del nivel 15 (antes 'oculto'), alcanzable en partida normal. Reescrita como tabla de datos nativa (DW/DB con etiquetas reales CUERPO_L01/CABECERA_50BC/etc.) en vez de INCBIN de un .bin aparte -- ver FINDINGS.md.", category: "nivel" },
+  { start: 0x5AE9, end: 0x6500, label: "MENU PRINCIPAL + CREDITOS", detail: "0x5AE9-0x6500: la pantalla de MENU PRINCIPAL del juego (\"1 TECLADO / 2 JOYSTICK / 3 REDEFINE TECLAS / 4 DEMO / 0 JUGAR\", con codigo automodificable real que alterna atributos de color para resaltar la opcion seleccionada), el submenu de redefinicion de teclas (PAUSA/FUEGO/ARRIBA/ABAJO/IZQUIERDA/DERECHA + nombres de teclas), el modo DEMO (cicla 4 niveles llamando a CARGAR_NIVEL/INICIALIZAR_ITEMS_NIVEL), un motor de dibujado de texto en VRAM (DIBUJAR_TEXTO_VRAM, antes TAIL_DECODE), una segunda rutina de reubicacion gemela a MADMIX0.BIN (REUBICADOR_REINICIO_JUEGO, candidato a \"volver al menu\" en caliente), y LOS CREDITOS ORIGINALES DEL JUEGO (texto real, sin corregir ortografia): \"POGRAMADO BY: RAPHAEL GOMEZZZ..\", \"GRAPHICOS BY : ROBERTO P.ACEBES\", \"MUSIC-A BY: COMILONAS\", \"TOPOSHOW -1988-\". Incluye tambien un bloque de 811 bytes tras $60FE (14 registros [id,puntero] del gestor de recursos + 768 bytes que APLICAR_COLOR_PANTALLA (antes TAIL_CREDITS_MAIN) pasa por OBTENER_COLOR_VDP (antes TAIL_TILE_LOOKUP) -- nibble-swap via la tabla real CONSULTAR_COLOR_VDP de MADMIX1.BIN -- y usa como relleno solido de 8 bytes via FILVRM; 768 = 32x24, la rejilla completa de pantalla MSX). RESUELTO: es el COLOR REAL (rojo oscuro/gris/blanco) del marco de caramelo, aplicado a la tabla de color de VRAM ($2000) -- verificado aplicando la transformacion real a los 768 bytes y comparando exacto, byte a byte, contra un volcado de VRAM real (fila 0 = $E1,$E1,$E1,$F1,$F1,$E1,$6E x20,$E1,$F1,$F1,$E1,$E1,$E1). La forma del marco viene de TABLA_RLE_MARCO_CARAMELO (0xD6B6-0xDD82 de MADMIX1.BIN); este bloque de 768 bytes da su color (ver FINDINGS.md). TRANSCRITO COMPLETO, 0 diferencias byte a byte en los 2603 bytes -- madmix_scr.asm ya no tiene ningun hueco DS pendiente.", category: "codigo" },
+
+  { start: 0x6500, end: 0x8400, label: "sistema / BASIC (fuera de alcance)", detail: "0x6500-0x8400: fuera del bloque reubicado y de MADMIX1.BIN. Confirmado en volcados de RAM reales: la zona de programa del interprete BASIC (donde vive el programa cargado en memoria, tipicamente AUTOEXEC.BAS/MADMIX.BAS) ocupa una parte de este rango. No es parte de ninguno de los 3 binarios reconstruidos -- es memoria de sistema/BASIC ajena al motor del juego, y su contenido concreto depende del disco/copia usada, no del juego en si.", category: "sistema" },
+
+  { start: 0x8400, end: 0x8430, label: "jump table", detail: "0x8400-0x8430: tabla de saltos publica del motor (12 entradas: INICIO, MOTOR_ACTORES, ENTRADA_INTERRUPCION_VBLANK, WAIT_VBLANK, MAPEAR_LOSETA_RELATIVA_A_ABSOLUTA, CONSULTAR_TIPO_LOSETA...). Verificado: solo el slot 0 (JT_INICIO/INICIO) tiene llamadores reales fuera de este fichero (cargadores de disco/cinta) -- los otros 11 slots no los llama nadie, cada sitio usa la etiqueta real directamente.", category: "codigo" },
+  { start: 0x8430, end: 0x8440, label: "variables (FRAME_FLAG + RAM)", detail: "0x8430-0x8440: FRAME_FLAG (semaforo de ENTRADA_INTERRUPCION_VBLANK, confirmado) + 15 bytes de variables residentes en RAM (0x8437/0x843A/0x843E/0x843F, usadas en MOTOR_ACTORES), CONFIRMADAS a cero en el .BIN original -- no es relleno de fichero.", category: "variables" },
+  { start: 0x8440, end: 0x8800, label: "MOTOR_ACTORES (960 B)", detail: "0x8440-0x8800: motor de actores/render sub-pixel de personajes. Transcrito byte a byte, 0 diferencias contra el original.", category: "codigo" },
+  { start: 0x8800, end: 0x882A, label: "ACTIVAR_INTERRUPCION_MODO_1 + relleno", detail: "0x8800-0x882A: TRANSCRITO COMPLETO. 27 bytes de relleno/espacio no usado (23x $77 + 4x $00) y luego ACTIVAR_INTERRUPCION_MODO_1 (JT_ACTIVAR_INTERRUPCION, $881B, confirmado): instala el vector de interrupcion, llamado directo desde INICIO. NO empieza con DI (un stub anterior colocado en otro sitio del fichero si lo tenia, era erroneo y se elimino).", category: "codigo" },
+  { start: 0x882A, end: 0x8860, label: "ENTRADA_INTERRUPCION_VBLANK", detail: "0x882A-0x8860: rutina de interrupcion (ENTRADA_INTERRUPCION_VBLANK), CORREGIDA (0 diferencias): la version anterior tenia 3 bugs reales (faltaba un PUSH AF/POP AF simetrico, faltaba un bloque de lectura de estado del VDP, y terminaba en RETI en vez de RET). Confirma que CALL $60DC es una direccion estatica real.", category: "codigo" },
+  { start: 0x8860, end: 0x8931, label: "ISR_HOUSEKEEPING + rutinas", detail: "0x8860-0x8931: TRANSCRITO COMPLETO (0 diferencias). ISR_HOUSEKEEPING llama a CONTINUAR_CAPTURA_MASCARAS_ACTORES ($86BB), RESET_CONTADOR_ACTORES ($899B) y ACTUALIZAR_VRAM_FRAME ($8891, antes 'GH_8891': usa LOOKUP_8978/FILVRM/SETVRAM) via un hook de desarrollo ($8889, un simple RET que ignora su parametro) -- su tramo final (0x88ED) es el que de verdad vuelca el buffer BUFFER_LOSETAS_TRABAJO a la VRAM real (tabla de patrones, direccion ZONA_PATRON_VRAM_LABERINTO/$0220 en adelante), una vez por frame; GESTIONAR_SCROLL/SCROLL_LOSETA_BUFFER_VRAM (ver mas abajo) solo preparan ese buffer en RAM, no escriben en VRAM directamente.", category: "codigo" },
+  { start: 0x8931, end: 0x89A0, label: "FILVRM/LDIRVM/SETVRAM...", detail: "0x8931-0x89A0: API de VDP (FILVRM, LDIRVM, SETVRAM) + CONSULTAR_COLOR_VDP, TABLA_COLORES_VDP, CALCULAR_DIRECCION_MASCARA_ACTOR, RESET_CONTADOR_ACTORES. Confirmado.", category: "codigo" },
+  { start: 0x89A0, end: 0x89AD, label: "WAIT_VBLANK", detail: "0x89A0-0x89AD: espera de sincronismo vertical. Confirmado.", category: "codigo" },
+  { start: 0x89AD, end: 0x8C34, label: "GESTIONAR_SCROLL (JT_GESTIONAR_SCROLL)", detail: "0x89AD-0x8C34: TRANSCRITO COMPLETO (0 diferencias). GESTIONAR_SCROLL decide, segun los bits bajos de REGISTRO_NIVEL_POSICION_COMECOCOS ($2C02), si hay que desplazar 4px arriba (SCROLL_ARRIBA, nibble RLD), abajo (SCROLL_ABAJO, RRD) o lateral (SCROLL_IZQUIERDA/SCROLL_DERECHA, LDI, distincion por hipotesis de confianza media-alta). SCROLL_ARRIBA/SCROLL_ABAJO confluyen en SCROLL_LOSETA_BUFFER_VRAM, que si ademas se cruzo una loseta completa, usa MAPEAR_LOSETA_A_GRAFICO + COPIAR_LOSETA_FASE_A/COPIAR_LOSETA_FASE_B para traer la loseta nueva de la RAM residente del nivel y escribirla en el buffer BUFFER_LOSETAS_TRABAJO -- CORREGIDO: el scroll lateral NO pasa por aqui, termina en DIBUJAR_FILA_LOSETAS_BUFFER_VRAM (ver APLICAR_DESPLAZAMIENTO_LATERAL). Ninguna de estas rutinas toca la VRAM real: eso lo hace ACTUALIZAR_VRAM_FRAME (0x8891, ver arriba), una vez por frame.", category: "codigo" },
+  { start: 0x8C34, end: 0x8CB6, label: "REDIBUJAR_PANTALLA_COMPLETA_BUFFER_VRAM (JT_REDIBUJAR_PANTALLA_COMPLETA_BUFFER_VRAM)", detail: "0x8C34-0x8CB6: TRANSCRITO COMPLETO (0 diferencias). Redibujado TOTAL de la camara (36 pasadas de DIBUJAR_FILA_LOSETAS_BUFFER_VRAM sobre el lienzo BUFFER_LOSETAS_TRABAJO, no incremental) y, si el contador de vidas ($2C27) no es cero, dibuja los iconos de vida via una variante negada de LDIRVM leyendo sprites desde $92C3. Se invoca solo en puntos concretos (arranque, cambio de nivel, perdida de vida, ciclado de demo), nunca en el bucle continuo de frame a frame.", category: "codigo" },
+  { start: 0x8CB6, end: 0x8CDA, label: "MAPEAR_LOSETA_RELATIVA_A_ABSOLUTA", detail: "0x8CB6-0x8CDA: convierte coordenada de camara/comecocos en direccion dentro de la matriz de nivel (stride de 32 columnas). Confirmado byte a byte.", category: "codigo" },
+  { start: 0x8CDA, end: 0x8D1B, label: "CONSULTAR_TIPO_LOSETA + cola de redibujado", detail: "0x8CDA-0x8D1B: TRANSCRITO COMPLETO (0 diferencias), CORREGIDO (el stub anterior no coincidia con el real: usa base $8EC7, no $8EC4, con AND $1F adicional). Incluye una cola de redibujado diferido (APILAR_PETICION_REDIBUJADO/VACIAR_COLA_REDIBUJADO) que GESTIONAR_FRAME vacia cada frame (era el misterioso CALL $8CFF) llamando a REDIBUJAR_LOSETA_BUFFER_VRAM.", category: "codigo" },
+  { start: 0x8D1B, end: 0x8E3C, label: "REDIBUJAR_LOSETA_BUFFER_VRAM + DIBUJAR_MARCADOR_PUNTOS (JT_DIBUJAR_MARCADOR_PUNTOS)", detail: "0x8D1B-0x8E3C: TRANSCRITO COMPLETO (0 diferencias), CORREGIDO (el stub anterior decia origen GRAFICOS_LOSETAS/destino SCREEN_SHADOW; el real usa $2C02+BUFFER_LOSETAS_TRABAJO). REDIBUJAR_LOSETA_BUFFER_VRAM (antes REDRAW_STRIP) redibuja UNA loseta (16x16px, 2x16 LDI) en el lienzo BUFFER_LOSETAS_TRABAJO, leyendo de GRAFICOS_LOSETAS ($B940); la llaman tanto la cola diferida (APILAR_PETICION_REDIBUJADO en HNDLR_MARICOCO/HNDLR_REGPUNANTOSO, al regenerar una bolita) como muchos sitios directos en madmix_scr.asm. Incluye DIBUJAR_MARCADOR_PUNTOS (antes SCORE_DRAW, JT_DIBUJAR_MARCADOR_PUNTOS, $8D70): dibuja el marcador de puntos, con dos textos alternativos curiosos -- 'BESTIA' si la puntuacion llega a 10000, ' DEMO ' en modo demostracion (INDICE_CICLO_NIVELES, $60CA).", category: "codigo" },
+  { start: 0x8E3C, end: 0x8EC4, label: "LEER_ENTRADA (JT_LEER_ENTRADA)", detail: "0x8E3C-0x8EC4: TRANSCRITO COMPLETO (0 diferencias). Lectura de teclado (matriz MSX estandar) y joystick (puerto del PSG), decodificando direcciones con el mismo patron de extraccion de bits de CONSULTAR_COLOR_VDP/TABLA_COLORES_VDP (reutilizado aqui para direccion, no color). Guarda el resultado en ACUMULADOR_ENTRADA/FLAG_ENTRADA_BLOQUEADA, bytes 'libres' reutilizados en el bloque reservado justo antes de TABLA_TIPOS_LOSETA.", category: "codigo" },
+  { start: 0x8EC4, end: 0x8F24, label: "TABLA_TIPOS_LOSETA (96 B)", detail: "0x8EC4-0x8F24: bloque reservado completo de 96 bytes. Los primeros 3 (0x8EC4-0x8EC6, ACUMULADOR_ENTRADA/FLAG_ENTRADA_BLOQUEADA) se reutilizan en RAM por LEER_ENTRADA, sin relacion con losetas. La tabla TABLA_TIPOS_LOSETA en si (tipos de loseta/colision, indexada por el mismo numero que el grafico) arranca en 0x8EC7 -- CONFIRMADO por su unico consumidor real, CONSULTAR_TIPO_LOSETA (aritmetica HL=$8EC7+A, AND $1F). Etiqueta TABLA_TIPOS_LOSETA movida a 0x8EC7 para reflejarlo.", category: "graficos" },
+  { start: 0x8F24, end: 0x9136, label: "INICIO + secuencia de arranque/recarga de nivel", detail: "0x8F24-0x9136: TRANSCRITO COMPLETO, 0 diferencias reales (termina en un NOP suelto de relleno en 0x9135). INICIO (antes 'INIT') nunca hace RET -- cae en PREPARAR_INICIO_NIVEL (0x8FD4). CORREGIDO: PREPARAR_INICIO_NIVEL NO es el bucle principal del juego -- es la secuencia de un solo paso (HUD, parpadeo/destello de icono+color de transicion via DESTELLO_ICONO_COLOR_HUD (antes INIT_HELPER_9116) -- CORREGIDO: pese al apodo historico \"maquina de escribir\", NO revela texto letra a letra, ver mas abajo, arranque de musica, espera de tecla) que se ejecuta solo en las transiciones (arranque/cambio de nivel/perdida de vida); el bucle real de cada frame es BUCLE_PRINCIPAL_JUEGO (antes IML_9078)/VERIFICAR_FIN_NIVEL (antes IML_90B7, ver mas abajo). Dos saltos hacia atras (JP $8F54 / JP $8F71) reentran en el propio INICIO ya verificado (patron de doble entrada, etiquetas REINICIAR_PARTIDA/PANTALLA_PRESENTACION_NIVEL). REINICIAR_PARTIDA (antes INIT_RESUME_8F54) se alcanza tanto cayendo sin salto desde el arranque real de la maquina como via JP desde la secuencia de Game Over (no desde APLICAR_COLOR_PANTALLA/antes TAIL_CREDITS_MAIN como se penso antes). Unico llamador externo real de JT_INICIO/INICIO: los cargadores de disco/cinta (JP START) y REINICIO_SLOT_DD82 como reinicio interno. Dentro de este tramo, BUSCAR_COLUMNA_HUD ($900F, bucle de busqueda/barrido en TABLA_POSICIONES_HUD) y MOSTRAR_READY_Y_ARRANCAR_NIVEL ($902A, marcado con etiqueta propia por claridad aunque se alcanza solo por caida natural desde BUSCAR_COLUMNA_HUD, sin ningun JP/JR/CALL directo) son dos bloques con funciones distintas: el primero busca/espera, el segundo reactiva el teclado, calcula el color y dibuja READY?/arranca la musica de nivel.", category: "codigo" },
+  { start: 0x9136, end: 0x92E3, label: "textos de HUD + tabla de punteros", detail: "0x9136-0x92E3: TRANSCRITO COMPLETO, 0 diferencias reales. Empieza con TABLA_POSICIONES_HUD (19 bytes, 0x9136-0x9148): pares (columna, columna+$40) con columna en $08..$38 (paso 8) -- todos los multiplos de 8 que sobreviven a la mascara AND $78 usada por el bucle de busqueda BUSCAR_COLUMNA_HUD; los offsets 15-16 (TABLA_POSICIONES_HUD+15) se reutilizan como puntero de 2 bytes que BUSCAR_COLUMNA_HUD deja apuntando a la entrada que coincidio (luego usado por DESTELLO_ICONO_COLOR_HUD (antes INIT_HELPER_9116) para el parpadeo/destello rapido de icono+color de transicion en REGISTRO_NIVEL_ICONO_HUD/COLOR_ACTUAL via ACTUALIZAR_VRAM_FRAME -- CORREGIDO: pese al apodo historico \"maquina de escribir\", NO revela texto/glifos, los valores copiados son las columnas crudas de la tabla), y los offsets 17/18 (TABLA_POSICIONES_HUD+17/+18) se sobreescriben en tiempo real como icono/color de HUD. RESUELTO el porque de la estructura en pares: el bit 6 (el que distingue columna de columna+$40) es uno de los 2 bits (junto al bit 3, mascara AND $48) que BUSCAR_COLUMNA_HUD usa despues para derivar el color del HUD/READY? via OBTENER_COLOR_VDP (antes TAIL_TILE_LOOKUP) -- no son pares (posicion,color) independientes, es el mismo bit haciendo doble funcion: fila/orden de busqueda Y color. Luego, mensajes de partida nunca documentados hasta ahora: TEXTO_FASE (\"FASE 00\", con plantilla de numero de nivel sustituible), TEXTO_VIDA_EXTRA (\"EN LA PROXIMA... EXTRA\"), TEXTO_READY (\"READY?\"), TEXTO_GAME_OVER (antes GAMEOVER_TEXT, \"ESTAS FRITO\"). Tambien PTR_TABLA_SPRITES: 64 entradas de 4 bytes con paso fijo de 144 bytes, direcciones $953B-$B8AB. RESUELTO: es la tabla de punteros a los 64 sprites de personajes de abajo (0x953B-0xB93B), identificados uno a uno por el usuario -- ver recursos/ptrtable_sprites.html. Y ICONO_VIDA_EXTRA (32 bytes, RESUELTO: es el icono de vida extra del HUD, un comecocos en miniatura, dibujado por REDIBUJAR_PANTALLA_COMPLETA_BUFFER_VRAM una vez por cada vida restante -- ver FINDINGS.md). Datos en data/img/icono_vida.img.", category: "codigo" },
+  { start: 0x92E3, end: 0x953B, label: "FUENTE DE CARACTERES (TABLA_FUENTE_CARACTERES)", detail: "0x92E3-0x953B (600 bytes): TRANSCRITO COMPLETO, 0 diferencias. Fuente de caracteres usada por DIBUJAR_TEXTO_VRAM/DIBUJAR_TEXTO_INVERTIDO_VRAM para dibujar todos los textos (creditos, menu, marcador, FASE/READY/ESTAS FRITO). Localizada con la formula real de DIBUJAR_TEXTO_INVERTIDO_VRAM: direccion de glifo = $925B + codigo*8. Codigos $11-$1F y $20 (espacio) son cero real; desde $21 (TABLA_FUENTE_CARACTERES, 0x9363) hay 59 glifos reales de 8 bytes, terminando exacto donde empieza la tabla de sprites. Los 59 glifos (472 bytes) estan ahora en data/fonts/fuente_caracteres.fnt.", category: "codigo" },
+  { start: 0x953B, end: 0xB93B, label: "SPRITES DE PERSONAJES (64 x 144 B)", detail: "0x953B-0xB93B: TRANSCRITO COMPLETO, 0 diferencias byte a byte. Las 64 entradas apuntadas por PTR_TABLA_SPRITES, IDENTIFICADAS por el usuario (jugador original) viendo recursos/ptrtable_sprites.html: comecocos (vulnerable/invencible con fases de boca, avion, obra/saca-bolas, hipopotamo, tanque), fantasma (normal/vulnerable/muerto), mariquita, 'repugnantoso', secuencia completa de muerte del comecocos (orden real: 58,59,60,61,40,41,42,43,44) y marcador de puntos por fantasma comido (400/600). DATO CLAVE: solo hay sprites hacia derecha/abajo/arriba, NUNCA hacia la izquierda -- se invierte horizontalmente el de la derecha en tiempo de ejecucion (candidato: DIBUJAR_FILA_DESPLAZADA_DERECHA/IZQUIERDA de MOTOR_ACTORES). Ver FINDINGS.md para el catalogo completo. Cada sprite (144 bytes) esta ahora en su propio fichero en data/sprites/*.spr.", category: "graficos" },
+  { start: 0xB93B, end: 0xB940, label: "cola sin identificar (5 B)", detail: "0xB93B-0xB940 (5 bytes): TRANSCRITO, contenido real $00,$FF,$FF,$FF,$FF, proposito sin identificar.", category: "sinexplorar" },
+  { start: 0xB940, end: 0xC4A0, label: "data/tiles/*.til (91 losetas)", detail: "0xB940-0xC4A0: las 91 losetas del laberinto, todas identificadas visualmente, un fichero .til por loseta. Ver recursos/graficos.html.", category: "graficos" },
+  { start: 0xC4A0, end: 0xC8DE, label: "driver de sonido PSG (codigo)", detail: "0xC4A0-0xC8DE: TRANSCRITO COMPLETO, 0 diferencias byte a byte (verificado compilando el bloque aislado con ORG $C4A0). No es un 'gestor de recursos' generico: es el driver de sonido/musica del PSG AY-3-8910 (puertos $A0/$A1), encaja con el credito real 'MUSIC-A BY: COMILONAS' (con guion, texto real del juego). INSTALAR_RECURSO_SONIDO (antes LOAD_RESOURCE_SLOT_ALLOC, 0xC4A0) busca hueco libre entre 4 ranuras de canal de 46 bytes en 0xC9C9; el reproductor principal lee comandos/duraciones de un script y vuelca los 11 registros del PSG cada tic. Ver FINDINGS.md.", category: "codigo" },
+  { start: 0xC8DE, end: 0xCF8B, label: "datos del driver de sonido", detail: "0xC8DE-0xCF8B: TRANSCRITO COMPLETO (datos crudos, verificados byte a byte). Tabla de duraciones (0xC8DE-0xC99D, 96 palabras), tabla de salto de 15 comandos (0xC99E-0xC9BB), estado en RAM de los canales a cero en el .BIN de fabrica (el usuario vio esta zona variar al ritmo de la musica en vivo -- coincide con ser el estado de reproduccion), tablas de instrumento/nota desde 0xCA53, y los 3 scripts de sonido reales en 0xCDCB/0xCDFF/0xCE0C (los mismos punteros que carga INICIO).", category: "recursos" },
+  { start: 0xCF8B, end: 0xCFA4, label: "VACIAR_CANALES_SONIDO (antes LOAD_RESOURCE_SLOT_EMPTY)", detail: "0xCF8B-0xCFA4: TRANSCRITO COMPLETO, 0 diferencias byte a byte. Direccion CONFIRMADA (era la ya sospechada antes de desensamblar este bloque). Llama 3 veces al helper interno del driver con A=0,1,2 para vaciar las 3 ranuras de canal.", category: "codigo" },
+  { start: 0xCFA4, end: 0xD244, label: "cuerpo COMPLETO del nivel 13 (antes RM_TABLE_CFA4/CUERPO_L13_HEAD_CFA4 + parte de maze_data.bin)", detail: "0xCFA4-0xD244 (672 bytes = 21x32): TRANSCRITO COMPLETO. Los primeros 92 bytes se etiquetaron en una sesion antigua como posible 'tabla de envolvente/percusion' solo por estar pegados a las tablas de sonido reales -- NUNCA confirmado, y con el driver de sonido ya desensamblado por completo (0xC4A0-0xC8C9) se confirmo que ninguna rutina de sonido los lee jamas. DESCARTADA la hipotesis de sonido: decodificados como losetas, esos 92 bytes son una sala de laberinto coherente y simetrica (muros de cemento, suelo con bola + item de bola de poder a cada lado, estrellas decorativas), exactamente el patron de un nivel real -- no relleno reciclado. El puntero de cuerpo del nivel 13 en TABLA_NIVELES es 0xCFA4, dentro del rango ESTATICO de MADMIX1.BIN. Prueba de diseno deliberado: este cuerpo termina EXACTO donde empieza el puntero del nivel 14 (0xD244) -- no es coincidencia. CARGAR_NIVEL escribe sobre 10 de los primeros 92 bytes al cargar el nivel 13 (limpia el bit 7 de los $BF, ver FINDINGS.md) igual que con el resto del cuerpo. Unificado en un unico fichero editable: data/niveles/body_l13.bin, con INCBIN propio en madmix1.asm (CUERPO_L13_CFA4) -- antes partido en dos ficheros sin ninguna razon real para mantenerlos separados.", category: "nivel" },
+  { start: 0xD244, end: 0xD524, label: "cuerpo COMPLETO del nivel 14 (antes parte de maze_data.bin + GUION_DEMO_NIVEL1)", detail: "0xD244-0xD524 (736 bytes = 23x32): PROPOSITO RESUELTO. El puntero de cuerpo del nivel 14 en TABLA_NIVELES es 0xD244, dentro del rango ESTATICO de MADMIX1.BIN. Prueba de diseno deliberado: el cuerpo del nivel 13 termina EXACTO donde empieza este puntero -- no es coincidencia. CORREGIDO: antes se creia que los ultimos 36 bytes (0xD500-0xD524) eran el arranque del guion de demo 'nivel 1' (GUION_DEMO_NIVEL1), simplemente reasignado por TABLA_CICLO_NIVELES a 0xD524 -- error de una sesion antigua. TABLA_CICLO_NIVELES SIEMPRE ha apuntado a 0xD524, nunca a 0xD500, asi que esos 36 bytes nunca fueron guion de demo: siempre fueron cola del cuerpo del nivel 14 (mismo tipo de error que CUERPO_L13_CFA4/antes RM_TABLE_CFA4). Unificado en un unico fichero editable: data/niveles/body_l14.bin, con INCBIN propio en madmix1.asm (CUERPO_L14_D244).", category: "nivel" },
+  { start: 0xD524, end: 0xD6B6, label: "10 guiones de modo DEMO (402 B)", detail: "0xD524-0xD6B6: RESUELTO. Son 10 guiones de reproduccion automatica del modo DEMO (ciclador de niveles de muestra): pares [duracion en fotogramas, direccion simulada] terminados en direccion $FF. Consumidos por GESTIONAR_CICLO_NIVELES ($6045, madmix_scr.asm) via TABLA_CICLO_NIVELES ($60D0), que solo referencia 4 de los 10 (GUION_DEMO_NIVEL1/2/4/5, para el ciclo de niveles 1-2-4-5). Los otros 6 (GUION_DEMO_SINREF_1..6) son guiones reales y bien formados pero sin ningun puntero que los use -- a diferencia del nivel 15 (que parecia desconectado pero SI se alcanza en partida normal, ver FINDINGS.md), estos 6 guiones si son contenido genuinamente muerto/sin usar. Verificado recorriendo el bloque de un tiron: los 402 bytes se dividen EXACTOS en los 10 guiones, sin ningun byte sobrante. Datos en data/demos/*.dem: un fichero .dem por guion (01_nivel1.dem .. 10_sinref.dem), cargados con INCBIN bajo cada etiqueta GUION_DEMO_* en madmix1.asm.", category: "recursos" },
+  { start: 0xD6B6, end: 0xDD82, label: "MARCO DE CARAMELO (TABLA_RLE_MARCO_CARAMELO)", detail: "0xD6B6-0xDD82 (1740 bytes): TRANSCRITO COMPLETO, 0 diferencias byte a byte. ES EL MARCO DE CARAMELO, CONFIRMADO VISUALMENTE. Tabla RLE cuyas 870 repeticiones (valor,repeticion) suman EXACTO 6144 bytes = la tabla de patrones de VRAM completa de SCREEN2. DIBUJAR_MARCO_CARAMELO_VRAM (antes TAIL_LEVELCYCLE_HELPER2, madmix_scr.asm, $6429) la vuelca SECUENCIALMENTE desde VRAM $0000 via FILVRM (verificado por aritmetica exacta: $D6B6+2*$0366=$DD82). Expandiendo el RLE y renderizando con la tabla de nombres identidad sale el marco completo: rayas diagonales rojiblancas, esquinas redondeadas y brillo -- pixel a pixel igual que dump_openmsx/screen_reconstructed.png (render en dump_openmsx/candy_frame_reconstructed.png). El centro sale vacio porque el laberinto se dibuja encima despues. Ademas, un SUBTRAMO de esta misma tabla (desde $DC00) tiene un segundo uso: CALCULAR_DIRECCION_MASCARA_ACTOR ($8988) + COMPONER_ACTORES_EN_BUFFER lo leen de forma ALEATORIA como mascaras AND/OR de 16 bits para componer sprites contra el fondo -- resuelve el antiguo hallazgo 'Zona 0xDC00 sin descifrar'. Datos en data/img/marco_caramelo_forma.img (forma) y data/img/marco_caramelo_color.img (color, 768 bytes en madmix_scr.asm).", category: "graficos" },
+  { start: 0xDD82, end: 0xDD8A, label: "REINICIO_SLOT_DD82 (codigo)", detail: "0xDD82-0xDD8A (8 bytes): TRANSCRITO, 0 diferencias. Codigo real (DI / LD A,$55 / OUT ($A8),A / JP $8400), sin llamador conocido en el codigo ya transcrito -- posible punto de entrada externo (desde MADMIX0.BIN u otro mecanismo), disparador sin confirmar.", category: "codigo" },
+  { start: 0xDD8A, end: 0xDD93, label: "CONFIGURAR_Y_LEER_JOYSTICK_PSG (codigo)", detail: "0xDD8A-0xDD93 (9 bytes): TRANSCRITO, 0 diferencias. Destino real de CALL $DD8A en LEER_JOYSTICK (llamador ya existente en el fichero). Escribe A al registro PSG seleccionado, selecciona el registro 14 (Puerto E/S A, joystick 1 en MSX) y devuelve su valor.", category: "codigo" },
+  { start: 0xDD93, end: 0xDDA0, label: "cola huerfana + relleno $FF", detail: "0xDD93-0xDDA0 (13 bytes): TRANSCRITO, 0 diferencias. 3 bytes de codigo huerfano sin llamador conocido (POP HL / EI / RET) mas 10 bytes de relleno solido $FF.", category: "sistema" },
+
+  { start: 0xDDA0, end: 0xDE04, label: "sistema (manejador de interrupcion BIOS/DOS)", detail: "0xDDA0-0xDE04: mas alla del rango real cargado de MADMIX1.BIN ($CD en 0xDDA0 es solo un byte huerfano de relleno de sector, ver FINDINGS.md). El resto (0xDDA9-0xDE03 aprox.) es CODIGO real, confirmado estatico en 6 volcados de RAM: un manejador de interrupcion clasico (guarda PUSH IX/IY/HL/DE/BC/AF + EXX + EX AF,AF', comprueba un flag y hace CALL a zona reservada de BIOS antes de restaurar con EI/RET), referenciando direcciones fijas de bajo nivel ($0038 = vector de interrupcion Z80, $001C y $F380 = BIOS/DOS). Casi con toda seguridad codigo residente de MSX-DOS/Disk-BASIC (un gancho de interrupcion generico), no parte de ninguno de los 3 binarios del juego.", category: "sistema" },
+  { start: 0xDE04, end: 0xF004, label: "lienzo de bitmap en RAM (pixeles, no tipos de loseta)", detail: "0xDE04 en adelante (al menos 4608 bytes, 144 filas x 32). REINTERPRETADO: NO es 'el buffer del nivel activo' (ese es el de 0xFC50, mucho mas pequeno, ~928 bytes maximo, porque solo guarda 1 byte por tipo de loseta) -- este es un lienzo de PIXELES ya renderizados, listo para volcarse tal cual a la tabla de patrones de VRAM (misma tecnica que DIBUJAR_PORTADA: tabla de nombres 'identidad' + escritura secuencial byte a byte). Las dimensiones encajan exactas con la rejilla visible ya confirmada: 144 filas = 9 filas de losetas x 16px; 32 bytes/fila = 256px = ancho total de pantalla (16 losetas), de las cuales 24 bytes (12 losetas) son el area jugable y 8 bytes (4 losetas) quedan bajo el marco de caramelo. Lo desplazan SCROLL_ARRIBA/SCROLL_ABAJO/SCROLL_IZQUIERDA/SCROLL_DERECHA (scroll fino de 4px sobre TODO el lienzo, 144 filas por paso), lo redibuja SCROLL_LOSETA_BUFFER_VRAM al cruzar una loseta completa, lo llena por completo DIBUJAR_FILA_LOSETAS_BUFFER_VRAM/REDIBUJAR_PANTALLA_COMPLETA_BUFFER_VRAM (redibujado total de camara, 36 pasadas) y lo usa tambien REDIBUJAR_LOSETA_BUFFER_VRAM (0x8D1B, redibujado de una sola loseta). Ninguna de estas escribe en VRAM directamente: el volcado real (solo 18 de las 144 filas por frame, a VRAM ZONA_PATRON_VRAM_LABERINTO/$0220) lo hace ACTUALIZAR_VRAM_FRAME (0x8891). Se reutiliza tambien FUERA de la partida: RELLENAR_SOLIDO_AREA_JUEGO_BUFFER_VRAM (antes TAIL_VDP_FILL)/LIMPIAR_VRAM_AREA_JUEGO (antes TAIL_VDP_CLEAR, menu/demo, ~0x5B8C) rellenan este mismo lienzo con $FF (relleno solido, SOLO el area jugable de 24 de 32 bytes/fila, no el marco) para esas pantallas y para la secuencia de GAME OVER -- no es exclusivo del nivel activo. VERIFICADO en vivo: en el Game Over el area de juego se ve NEGRA y sin parpadeo (relleno estatico de una sola vez).", category: "variables" },
+  { start: 0xF004, end: 0xFA00, label: "sistema / BASIC-DOS (fuera de alcance)", detail: "0xF004-0xFA00: confirmado en 6 volcados de RAM reales (practicamente 0 diferencias entre ellos) que es memoria de sistema del interprete MSX-BASIC/DOS -- contiene la tabla de nombres de dispositivo estandar (\"PRN LST NUL AUX CON\"). No es parte de ninguno de los 3 binarios reconstruidos.", category: "sistema" },
+  { start: 0xFA00, end: 0xFA32, label: "MADMIX0.BIN (relocador)", detail: "0xFA00-0xFA32: MADMIX0.BIN completo (58 bytes incl. cabecera). Hace el LDIR que reubica 0x5500 bytes de MADMIX.SCR desde 0x8800 a 0x1000.", category: "codigo" },
+  { start: 0xFA32, end: 0xFC60, label: "sistema / BASIC-DOS (fuera de alcance)", detail: "0xFA32-0xFC60: confirmado en 6 volcados de RAM reales (0 diferencias entre ellos) que es memoria de sistema del interprete MSX-BASIC -- contiene la tabla de palabras clave (\"color auto goto list run...\"). No es parte de ninguno de los 3 binarios reconstruidos.", category: "sistema" },
+  { start: 0xFC60, end: 0xFF80, label: "buffer de nivel activo (RAM) -- 0xFC60 en la v1.0 original, 0xFC50 en esta reconstruccion", detail: "0xFC60-0xFF80: matriz de trabajo del nivel actualmente cargado (800 bytes reales usados en el volcado analizado, 32 columnas de stride). CORREGIDO (limite anterior 0xFE60 era demasiado corto): confirmado por comparacion directa byte a byte contra un volcado de RAM real -- 0xFC60-0xFF80 coincide EXACTO (0 diferencias, bit7 enmascarado) con header_50bc.bin + body_l01.bin, es decir, el nivel 1 completo (cabecera+cuerpo+PIE, 25 filas) tal como estaba cargado en ese instante. NO viene de ningun fichero directamente -- lo rellena en tiempo de ejecucion CARGAR_NIVEL (antes cargador de 0x5904) cada vez que arranca/cambia de nivel; el tamano real usado varia segun las filas del nivel activo (hasta 26 para el nivel mas alto). IMPORTANTE: esta direccion (0xFC60) es la de la v1.0 ORIGINAL, capturada en un volcado de RAM real de esa version -- tiene un bug real (buffer insuficiente para el nivel 14). Esta reconstruccion (`madmix_scr_body.asm`) aplica el fix de la v2.0: `CARGAR_NIVEL` usa `LD HL,$FC50` (16 bytes antes) en los 5 sitios afectados, sin constante/label simbolico propio -- ver FINDINGS.md.", category: "variables" },
+  { start: 0xFF80, end: 0xFFE0, label: "reserva sin usar del buffer de nivel", detail: "0xFF80-0xFFE0: relleno solido 0x42 en el volcado analizado -- parte del mismo buffer (0xFC60 en la v1.0 original / 0xFC50 en esta reconstruccion), simplemente sin usar por el nivel activo en ese momento (los niveles mas altos, hasta 26 filas, llegarian a ocupar mas de este tramo).", category: "variables" },
+  { start: 0xFFE0, end: 0x10000, label: "sistema (pila/registros heredados del arranque BASIC)", detail: "0xFFE0-0xFFFF: confirmado estatico (0 diferencias en 6 volcados de RAM reales tomados en momentos distintos de partida). Contenido reconocible como resto de pila Z80 (arranca con EI/POP IY/POP IX/POP DE/RET, un epilogo tipico) -- probablemente lo que quedo en la pila de la fase BASIC antes de que INICIO fijara SP a 0x0FFF, nunca mas tocado durante la partida. No es parte de ninguno de los 3 binarios reconstruidos.", category: "sistema" },
+];
+
+// ============================================================
+// FICHEROS DEL DISCO -- direccion real de carga (cabecera BLOAD)
+// y, si aplica, reubicacion posterior hecha por codigo del juego.
+// ============================================================
+const FILES = [
+  {
+    name: "MADMIX.SCR", size: 21768,
+    loadStart: 0x8800, loadEnd: 0xDD00,
+    temp: true,
+    note: "Carga temporal en 0x8800-0xDD00 (cabecera BLOAD tipo codigo, NO es una imagen de pantalla pese al nombre)",
+    relocation: { toStart: 0x1000, toEnd: 0x6500, via: "MADMIX0.BIN hace LDIR de 0x5500 bytes" }
+  },
+  {
+    name: "MADMIX0.BIN", size: 58,
+    loadStart: 0xFA00, loadEnd: 0xFA32,
+    temp: false,
+    note: "Reside en 0xFA00-0xFA32. Se ejecuta nada mas cargarse (BLOAD...,R) y hace el LDIR de arriba."
+  },
+  {
+    name: "MADMIX1.BIN", size: 22952,
+    loadStart: 0x8400, loadEnd: 0xDDA0,
+    temp: false,
+    note: "El motor de juego. Se carga DESPUES de MADMIX.SCR/MADMIX0.BIN y sobrescribe la zona temporal 0x8800-0xDD00."
+  }
+];
+
+const TOTAL = 0x10000;
+const pct = (addr) => (addr / TOTAL) * 100;
+
+const CATEGORY_VAR = {
+  codigo: "--c-codigo",
+  recursos: "--c-recursos",
+  graficos: "--c-graficos",
+  nivel: "--c-nivel",
+  variables: "--c-variables",
+  sinexplorar: "--c-sinexplorar",
+  sistema: "--c-sistema",
+};
+
+function fmtAddr(a) { return "0x" + a.toString(16).toUpperCase().padStart(4, "0"); }
+
+// --- llaves de fichero: posicion FINAL/permanente de cada uno de
+// los 3 binarios (si hay reubicacion, esa es la que cuenta, no la
+// carga temporal) ---
+const fileBrackets = document.getElementById("file-brackets");
+FILES.forEach((f) => {
+  const finalStart = f.relocation ? f.relocation.toStart : f.loadStart;
+  const finalEnd = f.relocation ? f.relocation.toEnd : f.loadEnd;
+  const div = document.createElement("div");
+  div.className = "file-bracket";
+  div.style.left = pct(finalStart) + "%";
+  div.style.width = Math.max(pct(finalEnd) - pct(finalStart), 0.3) + "%";
+  div.title = f.name + " -- posicion final " + fmtAddr(finalStart) + "-" + fmtAddr(finalEnd) + (f.relocation ? " (reubicado desde " + fmtAddr(f.loadStart) + ")" : "");
+  const label = document.createElement("div");
+  label.className = "file-bracket-label";
+  label.textContent = f.name;
+  div.appendChild(label);
+  fileBrackets.appendChild(div);
+});
+
+// --- barra de memoria ---
+const bar = document.getElementById("mem-bar");
+SEGMENTS.forEach((seg) => {
+  const div = document.createElement("div");
+  div.className = "mem-seg";
+  div.style.left = pct(seg.start) + "%";
+  div.style.width = (pct(seg.end) - pct(seg.start)) + "%";
+  div.style.background = "var(" + CATEGORY_VAR[seg.category] + ")";
+  div.title = fmtAddr(seg.start) + " - " + fmtAddr(seg.end) + "  (" + (seg.end - seg.start) + " bytes)\n" + seg.detail;
+  const widthPx = (pct(seg.end) - pct(seg.start)) / 100 * bar.clientWidth || 0;
+  if (widthPx > 40) {
+    const lbl = document.createElement("div");
+    lbl.className = "mem-seg-label";
+    lbl.textContent = seg.label;
+    div.appendChild(lbl);
+  }
+  bar.appendChild(div);
+});
+
+// --- regla simple: solo direcciones redondas (cada 0x1000), nunca
+// se amontonan porque son pocas y estan regularmente espaciadas ---
+const ticks = document.getElementById("mem-ticks");
+for (let addr = 0; addr <= TOTAL; addr += 0x1000) {
+  const t = document.createElement("div");
+  t.className = "tick";
+  t.style.left = pct(addr) + "%";
+  ticks.appendChild(t);
+  const l = document.createElement("div");
+  l.className = "tick-label";
+  l.style.left = pct(addr) + "%";
+  l.textContent = fmtAddr(addr);
+  ticks.appendChild(l);
+}
+
+// --- tabla de detalle: una fila legible por segmento, en orden de
+// direccion, sin limite de espacio horizontal (nunca se solapa) ---
+const memTableBody = document.getElementById("mem-table-body");
+SEGMENTS.forEach((seg) => {
+  const tr = document.createElement("tr");
+  const size = seg.end - seg.start;
+  tr.innerHTML =
+    '<td class="addr">' + fmtAddr(seg.start) + " - " + fmtAddr(seg.end - 1) + '</td>' +
+    '<td class="addr">' + size + ' B</td>' +
+    '<td class="cat"><span class="row-swatch" style="background:var(' + CATEGORY_VAR[seg.category] + ')"></span>' + seg.label + '</td>' +
+    '<td>' + seg.detail + '</td>';
+  memTableBody.appendChild(tr);
+});
+
+// --- tabla de detalle de ficheros ---
+const filesTableBody = document.getElementById("files-table-body");
+FILES.forEach((f) => {
+  const tr = document.createElement("tr");
+  tr.innerHTML =
+    '<td>' + f.name + '</td>' +
+    '<td class="addr">' + f.size + ' B</td>' +
+    '<td class="addr">' + fmtAddr(f.loadStart) + " - " + fmtAddr(f.loadEnd - 1) + (f.temp ? " (temporal)" : "") + '</td>' +
+    '<td>' + (f.note || "") + '</td>';
+  filesTableBody.appendChild(tr);
+  if (f.relocation) {
+    const tr2 = document.createElement("tr");
+    tr2.innerHTML =
+      '<td>' + f.name + ' <span style="color:var(--muted)">(reubicado)</span></td>' +
+      '<td class="addr">—</td>' +
+      '<td class="addr">' + fmtAddr(f.relocation.toStart) + " - " + fmtAddr(f.relocation.toEnd - 1) + '</td>' +
+      '<td>' + f.relocation.via + '</td>';
+    filesTableBody.appendChild(tr2);
+  }
+});
+
+// --- seccion de ficheros, alineada a la MISMA escala de direcciones ---
+const filesOuter = document.getElementById("files-outer");
+FILES.forEach((f) => {
+  const row = document.createElement("div");
+  row.className = "file-row";
+
+  const block = document.createElement("div");
+  block.className = "file-block" + (f.temp ? " temp" : "");
+  block.style.left = pct(f.loadStart) + "%";
+  block.style.width = Math.max(pct(f.loadEnd) - pct(f.loadStart), 0.3) + "%";
+  block.style.background = "var(--c-nivel)";
+  block.title = f.name + " (" + f.size + " bytes) -> " + fmtAddr(f.loadStart) + "-" + fmtAddr(f.loadEnd) + (f.note ? "\n" + f.note : "");
+  block.textContent = f.name;
+  row.appendChild(block);
+
+  filesOuter.appendChild(row);
+
+  if (f.relocation) {
+    const relRow = document.createElement("div");
+    relRow.className = "file-row";
+
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("class", "file-arrow-svg");
+    svg.setAttribute("viewBox", "0 0 100 40");
+    svg.setAttribute("preserveAspectRatio", "none");
+    const x1 = pct(f.loadStart), x2 = pct(f.relocation.toStart);
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("x1", x1); line.setAttribute("y1", "0");
+    line.setAttribute("x2", x2); line.setAttribute("y2", "34");
+    line.setAttribute("stroke", "var(--muted)");
+    line.setAttribute("stroke-width", "0.3");
+    line.setAttribute("vector-effect", "non-scaling-stroke");
+    svg.appendChild(line);
+    relRow.appendChild(svg);
+
+    const relBlock = document.createElement("div");
+    relBlock.className = "file-block";
+    relBlock.style.left = pct(f.relocation.toStart) + "%";
+    relBlock.style.width = Math.max(pct(f.relocation.toEnd) - pct(f.relocation.toStart), 0.3) + "%";
+    relBlock.style.background = "var(--c-nivel)";
+    relBlock.title = f.name + " reubicado -> " + fmtAddr(f.relocation.toStart) + "-" + fmtAddr(f.relocation.toEnd) + "\n" + f.relocation.via;
+    relBlock.textContent = f.name + " (reubicado)";
+    relRow.appendChild(relBlock);
+
+    filesOuter.appendChild(relRow);
+  }
+});
+</script>
+</body>
+</html>

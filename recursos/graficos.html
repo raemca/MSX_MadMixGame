@@ -1,0 +1,828 @@
+﻿<!DOCTYPE html>
+<!-- Ingeniería inversa, herramientas y documentación: Rafael Eduardo Martín Candial -->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Mad Mix Game — gráficos identificados</title>
+<style>
+  :root {
+    --bg: #f5f3ef;
+    --fg: #2a2621;
+    --panel: #ffffff;
+    --border: #ddd6cc;
+    --muted: #7a7266;
+    --accent-floor: #7fae6a;
+    --accent-wall: #6a86ae;
+    --accent-unknown: #b08a3e;
+    --accent-sprite: #ae6a8f;
+    --pixel-on: #2a2621;
+    --pixel-off: #f5f3ef;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1a17;
+      --fg: #ece6da;
+      --panel: #262320;
+      --border: #3a352e;
+      --muted: #a39a8a;
+      --accent-floor: #8fc27a;
+      --accent-wall: #7f9bc4;
+      --accent-unknown: #cf9f4e;
+      --accent-sprite: #c47fa4;
+      --pixel-on: #ece6da;
+      --pixel-off: #262320;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 2rem clamp(1rem, 4vw, 3rem);
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; margin-bottom: 0.2rem; }
+  h2 { font-size: 1.2rem; margin-top: 2.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+  .subtitle { color: var(--muted); margin-top: 0; }
+  .note {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent-unknown);
+    border-radius: 6px;
+    padding: 0.8rem 1rem;
+    margin: 1rem 0;
+    font-size: 0.92rem;
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 0.8rem 0 1.2rem 0;
+    font-size: 0.85rem;
+  }
+  .legend span.swatch {
+    display: inline-block;
+    width: 0.8em;
+    height: 0.8em;
+    border-radius: 3px;
+    margin-right: 0.4em;
+    vertical-align: middle;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: 0.6rem;
+  }
+  .tile {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.4rem;
+    text-align: center;
+    font-size: 0.72rem;
+    position: relative;
+  }
+  .tile canvas {
+    image-rendering: pixelated;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: var(--pixel-off);
+    border-radius: 3px;
+    display: block;
+  }
+  .tile .idx {
+    font-family: "SFMono-Regular", Consolas, monospace;
+    color: var(--muted);
+    margin-top: 0.3rem;
+  }
+  .tile .label {
+    font-weight: 600;
+    min-height: 1.4em;
+  }
+  .tile .label.unknown { color: var(--muted); font-weight: 400; font-style: italic; }
+  .tile .bar {
+    height: 4px;
+    border-radius: 2px;
+    margin-bottom: 0.35rem;
+  }
+  .tile[draggable="true"] { cursor: grab; }
+  .tile[draggable="true"]:active { cursor: grabbing; }
+  .compose-wrap {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .compose-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 64px);
+    grid-template-rows: repeat(4, 64px);
+    border: 2px solid var(--fg);
+    width: max-content;
+  }
+  .compose-cell {
+    width: 64px;
+    height: 64px;
+    background: var(--pixel-off);
+    border: 1px dashed var(--border);
+    margin: -1px 0 0 -1px;
+    position: relative;
+  }
+  .compose-cell canvas {
+    image-rendering: pixelated;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .compose-cell.dragover { outline: 2px solid var(--accent-sprite); outline-offset: -2px; }
+  .compose-cell[draggable="true"] { cursor: grab; }
+  .compose-cell .cell-btn {
+    display: none;
+    position: absolute;
+    top: 2px;
+    width: 18px;
+    height: 18px;
+    line-height: 16px;
+    padding: 0;
+    font-size: 0.8rem;
+    background: var(--panel);
+    color: var(--fg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0.35;
+  }
+  .compose-cell:hover .cell-btn { opacity: 0.95; }
+  .compose-cell[data-hex] .cell-btn { display: block; }
+  .cell-rotate { right: 2px; }
+  .cell-clear { left: 2px; }
+  .compose-actions { display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.85rem; color: var(--muted); max-width: 22rem; }
+  .compose-actions button {
+    align-self: flex-start;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    border-radius: 6px;
+    padding: 0.5rem 0.9rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .compose-actions button:hover { border-color: var(--accent-sprite); }
+  .cover-wrap {
+    background: #000;
+    border-radius: 6px;
+    padding: 8px;
+    width: max-content;
+    margin-bottom: 1.5rem;
+  }
+  .cover-wrap canvas {
+    image-rendering: pixelated;
+    display: block;
+    width: 512px;
+    height: 384px;
+  }
+  footer {
+    margin-top: 3rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+  }
+  code { font-family: "SFMono-Regular", Consolas, monospace; }
+</style>
+</head>
+<body>
+
+<h1>Mad Mix Game (Topo Soft, 1987) — visor de gráficos</h1>
+<p class="attribution-line" style="color:var(--muted);font-size:0.85rem;margin:-0.3rem 0 1.2rem 0;">Ingeniería inversa, herramientas y documentación: Rafael Eduardo Martín Candial</p>
+<p class="subtitle">Ingeniería inversa de <code>MADMIX1.BIN</code> — ver <code>src/FINDINGS.md</code> para el detalle técnico completo.</p>
+
+<div class="note">
+  Este documento se va enriqueciendo a medida que identificamos más
+  gráficos. Los datos de cada loseta están embebidos como
+  hex en el <code>&lt;script&gt;</code> al final del fichero, junto
+  con el objeto <code>TILE_LABELS</code>
+  donde se van anotando las identificaciones confirmadas — para
+  añadir una, solo hace falta rellenar esa entrada (índice → nombre).
+</div>
+
+<h2>Losetas del laberinto (<code>data/tiles/*.til</code>, 0xB940-0xC4A0, 91 gráficos)</h2>
+<p>Cada gráfico son 32 bytes (16×16 px, monocromo, 2 bytes/fila). El
+"tipo" viene de la tabla de colisión <code>TILE_TYPES</code>
+(<code>0x8EC4</code>, ver FINDINGS.md) indexada por el mismo número
+que el gráfico — pero <strong>ojo</strong>: se ha confirmado que
+"tipo" NO distingue muro de suelo (las 45 losetas de muro y las de
+suelo comparten tipo <code>0</code>). El color de cada tarjeta de
+abajo refleja la identificación real (muro/suelo/especial), NO el
+valor de tipo — ese solo se muestra como dato de referencia.</p>
+
+<div class="legend">
+  <span><span class="swatch" style="background:var(--accent-wall)"></span>muro (confirmado)</span>
+  <span><span class="swatch" style="background:var(--accent-floor)"></span>suelo (confirmado)</span>
+  <span><span class="swatch" style="background:var(--accent-sprite)"></span>identificado, especial (flechas, pistas, puertas, decoración...)</span>
+  <span><span class="swatch" style="background:var(--accent-unknown)"></span>sin identificar todavía</span>
+</div>
+
+<div class="grid" id="grid-tiles"></div>
+
+<h2>Marco de caramelo (<code>data/img/marco_caramelo_*.img</code>, 256×192, RESUELTO)</h2>
+<p>No es una loseta ni un sprite — es una imagen completa de pantalla
+(la tabla de patrones VRAM entera, 6144 bytes) que se dibuja con
+<strong>tabla de nombres identidad</strong> (nombre = índice de
+patrón). La <strong>forma</strong> viene de una tabla RLE de 1740
+bytes (<code>TABLA_RLE_MARCO_CARAMELO</code>, pares valor/repetición que se
+expanden a los 6144 bytes reales) y el <strong>color</strong> de un
+bloque de 768 bytes (<code>LEVELCYCLE_RESOURCE_TABLE</code>,
+<code>madmix_scr.asm</code>) que pasa por <code>OBTENER_COLOR_VDP</code>
+(antes <code>TAIL_TILE_LOOKUP</code>; dos consultas a <code>TABLA_COLORES_VDP</code> combinadas en un nibble
+alto/bajo) antes de llegar a VRAM. El centro sale en blanco a
+propósito: el laberinto se dibuja encima después. <strong>Verificado
+byte a byte contra un volcado real de VRAM</strong> — 0 diferencias
+en las 224 posiciones de color y en todos los bytes de forma donde el
+marco dibuja algo (las diferencias restantes son del laberinto/HUD de
+esa partida real, dibujados encima en el momento del volcado).</p>
+
+<div class="cover-wrap">
+  <canvas id="candy-frame" width="256" height="192"></canvas>
+</div>
+
+<h2>Área de composición (4×4)</h2>
+<p>Arrastra copias de las losetas de arriba a este cuadrado
+de 16 celdas contiguas — sirve para probar visualmente cómo
+encajan piezas de muro, comprobar conexiones, o montar un rincón
+de nivel de ejemplo. Una vez colocada, puedes arrastrar una loseta
+de una celda a otra para reubicarla (mueve, no duplica), rotarla
+90° con el botón <strong>⟳</strong>, o vaciarla con <strong>×</strong>
+(ambos botones aparecen al pasar el ratón por la celda). Se guarda
+solo en este navegador (<code>localStorage</code>), no se escribe
+en el fichero.</p>
+
+<div class="compose-wrap">
+  <div class="compose-grid" id="compose-grid"></div>
+  <div class="compose-actions">
+    <button id="compose-clear">Vaciar composición</button>
+    <span>Arrastra desde la galería de arriba, o de una celda a otra para reubicar. ⟳ rota 90°, × vacía la celda.</span>
+  </div>
+</div>
+
+<footer>
+  Generado a partir de <code>src/data/tiles/*.til</code> y de
+  <code>MADMIX1.BIN</code> original (bytes leídos directamente,
+  cabecera MSX de 7 bytes descontada — ver nota en FINDINGS.md).
+  El marco de caramelo ya está localizado y confirmado visualmente
+  (<code>TABLA_RLE_MARCO_CARAMELO</code>, <code>0xD6B6-0xDD82</code> en
+  <code>madmix1.asm</code> — no es una loseta 16×16 como las de
+  arriba, es una tabla RLE que reconstruye la tabla de patrones de
+  VRAM completa de un tirón; ver <code>FINDINGS.md</code> y el
+  render en <code>dump_openmsx/candy_frame_reconstructed.png</code>),
+  por eso no aparece en esta galería de losetas.
+</footer>
+
+<script>
+// ============================================================
+// IDENTIFICACIONES CONFIRMADAS -- ir rellenando aqui conforme
+// se reconozcan gráficos a ojo o por trazado en vivo. Clave =
+// indice del gráfico (mismo orden que en el binario), valor =
+// nombre corto. No hace falta tocar nada mas del fichero.
+// ============================================================
+const TILE_LABELS = {
+  // --- Muro de HIERRO (0-15) ---
+  0: "muro hierro - pieza individual (no conectable)",
+  1: "muro hierro - limite superior pared vertical",
+  2: "muro hierro - pared vertical",
+  3: "muro hierro - limite inferior pared vertical",
+  4: "muro hierro - limite izquierdo pared horizontal",
+  5: "muro hierro - pared horizontal",
+  6: "muro hierro - limite derecho pared horizontal",
+  7: "muro hierro - esquina inferior izquierda",
+  8: "muro hierro - esquina inferior derecha",
+  9: "muro hierro - esquina superior izquierda",
+  10: "muro hierro - esquina superior derecha",
+  11: "muro hierro - horizontal + union central abajo",
+  12: "muro hierro - horizontal + union central arriba",
+  13: "muro hierro - vertical + union central derecha",
+  14: "muro hierro - vertical + union central izquierda",
+  15: "muro hierro - cruce vertical/horizontal",
+  // --- Muro de CEMENTO, redondeado (16-31), mismo orden que hierro ---
+  16: "muro cemento - pieza individual (no conectable)",
+  17: "muro cemento - limite superior pared vertical",
+  18: "muro cemento - pared vertical",
+  19: "muro cemento - limite inferior pared vertical",
+  20: "muro cemento - limite izquierdo pared horizontal",
+  21: "muro cemento - pared horizontal",
+  22: "muro cemento - limite derecho pared horizontal",
+  23: "muro cemento - esquina inferior izquierda",
+  24: "muro cemento - esquina inferior derecha",
+  25: "muro cemento - esquina superior izquierda",
+  26: "muro cemento - esquina superior derecha",
+  27: "muro cemento - horizontal + union central abajo",
+  28: "muro cemento - horizontal + union central arriba",
+  29: "muro cemento - vertical + union central derecha",
+  30: "muro cemento - vertical + union central izquierda",
+  31: "muro cemento - cruce vertical/horizontal",
+  // --- Muro de LADRILLO (32-44), solo analogas a hierro/cemento 0-12 ---
+  32: "muro ladrillo - pieza individual (no conectable)",
+  33: "muro ladrillo - limite superior pared vertical",
+  34: "muro ladrillo - pared vertical",
+  35: "muro ladrillo - limite inferior pared vertical",
+  36: "muro ladrillo - limite izquierdo pared horizontal",
+  37: "muro ladrillo - pared horizontal",
+  38: "muro ladrillo - limite derecho pared horizontal",
+  39: "muro ladrillo - esquina inferior izquierda",
+  40: "muro ladrillo - esquina inferior derecha",
+  41: "muro ladrillo - esquina superior izquierda",
+  42: "muro ladrillo - esquina superior derecha",
+  43: "muro ladrillo - horizontal + union central abajo",
+  44: "muro ladrillo - horizontal + union central arriba",
+  45: "suelo con bola (terreno 1/3)",
+  46: "suelo con bola (terreno 2/3)",
+  47: "suelo con bola (terreno 3/3)",
+  48: "suelo con bola CLAVADA - requiere herramienta (terreno 1/3)",
+  49: "suelo con bola CLAVADA - requiere herramienta (terreno 2/3)",
+  50: "suelo con bola CLAVADA - requiere herramienta (terreno 3/3)",
+  63: "suelo sin bola (terreno 1/3)",
+  64: "suelo sin bola (terreno 2/3)",
+  65: "suelo sin bola (terreno 3/3)",
+  55: "pista tanque (tramo vertical) - extremo a extremo, disparo adelante + alternar izquierda/derecha",
+  74: "trampilla A (L a derechas, se pasa der->izq) - arriba izquierda",
+  75: "trampilla A (L a derechas, se pasa der->izq) - arriba derecha",
+  67: "trampilla A (L a derechas, se pasa der->izq) - abajo izquierda",
+  68: "trampilla A (L a derechas, se pasa der->izq) - abajo derecha",
+  71: "trampilla B (L a izquierdas, se pasa izq->der) - arriba izquierda",
+  72: "trampilla B (L a izquierdas, se pasa izq->der) - arriba derecha",
+  73: "trampilla B (L a izquierdas, se pasa izq->der) - abajo izquierda",
+  69: "trampilla B (L a izquierdas, se pasa izq->der) - abajo derecha",
+  76: "trampilla - transicion A<->B (se tumba/vuelca) - arriba izquierda",
+  77: "trampilla - transicion A<->B (se tumba/vuelca) - arriba derecha",
+  78: "trampilla - transicion A<->B (se tumba/vuelca) - abajo izquierda",
+  79: "trampilla - transicion A<->B (se tumba/vuelca) - abajo derecha",
+  80: "inicio izquierdo puerta casa fantasmas (se une al muro, complementa 56/57)",
+  81: "inicio derecho puerta casa fantasmas (se une al muro, complementa 56/57)",
+  56: "linea electrica - puerta casa fantasmas (hipotesis sin confirmar: una de las 2 -56 o 57- deja pasar al comecocos, la otra no)",
+  57: "linea electrica - puerta casa fantasmas (hipotesis sin confirmar: una de las 2 -56 o 57- deja pasar al comecocos, la otra no)",
+  51: "flecha ARRIBA - obliga a avanzar en esa direccion",
+  52: "flecha ABAJO - obliga a avanzar en esa direccion",
+  53: "flecha IZQUIERDA - obliga a avanzar en esa direccion",
+  54: "flecha DERECHA - obliga a avanzar (unica de las 4 con tipo distinto: 3 en vez de 2)",
+  58: "pista avion (tramo recto) - entra por un extremo, sale por el otro, te conviertes en avion y disparas",
+  82: "pista avion - remate izquierdo",
+  83: "pista avion - remate derecho",
+  59: "item de suelo, parecido a 60, funcion sin confirmar",
+  60: "item BOLA DE PODER - comer fantasmas temporalmente",
+  61: "item HIPOPOTAMO - te transforma, pisas fantasmas (sin puntos), no puedes comer bolas mientras dura",
+  62: "item HERRAMIENTA - necesaria para desclavar las bolas clavadas (ver 48-50)",
+  66: "loseta solida negra - relleno/suelo fuera de la zona jugable",
+  70: "muro ladrillo suelto - sin nivel conocido que lo use, posible T/cruce que falta en el set de ladrillo",
+  88: "estrella decorativa pequeña - relleno junto a loseta negra",
+  89: "estrella decorativa mediana - relleno junto a loseta negra",
+  90: "estrella decorativa grande - relleno junto a loseta negra",
+  84: "mosaico decorativo comecocos (pieza 1/4)",
+  85: "mosaico decorativo comecocos (pieza 2/4)",
+  86: "mosaico decorativo comecocos (pieza 3/4)",
+  87: "mosaico decorativo comecocos (pieza 4/4)",
+};
+// TILE_TYPES (0x8EC4, 96 bytes) -- tabla de tipos de loseta (colision)
+const TILE_TYPES = [
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,2,2,2,3,4,5,6,7,8,9,10,11,12,13,14,15,15,15,16,0,17,0,15,0,0,18,0,0,0,0,19,19,0,0,10,10,0,0,0,0,0,0,0,0,0
+];
+
+// data/tiles/*.til (0xB940-0xC4A0), 91 tiles x 32 bytes (hex, 64 chars c/u)
+const GRAFICOS_LOSETAS = [
+"80014002e0047008f8107fe0fd607ca0fd607c20fbe077f0eff85ffcbffe5555",
+"80014002e0047008f8107fe0fd607ca0fd607ca0fd607ca0fd607ca0fd607ca0",
+"fd607ca0fd607ca0fd607ca0fd607ca0fd607ca0fd607ca0fd607ca0fd607ca0",
+"fd607ca0fd607ca0fd607ca0fd607ca0fd607c20fbe077f0eff85ffcbffe5555",
+"80004000e0007000f8007ffffd557caafd557c00fbff77ffefff5fffbfff5555",
+"00000000000000000000ffff5555aaaa55550000ffffffffffffffffffff5555",
+"00010002000400080010ffe05560aaa055600020ffe0fff0fff8fffcfffe5555",
+"fd617ca2fd647ca8fd707cbffd557caafd557c00fbff77ffefff5fffbfff5555",
+"fd607ca03d601ca00d60fea05560aaa055600020ffe0fff0fff8fffcfffe5555",
+"80004000e0007000f8007ffffd557caafd557c80fd7f7cbffd6f7ca7fd637ca1",
+"00010002000400080010ffe05560aaa0556000a0fd60f4a0ed60dca0bd607ca0",
+"00000000000000000000ffff5555aaaa55550080fd7ff4bfed6fdca7bd637ca1",
+"7d613ca21d640ca80570fcbf5555aaaa55550000ffffffffffffffffffff5555",
+"fd617ca2fd647ca8fd707cbffd557caafd557c80fd7f7cbffd6f7ca7fd637ca1",
+"fd607ca03d601ca00d60fca05560aaa0556000a0fd60f4a0ed60dca0bd607ca0",
+"fd617ca23d641ca80d70fcbf5555aaaa55550080fd7ff4bfed6fdca7bd637ca1",
+"83c0dff4bd4afa04f402f802f401e801f401f801f402fa8abd56dfacaffaffff",
+"83c0dff4bd4afa04f402fa02f401fa01f401fa01fd01fa01fd01fa01f401fa01",
+"f401fa01f401fa01fd01fa01f401fa01fc01fa01fd01fa01f401fa01f501fa01",
+"f401fa01f401fa01fd01fa01f401fa01fc03fa03fd46feaebffedffcaffaffff",
+"83ffde00b800f000f000e800f000e800f440faaaf555ffaebfffdfffafffffff",
+"ffff00000000000000000000000000004410aaaa5555baaeffffffffffffffff",
+"ffc00034000a000400060002000300034007a80f5556babefffefffcfffaffff",
+"f400fa00f400fa00fd00fa00f500fa00fd00fa82fd55feaabfdfdfffafffffff",
+"f40108010001000100010003000100034007aa2b5556babefffefffcfffaffff",
+"03ff2fe05f003e007c007a00fc00f800f400f801f402fa01f401f801fc01fa01",
+"ffc00034000a000400020002000100014001a8015401aa01f401fa01fd01fa01",
+"ffff0000000000000000000000000000000080005001a8027401fa01f401fa01",
+"f40108000000000000000000000000004410aaaa5555baaeffffffffffffffff",
+"f400fa00f400fa00fd00fa00f400fa00fc00fa00fd01fa02f401fa03f503fa03",
+"f4010001000100010001000100010001000100014001a801d401fa01f401fa01",
+"f4000800000000000000000000000000000000004001a802d401fa01f401fa01",
+"8001c002fffce004eaa5f556fffce084eaa5f4d6fffce004eaacfffcbffeffff",
+"8000c001e002fffce104f554e9a4f555e9a6fffce004f554eaa4f555eaa6fffc",
+"e004eaa4f555eaa6fffce104e9a4f554e9a5f556fffce004eaa4f555eaa6fffc",
+"e004eaa4f555eaa6f554fffce9a4f554e9a5f556e9acf554fffcdffcbffe7fff",
+"8400c200ffffe100e9aaf555e9aaffffe008f54deaaaf54deaaadfffbfffffff",
+"04000200ffffc000aaaad554aaaaffff008054d5aaaa54d5aaaaffffffffffff",
+"04010202fffc8004aaa4d554aaa4fffc008454d4aaa454d4aaa4fffcfffeffff",
+"e005eaa6f557eaa0f554eaaaf554ffffe080f4d5eaaaf4d5eaaadfffbfffffff",
+"e0047554eaa49554aaa4d555aaa6fffc010455aca95455aca954fffcfffeffff",
+"8000c000ffffe000f554eaaaf554ffffe001f555eaa9f555eaa9f557eaa7fff5",
+"00010002fffc8004aaa4d555aaa6fffc20042aa4b5542aa4b554eaa4f554fffc",
+"04000200ffffc000aaaad554aaaaffff00045555aaa45554aaa4f557eaa7fffd",
+"e0046aa4f557aaa0d554aaaad554ffff00405555aa6a5555aa6affffffffffff",
+"8000d554aaaad7d4ac6ad9b4acaadc34ae6ad7d4aaaad7d4afead7d4aaaaffff",
+"2aa99553caa667cdb45a59b5a8aa5835ac6a57d5a6ca4fe59ff237d96aacd556",
+"aaaa9595aaaa97d4cc4969a3b8a6582dac4a57d9aeea4fe99ffc37f66b6bd5d5",
+"8000b654cbfaa5f44bfa87fc08fa937c117ad07488fac7f482fad1d4aaaaffff",
+"2aa99553cba66ffdb5fa5bf5847a49bda8be4835a47a73a5907231596a2cd556",
+"aaaa9595aa2a94d4c2f9717ba3f6423d84da545fa41e523999fc30b66b7bd5d5",
+"ffff8001a0059c01b211ba39be7d9cff80399c39be399c018001a0058001ffff",
+"ffff8001a0059c01b239ba39be399cff807d9c39be119c018001a0058001ffff",
+"ffff8001a0059c01b221ba61befd9dfd80fd9c61be219c018001a0058001ffff",
+"ffff8001a0059c01b211ba19befd9cff80fd9c19be119c018001a0058001ffff",
+"d57f7fffffff4063d5637fe3ffeb405dd55d7febffeb4077d5777fffffff407f",
+"9000fd5caabaeddccb76cd55477705220200e011b139d3a9bbbbdaeaad5afffe",
+"9000fd5caabaeddccb76cd55477705220200e011b139d3a9bbbbdaeaad5afffe",
+"ffff0101ffff9999ccccffffffff07070707ffffffffcccc9999ffff8040ffff",
+"80017ffefc0e740ee8027186c98e503ee9fe54fee87a7406fa0e7d3efffe5555",
+"80017ffefc1e700eeb027182c98a502ee9fe54fae8527406fa0e7d3efffe5555",
+"80017ffef1ce6086e9966c36c3c24832d6ca56cae0066386ec6e7b3efffe5555",
+"80017ffef83e701ee6ce66cefffe5556caae455ec2be401ec00e6006fffe5555",
+"8000d554aaaad554aaaad554aaaad554aaaad554aaaad554aaaad554aaaaffff",
+"2aa99553caa6654db29a5935ac6a5455a92a5395a6ca4d659ab235596aacd556",
+"aaaa9595aaaa9494c9c96363b6b65d5daaaa5959aaaa49499c9c36366b6bd5d5",
+"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+"847cd4beac7cd4bead7cd4bfad7cd4bcac7cd4bcac7cd4bcacfcd55caeacfd5c",
+"804880ac804a802c804a802c004a00ac004a00ac004a00ac004a002c004a00af",
+"3e207d343e2a7d343eaafd343eaa3d343e2a3d343e2a3d343f2a3ab4356a3abf",
+"ffff8000aaaad554aaaaffff008054d5aaaa54d5ffff8000aaaad554aaaaffff",
+"00000000ffffc000aaaad554aaaaffff008054d5aaaa54d5affff800f200f501",
+"00000000ffffc640ae2add34ae2afc3f1e205d35beaa7d35feaa3d3f3ebffd3f",
+"9201d501b201d401b201d401b200d500b200d500b200d500b200d400b200f500",
+"00000000ffffc260ac7ad4b4ac7afc3f047854bdad7a54bdad7ffcbcfd7cfcbf",
+"00000000ffffc000aaaad554aaaaffff01005555a9aa5555fffa001f004f80af",
+"00000000ffffc000aaaadf54abaaf4ff68607415e80a7405e803f418e815f413",
+"00000000ffffc000aaaad57caae2ffd201a15751aea15d51baa1fd51caa1ad51",
+"e815f411e815f40de803f401e801f401e801f401e801f401e801f401d801ac01",
+"8aa1ad518aa1b551eaa1d551aaa1d551aaa1d551aaa1d551aaa1d55daab7d56b",
+"8000d5546aaa55546aab3d5527ee64307fed7d57eaaad554eaaad554aaaafffe",
+"8001d553aaaad556aaaef57cdbe48e261beef57eaaafd557aaabd557aaa9ffff",
+"ffff8101bfffb799bfccbfffb7ffbf07bf07b7ffbfffbfccb799bfff8040ffff",
+"ffff0081fffd99edccfdfffdffede0fde0fdffedfffdccfd99edfffd0201ffff",
+"ffff8000eaaad555f2aad557eabed570eae1d5c1eb81d781eb80d700ef00d700",
+"ffff0001aaa95555aab1fd550ea9c35521a920d561a96355c6a90d551aa93555",
+"ef00d700ef80d780eb80d7c0ebe0d5f0eafed57feabfd557f2aad555ffffffff",
+"6aa935551aa90d5506a9035501a9015507a9ff55fea9f555aab15555fffdffff",
+"fffffffffffffffffffffffffffffffffeffffffffffffffffffffffffffffff",
+"ffffffffffffffffffffffffff7ffe3fff7fffffffffffffffffffffffffffff",
+"ffffff7fff7ffffffb6ffd5ffe3fa409fe3ffd5fff7ffbf7ff7fff7fffffff7f"
+];
+
+function hexToBytes(hex) {
+  const out = [];
+  for (let i = 0; i < hex.length; i += 2) out.push(parseInt(hex.substr(i, 2), 16));
+  return out;
+}
+
+// Dos formatos posibles para un bloque de 32 bytes / 16x16 px:
+// - "raster" (quadrant=false): 16 filas x 2 bytes, bitmap plano.
+//   Es el formato real de tile_gfx.bin (confirmado: con esta
+//   decodificacion las 91 losetas se identificaron todas
+//   correctamente -- son graficos "software", pintados a mano
+//   por el motor via LDIRVM, no sprites de hardware).
+// - "quadrant" (quadrant=true): formato NATIVO de sprite 16x16
+//   del VDP TMS9918 de MSX -- 4 bloques de 8x8 (8 bytes cada
+//   uno) en orden arriba-izq, abajo-izq, arriba-der, abajo-der.
+//   Sin uso actual en este visor (solo losetas, siempre "raster"),
+//   se deja la funcion por si hace falta en el futuro.
+function hexToGrid(hex, quadrant) {
+  const bytes = hexToBytes(hex);
+  const grid = [];
+  for (let r = 0; r < 16; r++) grid.push(new Array(16).fill(false));
+  if (!quadrant) {
+    for (let row = 0; row < 16; row++) {
+      const bits = (bytes[row * 2] << 8) | bytes[row * 2 + 1];
+      for (let col = 0; col < 16; col++) grid[row][col] = !!((bits >> (15 - col)) & 1);
+    }
+  } else {
+    const quads = [
+      { off: 0, ox: 0, oy: 0 },   // arriba-izquierda
+      { off: 8, ox: 0, oy: 8 },   // abajo-izquierda
+      { off: 16, ox: 8, oy: 0 },  // arriba-derecha
+      { off: 24, ox: 8, oy: 8 },  // abajo-derecha
+    ];
+    quads.forEach((q) => {
+      for (let r = 0; r < 8; r++) {
+        const b = bytes[q.off + r];
+        for (let c = 0; c < 8; c++) grid[q.oy + r][q.ox + c] = !!((b >> (7 - c)) & 1);
+      }
+    });
+  }
+  return grid;
+}
+
+function drawTile(canvas, hex, rotationDeg, quadrant) {
+  rotationDeg = rotationDeg || 0;
+  const grid = hexToGrid(hex, quadrant);
+  canvas.width = 16;
+  canvas.height = 16;
+  const ctx = canvas.getContext("2d");
+  const style = getComputedStyle(document.documentElement);
+  const onColor = style.getPropertyValue("--pixel-on").trim();
+  const offColor = style.getPropertyValue("--pixel-off").trim();
+  ctx.save();
+  if (rotationDeg) {
+    ctx.translate(8, 8);
+    ctx.rotate(rotationDeg * Math.PI / 180);
+    ctx.translate(-8, -8);
+  }
+  ctx.fillStyle = offColor;
+  ctx.fillRect(0, 0, 16, 16);
+  ctx.fillStyle = onColor;
+  for (let row = 0; row < 16; row++) {
+    for (let col = 0; col < 16; col++) {
+      if (grid[row][col]) ctx.fillRect(col, row, 1, 1);
+    }
+  }
+  ctx.restore();
+}
+
+function buildTileCard(hex, index, opts) {
+  const card = document.createElement("div");
+  card.className = "tile";
+  card.draggable = true;
+  card.title = "Arrastra a la composición 4×4";
+  card.addEventListener("dragstart", (e) => {
+    e.dataTransfer.effectAllowed = "copy";
+    e.dataTransfer.setData("application/json", JSON.stringify({
+      hex,
+      label: opts.label || "",
+      idxText: opts.idxText,
+      quadrant: !!opts.quadrant,
+    }));
+  });
+
+  const bar = document.createElement("div");
+  bar.className = "bar";
+  bar.style.background = opts.barColor;
+  card.appendChild(bar);
+
+  const canvas = document.createElement("canvas");
+  drawTile(canvas, hex, 0, opts.quadrant);
+  card.appendChild(canvas);
+
+  const label = document.createElement("div");
+  label.className = "label" + (opts.label ? "" : " unknown");
+  label.textContent = opts.label || "sin identificar";
+  card.appendChild(label);
+
+  const idx = document.createElement("div");
+  idx.className = "idx";
+  idx.textContent = opts.idxText;
+  card.appendChild(idx);
+
+  return card;
+}
+
+function colorForLabel(label) {
+  if (!label) return "var(--accent-unknown)";
+  const l = label.toLowerCase();
+  if (l.includes("muro")) return "var(--accent-wall)";
+  if (l.includes("suelo")) return "var(--accent-floor)";
+  return "var(--accent-sprite)"; // identificado pero no es simplemente muro/suelo
+}
+
+const gridTiles = document.getElementById("grid-tiles");
+GRAFICOS_LOSETAS.forEach((hex, i) => {
+  const type = TILE_TYPES[i];
+  const label = TILE_LABELS[i] || "";
+  const card = buildTileCard(hex, i, {
+    barColor: colorForLabel(label),
+    label,
+    idxText: "#" + i + " · tipo " + type,
+  });
+  gridTiles.appendChild(card);
+});
+
+// ============================================================
+// Área de composición 4x4: arrastrar y soltar losetas,
+// reubicar arrastrando entre celdas, y rotar 90°. Se persiste en
+// localStorage (solo en este navegador).
+// ============================================================
+const COMPOSE_KEY = "madmix_compose_4x4_v2";
+const composeGrid = document.getElementById("compose-grid");
+const composeCells = [];
+
+function loadComposeState() {
+  try {
+    return JSON.parse(localStorage.getItem(COMPOSE_KEY) || "[]");
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveComposeState() {
+  const state = composeCells.map((c) =>
+    c.dataset.hex
+      ? { hex: c.dataset.hex, label: c.title, rot: Number(c.dataset.rot || 0), quadrant: c.dataset.quadrant === "1" }
+      : null
+  );
+  localStorage.setItem(COMPOSE_KEY, JSON.stringify(state));
+}
+
+function fillCell(cell, hex, label, rot, quadrant) {
+  rot = Number(rot || 0);
+  const canvas = cell.querySelector("canvas");
+  drawTile(canvas, hex, rot, quadrant);
+  cell.dataset.hex = hex;
+  cell.dataset.rot = String(rot);
+  cell.dataset.quadrant = quadrant ? "1" : "0";
+  cell.title = label || "";
+  cell.draggable = true;
+}
+
+function clearCell(cell) {
+  const canvas = cell.querySelector("canvas");
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  delete cell.dataset.hex;
+  delete cell.dataset.rot;
+  delete cell.dataset.quadrant;
+  cell.title = "";
+  cell.draggable = false;
+}
+
+function rotateCell(cell) {
+  if (!cell.dataset.hex) return;
+  const newRot = (Number(cell.dataset.rot || 0) + 90) % 360;
+  fillCell(cell, cell.dataset.hex, cell.title, newRot, cell.dataset.quadrant === "1");
+}
+
+const savedCompose = loadComposeState();
+for (let i = 0; i < 16; i++) {
+  const cell = document.createElement("div");
+  cell.className = "compose-cell";
+  cell.dataset.index = String(i);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 16;
+  canvas.height = 16;
+  cell.appendChild(canvas);
+
+  const rotateBtn = document.createElement("button");
+  rotateBtn.className = "cell-btn cell-rotate";
+  rotateBtn.type = "button";
+  rotateBtn.textContent = "⟳";
+  rotateBtn.title = "Rotar 90°";
+  rotateBtn.draggable = false;
+  rotateBtn.addEventListener("mousedown", (e) => e.stopPropagation());
+  rotateBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    rotateCell(cell);
+    saveComposeState();
+  });
+  cell.appendChild(rotateBtn);
+
+  const clearBtn = document.createElement("button");
+  clearBtn.className = "cell-btn cell-clear";
+  clearBtn.type = "button";
+  clearBtn.textContent = "×";
+  clearBtn.title = "Vaciar celda";
+  clearBtn.draggable = false;
+  clearBtn.addEventListener("mousedown", (e) => e.stopPropagation());
+  clearBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    clearCell(cell);
+    saveComposeState();
+  });
+  cell.appendChild(clearBtn);
+
+  cell.addEventListener("dragstart", (e) => {
+    if (!cell.dataset.hex) { e.preventDefault(); return; }
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("application/json", JSON.stringify({
+      hex: cell.dataset.hex,
+      label: cell.title,
+      rot: Number(cell.dataset.rot || 0),
+      quadrant: cell.dataset.quadrant === "1",
+      sourceCellIndex: i,
+    }));
+  });
+
+  cell.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    // dropEffect debe coincidir con el effectAllowed del origen o
+    // el navegador muestra el cursor de "prohibido" y bloquea el
+    // drop: galeria (origen) = "copy", celda-a-celda = "move".
+    e.dataTransfer.dropEffect = e.dataTransfer.effectAllowed === "move" ? "move" : "copy";
+    cell.classList.add("dragover");
+  });
+  cell.addEventListener("dragleave", () => cell.classList.remove("dragover"));
+  cell.addEventListener("drop", (e) => {
+    e.preventDefault();
+    cell.classList.remove("dragover");
+    const raw = e.dataTransfer.getData("application/json");
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    fillCell(cell, data.hex, data.label || data.idxText || "", data.rot || 0, !!data.quadrant);
+    if (typeof data.sourceCellIndex === "number" && data.sourceCellIndex !== i) {
+      clearCell(composeCells[data.sourceCellIndex]);
+    }
+    saveComposeState();
+  });
+
+  const saved = savedCompose[i];
+  if (saved && saved.hex) fillCell(cell, saved.hex, saved.label, saved.rot, !!saved.quadrant);
+
+  composeCells.push(cell);
+  composeGrid.appendChild(cell);
+}
+
+document.getElementById("compose-clear").addEventListener("click", () => {
+  composeCells.forEach(clearCell);
+  saveComposeState();
+});
+
+// ============================================================
+// Marco de caramelo -- data/img/marco_caramelo_forma.img (RLE,
+// 1740 bytes -> 6144 reales) + data/img/marco_caramelo_color.img
+// (768 bytes crudos, sin comprimir). Verificado 0 diferencias
+// contra un volcado real de VRAM (ver FINDINGS.md).
+// ============================================================
+const CANDY_FORMA_RLE_HEX = "00190101030207030f010001b0015401ab01fc01f701f801ff0101010201040184015a01a40132019a010001ff070001ff02f001fc01fe01ff020001ff02000480010001ff020006ff033f011f01070103010001ff070001ff02f001fc01fe01ff020001ff02000480010001ff020006ff023f010f010701030101010001ff070001ff02f001fc01fe01ff020001ff02000480010001ff020006ff027f011f010f01030101010001ff070001ff02f801fe01ff030001ff0200038001c0010001ff0200050101ff0200040101000140012001a1015201ad01d201540100010d012a01d5013f01ef011d01fa0100024001c001e0026001f001002b01010f013c0103015f010a010d0107019b017d01fe01d601af01ff017e01f901e701ff017c01020100015101ab01780195010901070102010001ff01bf021f0200010f010701ff050001ff02c001e001f002f8010001fc01fe010010ff017f013f021f0100010f010701ff050001ff02c001e001f002f8010001fc01fe010010ff017f013f021f0100010f010701ff050001ff02c001e001f002f8010001fc01fe0100107f013f011f020f01000107010301ff050001ff02e001f001f802fc010001fe01ff01000c010200029501d5012a01a901a201a10140018001ff023f01cf01f3013f01df013d01f003f801e5019e016b0115010003e0011c01fa01fc01fa0100202f015f016f011b012d0115021401ff01f701ed03da02d40100c0ff03770273013b011b01f401fa01f601f801b401a801680200200a0105010a01090134014b013e019e01a80110019001680114014601dd01ff0100c01e0103010801170128016201bb01e701d0019001600190016c01d2017c01f10100206003630167016f027f010b013b01fb0600c0d001dc01df060603c601e601f602fe0100207f08fb06fa01f80100c0df065f011f01fe0800207f047e017c0178017001f001c001800100c50f01030101010005fe047e013e011e010e0100207001600700d00e010607002060080004010103010b013b0100c48001c001d001dc010608002060026101630167016f027f017b01fb0700c0de01df0706028601c601e601f602fe0100207f08fb06fa01f80100c0df065f011f01fe0800207f057e017c02f001c001800100c50f01030101010005fe057e013e02002078017002600500d01e010e020605002060080004010103010b013b0100c48001c001d001dc010608002060026101630167016f027f017b01fb0700c0de01df0706028601c601e601f602fe0100207f08fb06fa01f80100c0df065f011f01fe0800207f057e017c02f001c001800100c50f01030101010005fe057e013e02002078017002600500d01e010e02060500209f015b0120012e0113010c010b011401ff017c01d2012c0190017001a001d00100c0ff013e014b01340109010e0105010201ff01dd01460114016801b0019001e00100200b021702370157013f015f0140018001a001b001d001f801f401f80100c0040105010b011b0137033f0110019001a802ec01ea01fc01fa0100203f015f01bf015f01bf0107010002d401b801f301ef01df019f013f013e010002f801ff01e701f9017e01ff01000102010701090195017801ab01510107010f0100011f02bf02ff030001ff05fe01fc010001f801f002e001c001001007010f0100011f013f027f01ff030001ff05fe01fc010001f801f002e001c001001007010f0100011f013f027f01ff030001ff05fe01fc010001f801f002e001c00100100301070100010f011f023f017f01ff020001ff06fe010001fc01f802f001e001000a0102000480014001a101a201a9012a01d50195013d01df013f01fd01de013f01ff023f01df01ef016f01ee017501f601f701fc01f801fc01fe02fc02e00100281f011e010f01170119010e0100027f01f801f701fc01ab015401b00100019a013201a4015a018401040102010101ff070001ff02fe01fc01f001ff02000180010004ff020006ff020001030107011f013f01ff030001ff070001ff02fe01fc01f001ff02000180010004ff020006ff0200010101030107010f013f01ff020001ff070001ff02fe01fc01f001ff02000180010004ff020006ff020001010103010f011f017f01ff020001ff070001ff03fe01f801ff020001c00180010003ff020006ff02000101010004ff0201015401d201ad015201a101200140010001ff013f01cf013f01d5012a010d010001f401e001d002d801380130020018ff1afc03f003ff023f02380110012002ff04700120015002ff04e1014001a002ff01bf01ff01bb01bf01af011f010101ff071301ffd1f001fc01fe02ff04200110010801070100018001e001ff0150026001c7014f025f01ff01a0014001e101ff041f01af01b701bf02ff01bf02ffc0";
+const CANDY_COLOR_RAW_HEX = "0707074747073a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a0747470707070707474747077a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a0747474707070707474700000000000000000000000000000000000000000000000047470707070707070000000000000000000000000000000000000000000000000707070707073a7a0000000000000000000000000000000000000000000000007a3a070707073a7a0000000000000000000000000000000000000000000000007a3a070707073a7a0000000000000000000000000000000000000000000000007a3a070707073a7a0000000000000000000000000000000000000000000000007a3a070707073a7a0000000000000000000000000000000000000000000000007a3a070707073a7a0000000000000000000000000000000000000000000000007a3a070707073a7a0000000000000000000000000000000000000000000000007a3a070707073a7a0000000000000000000000000000000000000000000000007a3a070707073a7a0000000000000000000000000000000000000000000000007a3a070707023a7a0000000000000000000000000000000000000000000000007a3a020707073a7a0000000000000000000000000000000000000000000000007a3a070707073a7a0000000000000000000000000000000000000000000000007a3a070707073a7a0000000000000000000000000000000000000000000000007a3a070707073a7a0000000000000000000000000000000000000000000000007a3a0707070707470000000000000000000000000000000000000000000000004707070707074747000000000000000000000000000000000000000000000000474707070707474747077a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a0747474707070707474747073a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a07474747070728282828282828783830303030303030303030302020202020202020202020206868686868686878687070707070707070707070606060606060606060606060";
+function decodeCandyRLE(hex) {
+  const bytes = hexToBytesRLE(hex);
+  const out = new Uint8Array(6144);
+  let pos = 0;
+  for (let i = 0; i < bytes.length; i += 2) {
+    const val = bytes[i], rep = bytes[i + 1];
+    for (let r = 0; r < rep && pos < 6144; r++) out[pos++] = val;
+  }
+  return out;
+}
+function hexToBytesRLE(hex) {
+  const out = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < hex.length; i += 2) out[i / 2] = parseInt(hex.substr(i, 2), 16);
+  return out;
+}
+// TABLA_COLORES_VDP (madmix1.asm, $8978) + OBTENER_COLOR_VDP (antes TAIL_TILE_LOOKUP,
+// madmix_scr.asm, $6484): resultado = (DIRBITS[n2]<<4) | DIRBITS[n1], con
+// n1 = (byte>>3)&0x0F  y  n2 = (((byte>>6)&1)<<3) | (byte&0x07).
+const CANDY_DIRBITS = [1,4,6,13,12,5,10,14,1,4,6,8,2,7,11,15];
+function candyTileLookup(b) {
+  const n1 = (b >> 3) & 0x0F;
+  const n2 = (((b >> 6) & 1) << 3) | (b & 0x07);
+  return ((CANDY_DIRBITS[n2] << 4) | CANDY_DIRBITS[n1]) & 0xFF;
+}
+function decodeCandyColor(rawHex) {
+  const raw = hexToBytesRLE(rawHex);
+  const out = new Uint8Array(6144);
+  for (let g = 0; g < raw.length; g++) {
+    const cb = candyTileLookup(raw[g]);
+    for (let k = 0; k < 8; k++) out[g * 8 + k] = cb;
+  }
+  return out;
+}
+// Misma paleta TMS9918/MSX1 usada en portada.html.
+const CANDY_PALETTE = [
+  [0,0,0], [0,0,0], [33,200,66], [94,220,120],
+  [84,85,237], [125,118,252], [212,82,77], [66,235,245],
+  [252,85,84], [255,121,120], [212,193,84], [230,206,128],
+  [33,176,59], [201,91,186], [204,204,204], [255,255,255]
+];
+const candyPattern = decodeCandyRLE(CANDY_FORMA_RLE_HEX);
+const candyColor = decodeCandyColor(CANDY_COLOR_RAW_HEX);
+const candyCanvas = document.getElementById("candy-frame");
+const candyCtx = candyCanvas.getContext("2d");
+const candyImg = candyCtx.createImageData(256, 192);
+for (let charRow = 0; charRow < 24; charRow++) {
+  for (let charCol = 0; charCol < 32; charCol++) {
+    for (let pr = 0; pr < 8; pr++) {
+      const addr = charRow * 256 + charCol * 8 + pr;
+      const patByte = candyPattern[addr];
+      const colByte = candyColor[addr];
+      const fg = (colByte >> 4) & 0x0F;
+      const bg = colByte & 0x0F;
+      for (let pc = 0; pc < 8; pc++) {
+        const bit = (patByte >> (7 - pc)) & 1;
+        const rgb = CANDY_PALETTE[bit ? fg : bg];
+        const px = charCol * 8 + pc;
+        const py = charRow * 8 + pr;
+        const off = (py * 256 + px) * 4;
+        candyImg.data[off] = rgb[0];
+        candyImg.data[off + 1] = rgb[1];
+        candyImg.data[off + 2] = rgb[2];
+        candyImg.data[off + 3] = 255;
+      }
+    }
+  }
+}
+candyCtx.putImageData(candyImg, 0, 0);
+</script>
+</body>
+</html>

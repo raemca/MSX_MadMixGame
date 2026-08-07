@@ -1,0 +1,416 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mad Mix Game — Dosier</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      color: #e4fbff;
+      background: #02080f;
+      font-family: "Inter", "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px;
+      background: radial-gradient(circle at top left, rgba(76, 205, 255, 0.16), transparent 28%),
+                  radial-gradient(circle at bottom right, rgba(164, 117, 255, 0.14), transparent 25%),
+                  linear-gradient(180deg, #050b12 0%, #02060b 100%);
+    }
+    .page {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 28px;
+      border: 1px solid rgba(111, 219, 255, 0.16);
+      background: rgba(2, 8, 18, 0.94);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.02), 0 40px 120px rgba(0, 0, 0, 0.35);
+    }
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: end;
+      margin-bottom: 26px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(92, 223, 255, 0.15);
+    }
+    .brand {
+      display: grid;
+      gap: 8px;
+    }
+    .brand-title {
+      font-size: clamp(3rem, 5vw, 6rem);
+      letter-spacing: 0.2em;
+      font-weight: 800;
+      text-transform: uppercase;
+      line-height: 0.95;
+      margin: 0;
+      color: #c2f7ff;
+      text-shadow: 0 0 20px rgba(129, 224, 255, 0.45);
+    }
+    .brand-sub {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.95rem;
+      color: #99e2ff;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+    }
+    .brand-sub span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: rgba(6, 19, 31, 0.9);
+      padding: 8px 12px;
+      border: 1px solid rgba(83, 217, 255, 0.18);
+      border-radius: 999px;
+    }
+    .top-bar {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      padding: 10px 14px;
+      border-radius: 14px;
+      background: rgba(9, 20, 33, 0.95);
+      border: 1px solid rgba(84, 210, 255, 0.16);
+    }
+    .stripe { width: 8px; height: 30px; border-radius: 999px; }
+    .stripe:nth-child(1) { background: #f8fb6d; }
+    .stripe:nth-child(2) { background: #72f1ff; }
+    .stripe:nth-child(3) { background: #ff7d68; }
+    .stripe:nth-child(4) { background: #d56eff; }
+    .meta {
+      display: grid;
+      gap: 8px;
+      justify-items: end;
+      text-align: right;
+      color: #8ad8ff;
+      font-variant-numeric: tabular-nums;
+    }
+    .meta strong { display: block; font-size: 1.1rem; color: #eafeff; }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 1fr) minmax(380px, 1.05fr) minmax(320px, 1fr);
+      gap: 24px;
+      margin-top: 24px;
+    }
+    .panel {
+      padding: 18px;
+      border-radius: 22px;
+      background: rgba(4, 12, 19, 0.92);
+      border: 1px solid rgba(84, 210, 255, 0.16);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+    .panel h2 {
+      margin: 0 0 16px 0;
+      font-size: 1.15rem;
+      letter-spacing: 0.14em;
+      color: #b8f2ff;
+      text-transform: uppercase;
+    }
+    .panel h3 {
+      margin: 18px 0 10px;
+      color: #9ee8ff;
+      font-size: 1rem;
+      letter-spacing: 0.09em;
+    }
+    .panel p, .panel li, .panel dd {
+      color: #ccefff;
+      font-size: 0.98rem;
+      line-height: 1.65;
+    }
+    .panel li { margin-bottom: 8px; }
+    .panel code { background: rgba(58, 141, 208, 0.12); padding: 2px 4px; border-radius: 6px; color: #d2fbff; }
+    .stats { display: grid; gap: 12px; }
+    .stat-card {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(14, 28, 42, 0.92);
+      border: 1px solid rgba(82, 206, 255, 0.12);
+    }
+    .stat-card strong {
+      display: block;
+      font-size: 2rem;
+      color: #baf6ff;
+      margin-bottom: 6px;
+    }
+    .stat-card span { color: #8cd9ff; }
+    .stacked { display: grid; gap: 10px; }
+    .stacked-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(10, 19, 31, 0.9);
+      border: 1px solid rgba(83, 220, 255, 0.12);
+    }
+    .stacked-item strong { color: #e8f9ff; }
+    .stacked-item span { color: #97d4ff; }
+    .block-grid { display: grid; gap: 14px; }
+    .badge { display: inline-flex; align-items: center; justify-content: center; min-width: 68px; height: 28px; border-radius: 999px; background: rgba(27, 60, 83, 0.85); color: #bde9ff; letter-spacing: 0.07em; font-size: 0.88rem; }
+    .memory-map {
+      display: grid;
+      gap: 14px;
+      padding: 20px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(4, 17, 28, 0.98), rgba(6, 13, 21, 0.98));
+      border: 1px solid rgba(110, 245, 255, 0.14);
+    }
+    .memory-map::before {
+      content: "MEMORIA MSX";
+      display: block;
+      margin-bottom: 10px;
+      font-size: 0.82rem;
+      letter-spacing: 0.18em;
+      color: rgba(153, 252, 255, 0.65);
+    }
+    .memory-stack {
+      display: grid;
+      gap: 10px;
+    }
+    .memory-stack .segment {
+      position: relative;
+      display: grid;
+      gap: 6px;
+      padding: 18px;
+      border-radius: 20px;
+      border: 1px solid rgba(86, 210, 255, 0.14);
+      min-height: 80px;
+      background: rgba(11, 17, 26, 0.92);
+      overflow: hidden;
+    }
+    .memory-stack .segment::after {
+      content: attr(data-size);
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      color: rgba(207, 255, 255, 0.75);
+      font-size: 0.82rem;
+      letter-spacing: 0.1em;
+    }
+    .memory-stack .segment strong {
+      display: block;
+      color: #d4f6ff;
+      font-size: 1.05rem;
+    }
+    .memory-stack .segment span {
+      color: #92d7ff;
+      font-size: 0.88rem;
+      letter-spacing: 0.05em;
+    }
+    .memory-stack .segment[data-type="system"] { background: rgba(44, 75, 104, 0.96); }
+    .memory-stack .segment[data-type="code"] { background: rgba(82, 116, 184, 0.92); }
+    .memory-stack .segment[data-type="media"] { background: rgba(118, 79, 179, 0.92); }
+    .memory-stack .segment[data-type="loader"] { background: rgba(166, 82, 92, 0.92); }
+    .memory-columns {
+      display: grid;
+      gap: 12px;
+    }
+    .memory-columns .bar {
+      position: relative;
+      padding: 16px;
+      border-radius: 20px;
+      color: #e7feff;
+      background: rgba(41, 79, 104, 0.85);
+      overflow: hidden;
+      border: 1px solid rgba(96, 235, 255, 0.12);
+    }
+    .memory-columns .bar::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.05), transparent 30%);
+      pointer-events: none;
+    }
+    .memory-columns .bar[data-type="system"] { background: rgba(44, 78, 105, 0.92); }
+    .memory-columns .bar[data-type="code"] { background: rgba(85, 129, 178, 0.96); }
+    .memory-columns .bar[data-type="media"] { background: rgba(120, 85, 186, 0.94); }
+    .memory-columns .bar[data-type="loader"] { background: rgba(168, 86, 90, 0.92); }
+    .memory-columns .bar span {
+      display: block;
+      position: relative;
+      z-index: 1;
+    }
+    .memory-columns .bar small { color: #d8f5ff; }
+    .memory-columns .bar .label { font-size: 1rem; font-weight: 700; }
+    .memory-columns .bar .address { font-size: 0.86rem; color: rgba(218, 255, 255, 0.76); }
+    .image-card {
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(90, 225, 255, 0.14);
+      background: #03121f;
+    }
+    .image-card img {
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+    }
+    .columns-wide {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .wide-panel {
+      grid-column: 1 / -1;
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 24px;
+      border: 1px solid rgba(82, 220, 255, 0.12);
+      background: rgba(5, 11, 18, 0.93);
+    }
+    .footer {
+      margin-top: 30px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: #95d9ff;
+      font-size: 0.95rem;
+      flex-wrap: wrap;
+    }
+    .footer a { color: #a4ecff; }
+    @media (max-width: 1180px) {
+      .layout { grid-template-columns: 1fr; }
+      header { grid-template-columns: 1fr; }
+      .brand { justify-items: start; }
+      .meta { justify-items: start; text-align: left; }
+      .columns-wide { grid-template-columns: 1fr; }
+    }
+    @media (print) {
+      body { background: #02080f; }
+      .page { box-shadow: none; border: none; }
+      .panel, .wide-panel { border-color: rgba(255,255,255,0.06); }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="brand">
+        <div class="brand-sub">
+          <span>Topo Soft / Mad Mix Game</span>
+          <span>Reconstrucción MSX1</span>
+        </div>
+        <h1 class="brand-title">Mad Mix Game</h1>
+      </div>
+      <div class="meta">
+        <span><strong>1988</strong> Fecha original</span>
+        <span><strong>Z80</strong> MSX1 / 64KB</span>
+        <span><strong>Impresión</strong> estilo póster</span>
+      </div>
+    </header>
+
+    <div class="layout">
+      <section class="panel">
+        <h2>Descripción</h2>
+        <p>Esta reconstrucción documenta y genera desde cero los binarios de <strong>Mad Mix Game</strong> en MSX1. El proyecto incluye el motor de juego completo, los cargadores de disco y cinta, el logo animado de Topo Soft y toda la documentación técnica de la ingeniería inversa.</p>
+
+        <div class="stacked">
+          <div class="stacked-item"><strong>Módulos Z80</strong><span>Entrada, colisión, IA, pantalla y render</span></div>
+        </div>
+
+        <div class="stats">
+          <div class="stat-card"><strong>64</strong><span>sprites reconstruidos</span></div>
+          <div class="stat-card"><strong>91</strong><span>tiles de laberinto</span></div>
+          <div class="stat-card"><strong>15</strong><span>niveles jugables</span></div>
+          <div class="stat-card"><strong>16</strong><span>scripts de sonido</span></div>
+          <div class="stat-card"><strong>13</strong><span>patrones PSG</span></div>
+          <div class="stat-card"><strong>1</strong><span>fuente .fnt</span></div>
+        </div>
+
+        <h3>Arquitectura de código</h3>
+        <div class="block-grid">
+          <div class="stacked-item"><strong>main.asm</strong><span>135 líneas</span></div>
+          <div class="stacked-item"><strong>madmix1_body.asm</strong><span>4 633 líneas</span></div>
+          <div class="stacked-item"><strong>madmix_scr_body.asm</strong><span>4 570 líneas</span></div>
+          <div class="stacked-item"><strong>load_disk / load_cas</strong><span>cargadores y boot</span></div>
+        </div>
+
+        <h3>Artefactos finales</h3>
+        <div class="stacked">
+          <div class="stacked-item"><strong>MADMIX1.BIN</strong><span>22 945 bytes</span></div>
+          <div class="stacked-item"><strong>MADMIX.SCR</strong><span>21 768 bytes</span></div>
+          <div class="stacked-item"><strong>MADMIX0.BIN</strong><span>58 bytes</span></div>
+          <div class="stacked-item"><strong>LOAD.BIN / TEST.BIN</strong><span>299 / 253 bytes</span></div>
+          <div class="stacked-item"><strong>LOGOTOPO.CM</strong><span>4 254 bytes</span></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Mapa de memoria</h2>
+        <div class="memory-map">
+          <div class="memory-stack">
+            <div class="memory-block" data-type="system" data-size="16KB"><strong>BIOS & SYSTEM</strong><span>$0000 – $3FFF</span></div>
+            <div class="memory-block" data-type="system" data-size="17KB"><strong>RAM disponible</strong><span>$4000 – $83F8</span></div>
+            <div class="memory-block" data-type="code" data-size="22.9KB"><strong>MADMIX1.BIN</strong><span>$83F9 – $DDA0</span></div>
+            <div class="memory-block" data-type="media" data-size="21.2KB"><strong>MADMIX.SCR</strong><span>$8800 – $DD07</span></div>
+            <div class="memory-block" data-type="loader" data-size="58B"><strong>MADMIX0.BIN</strong><span>$FA00 – $FA39</span></div>
+            <div class="memory-block" data-type="loader" data-size="253B"><strong>TEST.BIN</strong><span>$C350 – $C451</span></div>
+            <div class="memory-block" data-type="loader" data-size="299B"><strong>LOAD.BIN</strong><span>$DDA0 – $DE8C</span></div>
+            <div class="memory-block" data-type="media" data-size="4.2KB"><strong>LOGOTOPO.CM</strong><span>$9470 – $A65F</span></div>
+          </div>
+          <div class="memory-columns">
+            <div class="bar" data-type="code"><span class="label">MADMIX1.BIN</span><span class="address">$83F9 – $DDA0</span><small>Motor de juego</small></div>
+            <div class="bar" data-type="media"><span class="label">MADMIX.SCR</span><span class="address">$8800 – $DD07</span><small>Portada y niveles</small></div>
+            <div class="bar" data-type="loader"><span class="label">MADMIX0.BIN</span><span class="address">$FA00 – $FA39</span><small>Relocador de disco</small></div>
+            <div class="bar" data-type="loader"><span class="label">TEST.BIN</span><span class="address">$C350 – $C451</span><small>Detección de RAM</small></div>
+            <div class="bar" data-type="loader"><span class="label">LOAD.BIN</span><span class="address">$DDA0 – $DE8C</span><small>Carga por cinta</small></div>
+            <div class="bar" data-type="media"><span class="label">LOGOTOPO.CM</span><span class="address">$9470 – $A65F</span><small>Logo animado</small></div>
+          </div>
+        </div>
+
+        <h3>Resumen de bloques</h3>
+        <div class="stacked">
+          <div class="stacked-item"><strong>Versiones</strong><span>Disco y cinta</span></div>
+          <div class="stacked-item"><strong>Compilación</strong><span>sjasmplus + Python</span></div>
+          <div class="stacked-item"><strong>Generación .dsk/.cas</strong><span>Desde cero, sin parchado</span></div>
+          <div class="stacked-item"><strong>Prueba</strong><span>openMSX</span></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Inventario</h2>
+        <div class="stacked">
+          <div class="stacked-item"><strong>Gráficos</strong><span>64 sprites, 91 tiles</span></div>
+          <div class="stacked-item"><strong>Niveles</strong><span>15 archivos de nivel</span></div>
+          <div class="stacked-item"><strong>Sonido</strong><span>16 scripts .snd + 13 .spt</span></div>
+          <div class="stacked-item"><strong>Documentos</strong><span>FINDINGS.md, FLUJO_PROGRAMA.md, manuales</span></div>
+          <div class="stacked-item"><strong>Herramientas</strong><span>Python / gen_flow_diagram / gen_inventory</span></div>
+        </div>
+
+        <h3>Recursos clave</h3>
+        <div class="block-grid">
+          <div class="stacked-item"><strong>src/data/sprites</strong><span>64 archivos .spr</span></div>
+          <div class="stacked-item"><strong>src/data/tiles</strong><span>91 archivos .til</span></div>
+          <div class="stacked-item"><strong>src/data/sound</strong><span>scripts y subpatrones</span></div>
+          <div class="stacked-item"><strong>src/data/niveles</strong><span>15 niveles y 3 headers</span></div>
+        </div>
+      </section>
+    </div>
+
+    <section class="wide-panel">
+      <div class="columns-wide">
+        <div>
+          <h2>Imágenes</h2>
+          <p>Captura del juego y los recursos restaurados que confirman la fidelidad visual de la reconstrucción.</p>
+        </div>
+        <div class="badge">Poster</div>
+      </div>
+      <div class="image-card">
+        <img src="dump_openmsx/pantalla%20mad%20mix%20game.png" alt="Captura de Mad Mix Game" />
+      </div>
+    </section>
+
+    <div class="footer">
+      <div>Creado para impresión y exhibición, estilo dossier técnico retro.</div>
+      <div><a href="src/README.md">src/README.md</a> · <a href="FINDINGS.md">FINDINGS.md</a> · <a href="FLUJO_PROGRAMA.md">FLUJO_PROGRAMA.md</a></div>
+    </div>
+  </div>
+</body>
+</html>

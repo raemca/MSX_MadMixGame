@@ -1,0 +1,477 @@
+﻿<!DOCTYPE html>
+<!-- Ingeniería inversa, herramientas y documentación: Rafael Eduardo Martín Candial -->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Mad Mix Game — flujo del programa e inventario de funciones</title>
+<style>
+  :root {
+    --bg: #f5f3ef;
+    --fg: #2a2621;
+    --panel: #ffffff;
+    --border: #ddd6cc;
+    --muted: #7a7266;
+    --accent: #8a6ab0;
+    --c-boot: #d69a3a;
+    --c-motor: #6a86ae;
+    --c-items: #8a6ab0;
+    --c-hud: #7fae6a;
+    --c-menu: #4aa89a;
+    --c-sonido: #c46a6a;
+    --c-pend: #cbc3b6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1a17;
+      --fg: #ece6da;
+      --panel: #263420;
+      --border: #3a352e;
+      --muted: #a39a8a;
+      --accent: #a17fd0;
+      --c-boot: #e6b25a;
+      --c-motor: #7f9bc4;
+      --c-items: #a17fd0;
+      --c-hud: #8fc27a;
+      --c-menu: #5ec2b2;
+      --c-sonido: #d68a8a;
+      --c-pend: #4a453c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 2rem clamp(1rem, 4vw, 3rem);
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; margin-bottom: 0.2rem; }
+  h2 { font-size: 1.2rem; margin: 2.5rem 0 0.8rem 0; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+  h3 { font-size: 1rem; margin: 1.6rem 0 0.5rem 0; color: var(--accent); }
+  .subtitle { color: var(--muted); margin-top: 0; }
+  code { font-family: "SFMono-Regular", Consolas, monospace; }
+  .note {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+    padding: 0.8rem 1rem;
+    margin: 1rem 0 2rem 0;
+    font-size: 0.92rem;
+  }
+  a { color: var(--accent); }
+
+  /* --- diagrama de flujo (organigrama simple, CSS puro) --- */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    margin: 1.5rem 0 2.5rem 0;
+  }
+  .flow-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.8rem;
+    margin: 0;
+  }
+  .flow-arrow {
+    color: var(--muted);
+    font-size: 1.3rem;
+    margin: 0.15rem 0;
+  }
+  .flow-note {
+    color: var(--muted);
+    font-size: 0.78rem;
+    max-width: 640px;
+    text-align: center;
+    margin: -0.1rem 0 0.3rem 0;
+  }
+  .tag-always { color: var(--c-hud); font-weight: 700; font-size: 0.9rem; }
+  .tag-cond { color: var(--c-sonido); font-weight: 700; font-size: 0.9rem; }
+  .tag-event { color: var(--c-items); font-weight: 700; font-size: 0.9rem; }
+  .box {
+    border: 1px solid var(--border);
+    border-left: 5px solid var(--muted);
+    background: var(--panel);
+    border-radius: 6px;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.82rem;
+    min-width: 150px;
+    max-width: 230px;
+    text-align: left;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+  .box b { display: block; font-size: 0.88rem; margin-bottom: 0.15rem; overflow-wrap: break-word; word-break: break-word; }
+  .box .addr { color: var(--muted); font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.78rem; }
+  .box.boot { border-left-color: var(--c-boot); }
+  .box.motor { border-left-color: var(--c-motor); }
+  .box.items { border-left-color: var(--c-items); }
+  .box.hud { border-left-color: var(--c-hud); }
+  .box.menu { border-left-color: var(--c-menu); }
+  .box.sonido { border-left-color: var(--c-sonido); }
+  .box.pend { border-left-color: var(--c-pend); font-style: italic; color: var(--muted); }
+
+  /* --- mini-diagrama de las opciones del menu principal --- */
+  .menu-options {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem;
+    margin: 0.2rem 0;
+    padding: 0.7rem;
+    background: color-mix(in srgb, var(--c-menu) 8%, transparent);
+    border: 1px dashed var(--c-menu);
+    border-radius: 8px;
+  }
+  .opt {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    border-radius: 6px;
+    padding: 0.45rem 0.7rem;
+    font-size: 0.8rem;
+    min-width: 130px;
+    text-align: center;
+  }
+  .opt b { font-size: 0.83rem; }
+  .opt-note { color: var(--muted); font-size: 0.74rem; }
+  .loopback { font-size: 0.74rem; color: var(--c-menu); font-weight: 600; }
+  .opt.opt-exit { border: 2px solid var(--c-motor); }
+  .loopback-exit { color: var(--c-motor); }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem 1.4rem;
+    margin: 0.6rem 0 1.6rem 0;
+    font-size: 0.85rem;
+  }
+  .legend span.swatch {
+    display: inline-block;
+    width: 0.8em;
+    height: 0.8em;
+    border-radius: 3px;
+    margin-right: 0.4em;
+    vertical-align: middle;
+  }
+
+  table { border-collapse: collapse; width: 100%; margin: 0.8rem 0 1.6rem 0; font-size: 0.86rem; }
+  th, td { text-align: left; padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; }
+  tr:hover td { background: var(--panel); }
+  .status-ok { color: #4a9a5a; }
+  .status-part { color: #c48a3a; }
+  .status-pend { color: var(--muted); }
+
+  #filterInput {
+    width: 100%;
+    max-width: 420px;
+    padding: 0.5rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--panel);
+    color: var(--fg);
+    font-size: 0.9rem;
+    margin-bottom: 0.8rem;
+  }
+  .inv-count { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.6rem; }
+  .file-tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    padding: 0.05rem 0.4rem;
+    border-radius: 4px;
+    background: var(--border);
+    color: var(--fg);
+  }
+  #invTableWrap { max-height: 560px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; }
+  #invTableWrap table { margin: 0; }
+  #invTableWrap thead th { position: sticky; top: 0; background: var(--bg); }
+  .tipo-tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    padding: 0.05rem 0.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+  .tipo-funcion { background: color-mix(in srgb, var(--c-motor) 30%, transparent); color: var(--c-motor); }
+  .tipo-interna { background: color-mix(in srgb, var(--c-pend) 50%, transparent); color: var(--muted); }
+  .tipo-dato { background: color-mix(in srgb, var(--c-hud) 30%, transparent); color: var(--c-hud); }
+  .tipo-sinref { background: color-mix(in srgb, var(--c-sonido) 25%, transparent); color: var(--c-sonido); }
+
+  .tipo-checks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.4rem;
+    margin: 0.8rem 0;
+    font-size: 0.88rem;
+  }
+  .tipo-checks label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    user-select: none;
+  }
+  .tipo-checks input[type=checkbox] { accent-color: var(--accent); width: 1rem; height: 1rem; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<h1>Mad Mix Game — flujo del programa e inventario de funciones</h1>
+<p class="attribution-line" style="color:var(--muted);font-size:0.85rem;margin:-0.3rem 0 1.2rem 0;">Ingeniería inversa, herramientas y documentación: Rafael Eduardo Martín Candial</p>
+<p class="subtitle">Compañero visual de <code>FLUJO_PROGRAMA.md</code> (el análisis narrativo) y de <code>FINDINGS.md</code> (el diario de descubrimientos). Documento vivo: se amplía sesión a sesión.</p>
+
+<div class="note">
+  Este fichero tiene dos partes: <b>1)</b> un diagrama del flujo grande
+  (arranque → tabla de despacho → bucle principal → subsistemas), a
+  mano, con solo las ~35 piezas más importantes para que se pueda leer
+  de un vistazo; y <b>2)</b> el <b>inventario completo</b> de las 646
+  etiquetas de los ficheros fuente (dirección, fichero, línea),
+  buscable, como referencia mecánica de apoyo. La mayoría de esas 646
+  todavía no tienen descripción propia — eso es precisamente lo que se
+  irá rellenando sesión a sesión (ver §7 de <code>FLUJO_PROGRAMA.md</code>).
+</div>
+
+<div class="legend">
+  <span><span class="swatch" style="background:var(--c-boot)"></span>Arranque/relocación</span>
+  <span><span class="swatch" style="background:var(--c-motor)"></span>Motor de juego (actores, colisión, cámara)</span>
+  <span><span class="swatch" style="background:var(--c-items)"></span>Items especiales</span>
+  <span><span class="swatch" style="background:var(--c-hud)"></span>HUD / entrada</span>
+  <span><span class="swatch" style="background:var(--c-menu)"></span>Menú / intro / créditos</span>
+  <span><span class="swatch" style="background:var(--c-sonido)"></span>Sonido</span>
+  <span><span class="swatch" style="background:var(--c-pend)"></span>Sin detallar / pendiente</span>
+</div>
+
+<h2>1. Diagrama de flujo grande</h2>
+
+<div class="flow">
+
+  <div class="flow-row">
+    <div class="box boot"><b>BASIC orquestador</b><span class="addr">fuera de alcance</span>AUTOEXEC.BAS/MADMIX.BAS</div>
+  </div>
+  <div class="flow-arrow">↓ BLOAD "MADMIX.SCR",R</div>
+  <div class="flow-row">
+    <div class="box boot"><b>DIBUJAR_PORTADA</b><span class="addr">$1000 (madmix_scr)</span>dibuja la portada, se autoejecuta</div>
+  </div>
+  <div class="flow-arrow">↓ BLOAD "MADMIX0.BIN",R</div>
+  <div class="flow-row">
+    <div class="box boot"><b>RELOCATOR</b><span class="addr">$FA00 (madmix0)</span>guarda slot, LDIR $8800→$1000, CALL $1000, restaura</div>
+  </div>
+  <div class="flow-arrow">↓ BLOAD "MADMIX1.BIN" (sin ,R) + CALL/USR</div>
+  <div class="flow-row">
+    <div class="box boot"><b>JUMP_TO_ENGINE</b><span class="addr">$FA2A (madmix0)</span>restaura otro slot, JP $8400</div>
+  </div>
+  <div class="flow-arrow">↓</div>
+  <div class="flow-row">
+    <div class="box motor"><b>JT_INICIO → INICIO</b><span class="addr">$8400 → $8F24 (madmix1)</span>tabla de despacho de 12 entradas (§2), nunca retorna</div>
+  </div>
+  <div class="flow-arrow">↓ CALL $5B56 (MOSTRAR_MENU_PRINCIPAL, segundo punto de entrada a GESTIONAR_INTRODUCCION.CONTINUAR_INTRO)</div>
+  <div class="flow-row">
+    <div class="box menu"><b>MENÚ PRINCIPAL (bucle)</b><span class="addr">DIBUJAR_MENU_PRINCIPAL, $5BCC / bucle ACTUALIZAR_MENU_PRINCIPAL</span>dibuja las 5 opciones, espera tecla, redibuja tras cada una (§5.8)</div>
+  </div>
+  <div class="flow-arrow">↓ despacho por tecla</div>
+  <div class="menu-options">
+    <div class="opt"><b>1 TECLADO</b><span class="opt-note">método de entrada</span><span class="loopback">↺ vuelve al menú</span></div>
+    <div class="opt"><b>2 JOYSTICK</b><span class="opt-note">método de entrada</span><span class="loopback">↺ vuelve al menú</span></div>
+    <div class="opt"><b>3 REDEFINE TECLAS</b><span class="opt-note">DIBUJAR_MENU_REDEFINIR_TECLAS</span><span class="loopback">↺ vuelve al menú</span></div>
+    <div class="opt"><b>4 DEMO</b><span class="opt-note">GESTIONAR_CICLO_NIVELES — cicla data/demos/*.dem</span><span class="loopback">↺ se ejecuta y vuelve al menú</span></div>
+    <div class="opt opt-exit"><b>0 JUGAR</b><span class="opt-note">sale del bucle del menú</span><span class="loopback loopback-exit">↓ continúa abajo</span></div>
+  </div>
+  <div class="flow-arrow">↓ solo "0 JUGAR" llega aquí</div>
+  <div class="flow-row">
+    <div class="box motor"><b>PREPARAR_INICIO_NIVEL</b><span class="addr">$8FD4 (madmix1)</span>recarga HUD/cámara completos + <code>REDIBUJAR_PANTALLA_COMPLETA_BUFFER_VRAM</code> — solo aquí (arranque/cambio de nivel/pérdida de vida), NUNCA cada frame</div>
+  </div>
+
+  <div class="flow-arrow">↓ cae en <code>BUCLE_PRINCIPAL_JUEGO</code> (antes <code>IML_9078</code>)/<code>VERIFICAR_FIN_NIVEL</code> (antes <code>IML_90B7</code>, madmix1) — el bucle real de cada frame</div>
+  <div class="flow-note">Cada frame: <code>WAIT_VBLANK</code>, cuenta atrás de modo especial/vidas, comprueba bolitas comidas vs objetivo de nivel (si se cumple → vuelve a PREPARAR_INICIO_NIVEL), y llama a <code>MOTOR_MOVIMIENTO_COLISION</code> (antes <code>MAIN_LOOP</code>, madmix_scr) vía el "trampolín" <code>ENLACE_MOTOR_MOVIMIENTO_COLISION</code> (antes <code>RAM_HOOK_2C36</code>).</div>
+
+  <div class="flow-arrow"><span class="tag-always">SIEMPRE</span> — dentro de <code>MOTOR_MOVIMIENTO_COLISION</code>, sin condición</div>
+
+  <div class="flow-row">
+    <div class="box hud"><b>LEER_ENTRADA</b><span class="addr">$8E3C (JT_LEER_ENTRADA)</span>teclado/joystick (o guion de demo) → decide dirección</div>
+    <div class="box motor"><b>MAPEAR_LOSETA_RELATIVA_A_ABSOLUTA<br>CONSULTAR_PROXIMA_LOSETA_EN_ESTA_DIRECCION</b><span class="addr">$8CB6 / $2E64</span>posición → tipo de loseta un paso por delante (con caché de columna; solo llama a <code>CONSULTAR_TIPO_LOSETA</code> si cambió)</div>
+    <div class="box motor"><b>TABLA_MANEJADORES_LOSETA</b><span class="addr">$2E3C (madmix_scr)</span>20 manejadores por tipo de loseta (§3) — forzado a "sin efecto" si hay un modo especial activo</div>
+    <div class="box hud"><b>GESTIONAR_SCROLL</b><span class="addr">$89AD (JT_GESTIONAR_SCROLL)</span>dispara scroll fino si toca</div>
+    <div class="box items"><b>ACTUALIZAR_DESTELLO_ITEMS</b><span class="addr">madmix_scr</span>temporizador de items especiales</div>
+    <div class="box items"><b>Bucle de 3 pistas (tanque/avión)</b><span class="addr">$2C2E (TABLA_PISTA_TANQUE_AVION)</span>redibuja cada pista activa vía MOTOR_ACTORES</div>
+  </div>
+
+  <div class="flow-arrow"><span class="tag-cond">CONDICIONAL</span> — solo si (<code>FLAG_ENTRADA_BLOQUEADA</code>)=0, teclado no bloqueado</div>
+
+  <div class="flow-row">
+    <div class="box motor"><b>MOTOR_ACTORES</b><span class="addr">$8440</span>redibuja el comecocos con la posición/estado nuevos</div>
+    <div class="box items"><b>HNDLR_PELMAZOIDE / HNDLR_MARICOCO / HNDLR_REGPUNANTOSO</b><span class="addr">$51FE / $54A9 / $55C0</span>IA de fantasma / mariquita repone bolitas / "repugnantoso" las convierte en clavadas</div>
+  </div>
+
+  <div class="flow-arrow"><span class="tag-event">EVENTO</span> — disparado desde dentro de un manejador <code>HNDLR_*</code> (§3), según el tipo de loseta pisada</div>
+
+  <div class="flow-row">
+    <div class="box hud"><b>DIBUJAR_MARCADOR_PUNTOS</b><span class="addr">$8D70 (JT_DIBUJAR_MARCADOR_PUNTOS)</span>solo cuando cambia la puntuación (comer bolita, bonus...), no cada frame</div>
+    <div class="box items"><b>REGISTRAR_PISTA_TANQUE_AVION<br>AVISAR_PROXIMIDAD_PISTA</b><span class="addr">$3043 / $566A</span>arma/mueve una pista de tanque / avión</div>
+    <div class="box sonido"><b>INSTALAR_RECURSO_SONIDO<br>VACIAR_CANALES_SONIDO</b><span class="addr">$C4A0 / $CF8B</span>driver de sonido PSG</div>
+  </div>
+
+  <div class="flow-arrow">↓ fin de nivel / game over / pausa</div>
+
+  <div class="flow-row">
+    <div class="box menu"><b>CARGAR_NIVEL / INICIALIZAR_ITEMS_NIVEL</b><span class="addr">$5904 / $5885</span>carga el siguiente registro de nivel</div>
+    <div class="box menu"><b>GESTIONAR_INTRODUCCION / .CONTINUAR_INTRO</b><span class="addr">$5AE9 / $5B50</span>modo demo, ciclo de niveles de muestra</div>
+    <div class="box menu"><b>APLICAR_COLOR_PANTALLA</b><span class="addr">$6454</span>pantalla de créditos + color del marco</div>
+  </div>
+
+</div>
+
+<h2>2. Tabla de despacho <code>JT_INICIO</code> — la "API pública" del motor (12 entradas, $8400)</h2>
+<p><b>Uso real verificado</b>: solo el slot 0 (<code>JT_INICIO</code>/<code>START</code>, $8400/$8403) tiene llamadores de verdad — los cargadores de disco (<code>load_disk/madmix0_body.asm</code>) y de cinta (<code>load_cas/load_bin_body.asm</code>) saltan aquí tras cargar <code>MADMIX1.BIN</code> en RAM, y <code>REINICIO_SLOT_DD82</code> lo usa como reinicio interno. Los otros 11 slots <b>no tienen ningún llamador</b> en todo el código fuente transcrito — cada sitio que necesita estas funciones llama directamente a la etiqueta real, nunca a través de la tabla. Se mantienen documentados aquí como referencia de la "API" original, no porque el despacho pase realmente por ellos.</p>
+<table>
+<thead><tr><th>Slot</th><th>Destino real</th><th>Qué hace</th></tr></thead>
+<tbody>
+<tr><td>0 — JT_INICIO</td><td><code>INICIO</code> ($8F24)</td><td>Arranque real, nunca retorna — ÚNICO slot con llamadores externos reales (cargadores de disco/cinta)</td></tr>
+<tr><td>1 — JT_MOTOR_ACTORES</td><td><code>MOTOR_ACTORES</code> ($8440)</td><td>Motor de actores/render sub-pixel</td></tr>
+<tr><td>2 — JT_RESET_CONTADOR_ACTORES</td><td><code>RESET_CONTADOR_ACTORES</code> ($899B)</td><td>Resetea el contador de actores activos cada frame</td></tr>
+<tr><td>3 — JT_WAIT_VBLANK</td><td><code>WAIT_VBLANK</code> ($89A0)</td><td>Espera sincronismo vertical</td></tr>
+<tr><td>4 — JT_ACTIVAR_INTERRUPCION</td><td><code>ACTIVAR_INTERRUPCION_MODO_1</code> ($881B)</td><td>Instala el vector de interrupción</td></tr>
+<tr><td>5 — JT_LEER_ENTRADA</td><td><code>LEER_ENTRADA</code> ($8E3C)</td><td>Teclado/joystick</td></tr>
+<tr><td>6 — JT_DIBUJAR_MARCADOR_PUNTOS</td><td><code>DIBUJAR_MARCADOR_PUNTOS</code> ($8D70)</td><td>Marcador de puntos</td></tr>
+<tr><td>7 — JT_GESTIONAR_SCROLL</td><td><code>GESTIONAR_SCROLL</code> ($89AD)</td><td>Scroll fino 4px (dispatcher → SCROLL_ARRIBA/SCROLL_ABAJO/APLICAR_DESPLAZAMIENTO_LATERAL → SCROLL_LOSETA_BUFFER_VRAM); prepara el búfer $DE04, no escribe en VRAM</td></tr>
+<tr><td>8 — JT_REDIBUJAR_PANTALLA_COMPLETA_BUFFER_VRAM</td><td><code>REDIBUJAR_PANTALLA_COMPLETA_BUFFER_VRAM</code> ($8C34)</td><td>Redibujado TOTAL de cámara (36 pasadas de DIBUJAR_FILA_LOSETAS_BUFFER_VRAM) + iconos de vida</td></tr>
+<tr><td>9 — JT_REDIBUJAR_LOSETA_BUFFER_VRAM</td><td><code>REDIBUJAR_LOSETA_BUFFER_VRAM</code> ($8D1B)</td><td>Redibuja una loseta (16×16px) en el lienzo $DE04, vía cola diferida o llamada directa</td></tr>
+<tr><td>10 — JT_MAPEAR_LOSETA_RELATIVA_A_ABSOLUTA</td><td><code>MAPEAR_LOSETA_RELATIVA_A_ABSOLUTA</code> ($8CB6)</td><td>Coordenada → dirección de matriz</td></tr>
+<tr><td>11 — JT_CONSULTAR_TIPO_LOSETA</td><td><code>CONSULTAR_TIPO_LOSETA</code> ($8CDA)</td><td>Dirección de loseta → tipo</td></tr>
+</tbody>
+</table>
+
+<h2>3. Despachador de tipo de loseta — <code>TABLA_MANEJADORES_LOSETA</code> ($2E3C, madmix_scr, 20 entradas)</h2>
+<table>
+<thead><tr><th>Tipo</th><th>Manejador</th><th>Qué se sabe</th></tr></thead>
+<tbody>
+<tr><td>0</td><td><code>HNDLR_SUELO_NORMAL</code></td><td class="status-ok">Pared/suelo normal, sin efecto de juego</td></tr>
+<tr><td>1</td><td><code>HNDLR_BOLITA_NORMAL</code></td><td class="status-ok">Bolita normal (comer, sumar contador)</td></tr>
+<tr><td>2</td><td><code>HNDLR_BOLITA_CLAVADA</code></td><td class="status-ok">Bola fija/clavada</td></tr>
+<tr><td>3</td><td><code>HNDLR_AUTOCOCO_ARRIBA</code></td><td class="status-ok">Flecha de dirección forzada (arriba)</td></tr>
+<tr><td>4</td><td><code>HNDLR_AUTOCOCO_ABAJO</code></td><td class="status-ok">Flecha de dirección forzada (abajo)</td></tr>
+<tr><td>5</td><td><code>HNDLR_AUTOCOCO_IZQUIERDA</code></td><td class="status-ok">Flecha de dirección forzada (izquierda)</td></tr>
+<tr><td>6</td><td><code>HNDLR_AUTOCOCO_DERECHA</code></td><td class="status-ok">Flecha de dirección forzada (derecha)</td></tr>
+<tr><td>7</td><td><code>HNDLR_PISTA_COCOTANQUE</code></td><td class="status-ok">Pista tanque vertical</td></tr>
+<tr><td>8, 9</td><td><code>HNDLR_SUELO_NORMAL</code> (repetido)</td><td>Líneas eléctricas de la puerta de fantasmas — mismo manejador que el tipo 0</td></tr>
+<tr><td>10</td><td><code>HNDLR_PISTA_COCONAVE</code></td><td class="status-ok">Pista del avión (CORREGIDO: un comentario antiguo lo llamaba "bola de poder comida")</td></tr>
+<tr><td>11</td><td><code>HNDLR_ITEM_SUELO</code></td><td class="status-part">Ítem de suelo sin confirmar del todo en el catálogo visual</td></tr>
+<tr><td>12</td><td><code>HNDLR_BOLA_PODER</code></td><td class="status-ok">Bola de poder real (evento final $6128=11)</td></tr>
+<tr><td>13</td><td><code>HNDLR_HIPODOSO</code></td><td class="status-ok">Ítem hipopótamo</td></tr>
+<tr><td>14</td><td><code>HNDLR_EXCAVATOFONO</code></td><td class="status-ok">Ítem herramienta</td></tr>
+<tr><td>15, 16</td><td><code>HNDLR_SUELO_SIN_BOLA</code></td><td class="status-ok">Tiles suelo_sin_bola/muro_ladrillo_suelto/loseta_solida_negra — resetea modo especial ($6128=3)</td></tr>
+<tr><td>17</td><td><code>HNDLR_TRAMPILLA_ABIERTA_DERECHA</code></td><td class="status-ok">Trampilla abriéndose hacia la derecha</td></tr>
+<tr><td>18</td><td><code>HNDLR_TRAMPILLA_ABIERTA_IZQUIERDA</code></td><td class="status-ok">Trampilla abriéndose hacia la izquierda</td></tr>
+<tr><td>19</td><td><code>HNDLR_TRAMPILLA_CERRADA</code></td><td class="status-ok">Trampilla cerrándose (entrada única de tabla para ambos lados, variante interna <code>HNDLR_TRAMPILLA_CERRADA_B</code>)</td></tr>
+</tbody>
+</table>
+
+<h2>4. Variables de estado compartido clave</h2>
+<table>
+<thead><tr><th>Dirección</th><th>Qué es</th></tr></thead>
+<tbody>
+<tr><td><code>$2C02</code></td><td><code>REGISTRO_NIVEL_POSICION_COMECOCOS</code> — posición viva del comecocos/cámara</td></tr>
+<tr><td><code>$2C05/$2C06</code></td><td><code>REGISTRO_NIVEL_OBJETIVO_BOLAS</code> (word) — objetivo de bolitas a comer (offsets 18-19 del registro de nivel)</td></tr>
+<tr><td><code>$2C07</code></td><td><code>NIVEL_ACTUAL</code> — nivel actual (1-15: el 15 es el nivel oculto, alcanzable en partida normal)</td></tr>
+<tr><td><code>$2C08</code></td><td><code>CONTADOR_BOLAS_COMIDAS</code> (antes <code>BALLS_EATEN_COUNT</code>, word) — contador en vivo de bolitas/items comidos este nivel</td></tr>
+<tr><td><code>$2C0D</code></td><td><code>MODO_ESPECIAL_FLAG</code> — flag de modo especial temporal activo</td></tr>
+<tr><td><code>$2C0E</code></td><td><code>MODO_ESPECIAL_CUENTA_ATRAS</code> (antes <code>MODO_ESPECIAL_COUNTDOWN</code>) — cuenta atrás de duración del modo especial (parpadeo)</td></tr>
+<tr><td><code>$2C0F</code></td><td><code>MODO_ESPECIAL_ACTIVO</code> (antes <code>MODO_ESPECIAL_ACTIVE</code>) — bandera != 0 = hay modo especial activo</td></tr>
+<tr><td><code>$2C10</code></td><td><code>DIRECCION_DE_MOVIMIENTO</code> — dirección elegida este frame (o el anterior)</td></tr>
+<tr><td><code>$2C11</code></td><td><code>SELECTOR_SPRITE_COMECOCOS</code> — valor de la subtabla de dirección; sus 7 bits bajos seleccionan el fotograma de animación (fase de boca + orientación, bit7=volteo horizontal) que <code>MOTOR_ACTORES</code> dibuja para el comecocos, vía <code>PTR_TABLA_SPRITES</code></td></tr>
+<tr><td><code>$2C27</code></td><td><code>VIDAS_RESTANTES</code> — vidas restantes</td></tr>
+<tr><td><code>$2C29</code></td><td><code>PUNTUACION</code> (word) — puntuación acumulada</td></tr>
+<tr><td><code>$2C2D</code></td><td><code>MODO_ESPECIAL</code> — selector de modo especial activo (0=ninguno, 1=bola de poder, 2=hipopótamo, 3=herramienta, 8=tanque, 9=avión)</td></tr>
+<tr><td><code>$2C2E</code> (3×2 bytes)</td><td><code>TABLA_PISTA_TANQUE_AVION</code> (antes <code>HINT_POS_TABLE</code>) — posiciones activas de pista de tanque/avión (limpiada por <code>INICIALIZAR_PARCIAL_ITEMS_NIVEL</code>)</td></tr>
+<tr><td><code>$6128</code></td><td>Sin etiqueta propia (número mágico repetido en varios sitios) — marcador de evento, índice de efecto de sonido a disparar, leído por <code>TICK_REPRODUCTOR_PSG</code></td></tr>
+<tr><td><code>$FC50-$FF80</code></td><td>Sin etiqueta propia — buffer del nivel activo (cabecera + cuerpo + <b>pie</b>, ver <code>CARGAR_NIVEL</code>). CORREGIDO: la v1.0 original usaba <code>$FC60</code> (bug de buffer insuficiente para el nivel 14); esta reconstrucción aplica el fix real a <code>$FC50</code>.</td></tr>
+</tbody>
+</table>
+
+<h2>5. Inventario completo (646 etiquetas, clasificadas y buscables)</h2>
+<div class="note">
+  <b>Una etiqueta no es lo mismo que una función.</b> De las 646:
+  <ul style="margin:0.4rem 0 0 0; padding-left:1.3rem;">
+    <li><b>116 función</b> — destino de al menos un <code>CALL</code> en algún sitio: candidatas reales a "función" (inicio → <code>RET</code>, invocable). Son la prioridad para nombrar/documentar bien.</li>
+    <li><b>177 interna</b> — destino solo de <code>JP</code>/<code>JR</code>, nunca de <code>CALL</code>: casi con toda seguridad viven DENTRO del cuerpo de una función (cabeceras de bucle, casos de una rama, puntos de salida compartidos como <code>TICK_MODO_ESPECIAL</code>), no son funciones en sí mismas.</li>
+    <li><b>323 dato</b> — le sigue un <code>DB</code>/<code>DW</code>/<code>DS</code>/<code>INCBIN</code>: tiles, sprites, texto, tablas. No es código.</li>
+    <li><b>30 sin ref.</b> — no la referencia ningún <code>CALL</code>/<code>JP</code>/<code>JR</code> conocido: mezcla de puntos de entrada externos (ISR, arranque), código huérfano, y posibles falsos negativos del propio cálculo (heurística, no infalible).</li>
+  </ul>
+  Clasificación calculada automáticamente cruzando el grafo de llamadas
+  real con qué sigue a cada etiqueta — es un punto de partida para
+  triaje, no una verdad absoluta (una etiqueta con múltiples puntos de
+  entrada, o alcanzada solo por una tabla de punteros en RAM, puede
+  clasificarse mal). Marca solo "función" en los checks de abajo para
+  ver las 94 candidatas a documentar primero.
+</div>
+<p>Escribe para filtrar por nombre, dirección o fichero, y marca los tipos que quieras ver. Ordenado por dirección real dentro de cada fichero.</p>
+<div class="tipo-checks" id="tipoChecks">
+  <label><input type="checkbox" value="funcion" checked> <span class="tipo-tag tipo-funcion">función</span> (116)</label>
+  <label><input type="checkbox" value="interna" checked> <span class="tipo-tag tipo-interna">interna</span> (177)</label>
+  <label><input type="checkbox" value="dato" checked> <span class="tipo-tag tipo-dato">dato</span> (323)</label>
+  <label><input type="checkbox" value="sinref" checked> <span class="tipo-tag tipo-sinref">sin ref.</span> (30)</label>
+</div>
+<input id="filterInput" type="text" placeholder="Filtrar por nombre, dirección hex o fichero...">
+<div class="inv-count" id="invCount"></div>
+<div id="invTableWrap">
+<table>
+<thead><tr><th>Nombre</th><th>Dirección</th><th>Fichero</th><th>Línea</th><th>Tipo</th></tr></thead>
+<tbody id="invBody"></tbody>
+</table>
+</div>
+
+<script>
+// ============================================================
+// INVENTARIO MECANICO -- generado automaticamente desde los .sym
+// de sjasmplus (nombre, direccion hex, fichero, linea de fuente).
+// No tiene descripcion propia (eso vive en las secciones de arriba,
+// en FLUJO_PROGRAMA.md y en FINDINGS.md) -- ir enriqueciendo aqui
+// sesion a sesion.
+// ============================================================
+const INVENTORY = [["START","8400","madmix1_body.asm",3,"interna"],["JT_INICIO","8403","madmix1_body.asm",11,"sinref"],["JT_MOTOR_ACTORES","8406","madmix1_body.asm",12,"sinref"],["JT_RESET_CONTADOR_ACTORES","8409","madmix1_body.asm",13,"sinref"],["JT_WAIT_VBLANK","840C","madmix1_body.asm",14,"sinref"],["JT_ACTIVAR_INTERRUPCION","840F","madmix1_body.asm",15,"sinref"],["JT_LEER_ENTRADA","8412","madmix1_body.asm",16,"sinref"],["JT_DIBUJAR_MARCADOR_PUNTOS","8415","madmix1_body.asm",17,"sinref"],["JT_GESTIONAR_SCROLL","8418","madmix1_body.asm",18,"sinref"],["JT_REDIBUJAR_PANTALLA_COMPLETA_BUFFER_VRAM","841B","madmix1_body.asm",19,"sinref"],["JT_REDIBUJAR_LOSETA_BUFFER_VRAM","841E","madmix1_body.asm",20,"sinref"],["JT_MAPEAR_LOSETA_RELATIVA_A_ABSOLUTA","8421","madmix1_body.asm",21,"sinref"],["JT_CONSULTAR_TIPO_LOSETA","8424","madmix1_body.asm",22,"sinref"],["MODO_ENTRADA","8427","madmix1_body.asm",28,"interna"],["FRAME_FLAG","8430","madmix1_body.asm",31,"dato"],["MOTOR_ACTORES","8440","madmix1_body.asm",111,"funcion"],["MEZCLAR_Y_AVANZAR_FILA_ACTOR","85A2","madmix1_body.asm",333,"interna"],["DIBUJAR_FILA_DESPLAZADA_DERECHA","85C1","madmix1_body.asm",360,"interna"],["DIBUJAR_FILA_DESPLAZADA_IZQUIERDA","8624","madmix1_body.asm",435,"interna"],["CAPTURAR_MASCARAS_ACTOR","8687","madmix1_body.asm",519,"funcion"],["IX_ACTOR_GUARDADO","86B9","madmix1_body.asm",543,"dato"],["CONTINUAR_CAPTURA_MASCARAS_ACTORES","86BB","madmix1_body.asm",548,"funcion"],["INVERTIR_BITS_PATRON_ACTOR","86FA","madmix1_body.asm",591,"funcion"],["INVERTIR_ORDEN_BYTES_PATRON_ACTOR","873A","madmix1_body.asm",644,"funcion"],["SALIR_MOTOR_ACTORES","8774","madmix1_body.asm",691,"interna"],["COMPONER_ACTORES_EN_BUFFER","8779","madmix1_body.asm",705,"sinref"],["TABLA_MASCARA_RECORTE_BORDE","87FB","madmix1_body.asm",802,"dato"],["ACTIVAR_INTERRUPCION_MODO_1","881B","madmix1_body.asm",825,"funcion"],["ENTRADA_INTERRUPCION_VBLANK","882A","madmix1_body.asm",850,"sinref"],["GESTIONAR_FRAME","8860","madmix1_body.asm",905,"funcion"],["ULTIMO_ICONO_HUD_CACHEADO","8888","madmix1_body.asm",932,"dato"],["FUNCION_INHABIL","8889","madmix1_body.asm",942,"funcion"],["FIJAR_COLOR_BORDE_VDP","888A","madmix1_body.asm",947,"funcion"],["ZONA_COLOR_VRAM_DESTELLO_A","8891","madmix1_body.asm",959,"interna"],["ZONA_COLOR_VRAM_DESTELLO_B","8891","madmix1_body.asm",960,"interna"],["ZONA_PATRON_VRAM_LABERINTO","8891","madmix1_body.asm",961,"interna"],["BUFFER_LOSETAS_TRABAJO","8891","madmix1_body.asm",962,"interna"],["ACTUALIZAR_VRAM_FRAME","8891","madmix1_body.asm",981,"funcion"],["FILVRM","8931","madmix1_body.asm",1092,"funcion"],["LDIRVM","8942","madmix1_body.asm",1107,"funcion"],["SETVRAM","8954","madmix1_body.asm",1123,"funcion"],["CONSULTAR_COLOR_VDP","8961","madmix1_body.asm",1150,"funcion"],["TABLA_COLORES_VDP","8978","madmix1_body.asm",1167,"dato"],["CALCULAR_DIRECCION_MASCARA_ACTOR","8988","madmix1_body.asm",1185,"funcion"],["RESET_CONTADOR_ACTORES","899B","madmix1_body.asm",1202,"funcion"],["WAIT_VBLANK","89A0","madmix1_body.asm",1210,"funcion"],["GESTIONAR_SCROLL","89AD","madmix1_body.asm",1263,"funcion"],["SCROLL_IZQUIERDA","89D0","madmix1_body.asm",1287,"sinref"],["SCROLL_DERECHA","89EE","madmix1_body.asm",1305,"interna"],["APLICAR_DESPLAZAMIENTO_LATERAL","8A0A","madmix1_body.asm",1322,"interna"],["DIBUJAR_FILA_LOSETAS_BUFFER_VRAM","8A5A","madmix1_body.asm",1380,"funcion"],["SCROLL_ABAJO","8A90","madmix1_body.asm",1415,"interna"],["SCROLL_ARRIBA","8AD9","madmix1_body.asm",1463,"interna"],["SCROLL_LOSETA_BUFFER_VRAM","8B21","madmix1_body.asm",1510,"interna"],["COPIAR_LOSETA_FASE_A","8B5C","madmix1_body.asm",1548,"interna"],["COPIAR_LOSETA_FASE_B","8B85","madmix1_body.asm",1580,"interna"],["MAPEAR_LOSETA_A_GRAFICO","8BC9","madmix1_body.asm",1665,"funcion"],["REDIBUJAR_PANTALLA_COMPLETA_BUFFER_VRAM","8C34","madmix1_body.asm",1754,"funcion"],["LDIRVM_INVERTIDO","8CA3","madmix1_body.asm",1820,"funcion"],["LDIRVM_INVERTIDO_LOOP","8CA9","madmix1_body.asm",1825,"interna"],["MAPEAR_LOSETA_RELATIVA_A_ABSOLUTA","8CB6","madmix1_body.asm",1863,"funcion"],["CONSULTAR_TIPO_LOSETA","8CDA","madmix1_body.asm",1942,"funcion"],["APILAR_PETICION_REDIBUJADO","8CEE","madmix1_body.asm",1958,"funcion"],["VACIAR_COLA_REDIBUJADO","8CFF","madmix1_body.asm",1971,"funcion"],["REDIBUJAR_LOSETA_BUFFER_VRAM","8D1B","madmix1_body.asm",1990,"funcion"],["DIBUJAR_MARCADOR_PUNTOS","8D70","madmix1_body.asm",2070,"funcion"],["DIBUJAR_MARCADOR_PUNTOS_COMMON","8D9F","madmix1_body.asm",2093,"interna"],["DIBUJAR_MARCADOR_PUNTOS_DIGITOS","8DAC","madmix1_body.asm",2107,"funcion"],["DIVISORES_PUNTUACION","8DE3","madmix1_body.asm",2174,"dato"],["BUFFER_DIGITOS_PUNTUACION","8DE9","madmix1_body.asm",2176,"dato"],["TEXTO_BESTIA","8DF0","madmix1_body.asm",2178,"dato"],["TEXTO_DEMO","8DF7","madmix1_body.asm",2180,"dato"],["DIBUJAR_TEXTO_INVERTIDO_VRAM","8DFE","madmix1_body.asm",2191,"funcion"],["DIBUJAR_TEXTO_INVERTIDO_VRAM_LOOP","8DFF","madmix1_body.asm",2193,"interna"],["LEER_ENTRADA","8E3C","madmix1_body.asm",2270,"funcion"],["LEER_TECLADO","8E52","madmix1_body.asm",2292,"interna"],["ESCANEAR_FILAS_TECLADO","8E5A","madmix1_body.asm",2296,"funcion"],["COMPROBAR_PAUSA","8E6E","madmix1_body.asm",2309,"interna"],["COMPROBAR_TECLA_MSX","8E7D","madmix1_body.asm",2319,"funcion"],["TABLA_TECLAS_MSX","8E88","madmix1_body.asm",2335,"dato"],["LEER_JOYSTICK","8E94","madmix1_body.asm",2342,"interna"],["ACUMULADOR_ENTRADA","8EC4","madmix1_body.asm",2391,"dato"],["FLAG_ENTRADA_BLOQUEADA","8EC6","madmix1_body.asm",2394,"dato"],["TABLA_TIPOS_LOSETA","8EC7","madmix1_body.asm",2396,"dato"],["INICIO","8F24","madmix1_body.asm",2433,"interna"],["REINICIAR_PARTIDA","8F54","madmix1_body.asm",2454,"interna"],["PANTALLA_PRESENTACION_NIVEL","8F71","madmix1_body.asm",2470,"interna"],["SIN_VIDA_EXTRA","8FB7","madmix1_body.asm",2543,"interna"],["PAUSA_TEXTO_FASE","8FCE","madmix1_body.asm",2553,"interna"],["PAUSA_TEXTO_FASE_LOOP","8FD1","madmix1_body.asm",2556,"interna"],["PREPARAR_INICIO_NIVEL","8FD4","madmix1_body.asm",2559,"interna"],["BUSCAR_COLUMNA_HUD","900F","madmix1_body.asm",2593,"interna"],["MOSTRAR_READY_Y_ARRANCAR_NIVEL","902A","madmix1_body.asm",2625,"sinref"],["BUCLE_PRINCIPAL_JUEGO","9078","madmix1_body.asm",2664,"interna"],["ESPERA_150_FRAMES","90B1","madmix1_body.asm",2693,"interna"],["VERIFICAR_FIN_NIVEL","90B7","madmix1_body.asm",2706,"interna"],["SIGUIENTE_NIVEL","90D8","madmix1_body.asm",2726,"interna"],["VERIFICAR_ENTRADA","90E4","madmix1_body.asm",2736,"interna"],["PAUSAR_PARTIDA","90EC","madmix1_body.asm",2741,"interna"],["BUCLE_PAUSA","90EF","madmix1_body.asm",2744,"interna"],["IML_POLL_90F2","90F2","madmix1_body.asm",2747,"interna"],["SALTAR_A_BUCLE_PRINCIPAL_JUEGO","90FD","madmix1_body.asm",2753,"interna"],["ACTUALIZAR_LOSETA_BOLA_ESPECIAL","9106","madmix1_body.asm",2763,"funcion"],["DESTELLO_ICONO_COLOR_HUD","9116","madmix1_body.asm",2793,"funcion"],["IH9116_LOOP","911F","madmix1_body.asm",2797,"interna"],["TABLA_POSICIONES_HUD","9136","madmix1_body.asm",2889,"dato"],["TEXTO_FASE","9149","madmix1_body.asm",2893,"dato"],["TABLA_NUMEROS_NIVEL","9153","madmix1_body.asm",2895,"dato"],["TEXTO_VIDA_EXTRA","9173","madmix1_body.asm",2897,"dato"],["TEXTO_EXTRA","918B","madmix1_body.asm",2899,"dato"],["TEXTO_VACIO_1","9192","madmix1_body.asm",2901,"dato"],["TEXTO_READY","919E","madmix1_body.asm",2903,"dato"],["TEXTO_VACIO_2","91AA","madmix1_body.asm",2905,"dato"],["TEXTO_GAME_OVER","91B6","madmix1_body.asm",2907,"dato"],["PTR_TABLA_SPRITES","91C3","madmix1_body.asm",2909,"dato"],["ICONO_VIDA_EXTRA","92C3","madmix1_body.asm",3038,"dato"],["TABLA_FUENTE_CARACTERES","9363","madmix1_body.asm",3056,"dato"],["SPR00_PM_VULN_DER_CERRADA","953B","madmix1_body.asm",3113,"dato"],["SPR01_PM_VULN_DER_BOCA90","95CB","madmix1_body.asm",3115,"dato"],["SPR02_PM_VULN_DER_BOCA95","965B","madmix1_body.asm",3117,"dato"],["SPR03_PM_VULN_ABAJO_CERRADA","96EB","madmix1_body.asm",3119,"dato"],["SPR04_PM_VULN_ABAJO_SEMI","977B","madmix1_body.asm",3121,"dato"],["SPR05_PM_VULN_ABAJO_MAS","980B","madmix1_body.asm",3123,"dato"],["SPR06_PM_VULN_ARRIBA","989B","madmix1_body.asm",3125,"dato"],["SPR07_PM_INV_DER_CERRADA","992B","madmix1_body.asm",3127,"dato"],["SPR08_PM_INV_DER_BOCA90","99BB","madmix1_body.asm",3129,"dato"],["SPR09_PM_INV_DER_BOCA95","9A4B","madmix1_body.asm",3131,"dato"],["SPR10_PM_INV_ABAJO_CERRADA","9ADB","madmix1_body.asm",3133,"dato"],["SPR11_PM_INV_ABAJO_MAS","9B6B","madmix1_body.asm",3135,"dato"],["SPR12_PM_AVION_ARRIBA","9BFB","madmix1_body.asm",3137,"dato"],["SPR13_PM_OBRA_DER","9C8B","madmix1_body.asm",3139,"dato"],["SPR14_PM_OBRA_ABAJO","9D1B","madmix1_body.asm",3141,"dato"],["SPR15_PM_OBRA_ARRIBA","9DAB","madmix1_body.asm",3143,"dato"],["SPR16_PM_HIPO_DER_1","9E3B","madmix1_body.asm",3145,"dato"],["SPR17_PM_HIPO_DER_2","9ECB","madmix1_body.asm",3147,"dato"],["SPR18_PM_HIPO_DER_3","9F5B","madmix1_body.asm",3149,"dato"],["SPR19_PM_HIPO_ABAJO_1","9FEB","madmix1_body.asm",3151,"dato"],["SPR20_PM_HIPO_ABAJO_2","A07B","madmix1_body.asm",3153,"dato"],["SPR21_PM_HIPO_ARRIBA_1","A10B","madmix1_body.asm",3155,"dato"],["SPR22_PM_HIPO_ARRIBA_2","A19B","madmix1_body.asm",3157,"dato"],["SPR23_PM_TANQUE_DER","A22B","madmix1_body.asm",3159,"dato"],["SPR24_PM_HIPO_ABAJO_3","A2BB","madmix1_body.asm",3161,"dato"],["SPR25_PM_HIPO_ARRIBA_3","A34B","madmix1_body.asm",3163,"dato"],["SPR26_DESCONOCIDO_CIRCULOS","A3DB","madmix1_body.asm",3165,"dato"],["SPR27_FANTASMA_DER_1","A46B","madmix1_body.asm",3167,"dato"],["SPR28_FANTASMA_DER_2","A4FB","madmix1_body.asm",3169,"dato"],["SPR29_FANTASMA_ABAJO_1","A58B","madmix1_body.asm",3171,"dato"],["SPR30_FANTASMA_ABAJO_2","A61B","madmix1_body.asm",3173,"dato"],["SPR31_FANTASMA_ARRIBA_1","A6AB","madmix1_body.asm",3175,"dato"],["SPR32_FANTASMA_ARRIBA_2","A73B","madmix1_body.asm",3177,"dato"],["SPR33_FANTASMA_VULN_DER_1","A7CB","madmix1_body.asm",3179,"dato"],["SPR34_FANTASMA_VULN_DER_2","A85B","madmix1_body.asm",3181,"dato"],["SPR35_FANTASMA_VULN_ABAJO_1","A8EB","madmix1_body.asm",3183,"dato"],["SPR36_FANTASMA_VULN_ABAJO_2","A97B","madmix1_body.asm",3185,"dato"],["SPR37_MARIQUITA_ABAJO","AA0B","madmix1_body.asm",3187,"dato"],["SPR38_MARIQUITA_ARRIBA","AA9B","madmix1_body.asm",3189,"dato"],["SPR39_MARIQUITA_DER","AB2B","madmix1_body.asm",3191,"dato"],["SPR40_MUERTE_PM_SEQ0","ABBB","madmix1_body.asm",3193,"dato"],["SPR41_MUERTE_PM_SEQ1","AC4B","madmix1_body.asm",3195,"dato"],["SPR42_MUERTE_PM_SEQ2","ACDB","madmix1_body.asm",3197,"dato"],["SPR43_MUERTE_PM_SEQ3","AD6B","madmix1_body.asm",3199,"dato"],["SPR44_MUERTE_PM_SEQ4","ADFB","madmix1_body.asm",3201,"dato"],["SPR45_REPUGNANTE_DER_1","AE8B","madmix1_body.asm",3203,"dato"],["SPR46_REPUGNANTE_DER_2","AF1B","madmix1_body.asm",3205,"dato"],["SPR47_REPUGNANTE_DER_3","AFAB","madmix1_body.asm",3207,"dato"],["SPR48_REPUGNANTE_ABAJO_1","B03B","madmix1_body.asm",3209,"dato"],["SPR49_REPUGNANTE_ABAJO_2","B0CB","madmix1_body.asm",3211,"dato"],["SPR50_REPUGNANTE_ABAJO_3","B15B","madmix1_body.asm",3213,"dato"],["SPR51_REPUGNANTE_ARRIBA_1","B1EB","madmix1_body.asm",3215,"dato"],["SPR52_REPUGNANTE_ARRIBA_2","B27B","madmix1_body.asm",3217,"dato"],["SPR53_REPUGNANTE_ARRIBA_3","B30B","madmix1_body.asm",3219,"dato"],["SPR54_REPUGNANTE_DESPEINADO","B39B","madmix1_body.asm",3221,"dato"],["SPR55_PUNTOS_400","B42B","madmix1_body.asm",3223,"dato"],["SPR56_PUNTOS_600","B4BB","madmix1_body.asm",3225,"dato"],["SPR57_PM_INV_ABAJO_SEMI","B54B","madmix1_body.asm",3227,"dato"],["SPR58_MUERTE_PM_RED1","B5DB","madmix1_body.asm",3229,"dato"],["SPR59_MUERTE_PM_RED2","B66B","madmix1_body.asm",3231,"dato"],["SPR60_MUERTE_PM_RED3","B6FB","madmix1_body.asm",3233,"dato"],["SPR61_MUERTE_PM_RED4","B78B","madmix1_body.asm",3235,"dato"],["SPR62_FANTASMA_MUERTO","B81B","madmix1_body.asm",3237,"dato"],["SPR63_NULO","B8AB","madmix1_body.asm",3239,"dato"],["GRAFICOS_LOSETAS","B940","madmix1_body.asm",3257,"dato"],["INSTALAR_RECURSO_SONIDO","C4A0","madmix1_body.asm",3394,"funcion"],["INSTALAR_RECURSO_SONIDO_EN_A","C4CC","madmix1_body.asm",3430,"funcion"],["LIMPIAR_E_INSTALAR_RANURA","C4D8","madmix1_body.asm",3437,"interna"],["TICK_REPRODUCTOR_PSG","C4EB","madmix1_body.asm",3462,"funcion"],["PROCESAR_CANAL_PSG","C4F9","madmix1_body.asm",3469,"interna"],["DESPACHAR_COMANDO_PSG","C518","madmix1_body.asm",3485,"interna"],["ARMAR_NOTA","C53A","madmix1_body.asm",3503,"interna"],["CERRAR_NOTA","C552","madmix1_body.asm",3511,"interna"],["APLICAR_ENVOLVENTES_CANAL","C564","madmix1_body.asm",3529,"interna"],["COMBINAR_Y_ESCRIBIR_CANAL","C61D","madmix1_body.asm",3627,"interna"],["APLICAR_ENVOLVENTE_RUIDO","C647","madmix1_body.asm",3662,"sinref"],["REINICIAR_ENVOLVENTE_VOLUMEN","C699","madmix1_body.asm",3716,"funcion"],["REINICIAR_ENVOLVENTE_TONO","C6B1","madmix1_body.asm",3729,"funcion"],["REINICIAR_ENVOLVENTE_RUIDO","C6C9","madmix1_body.asm",3746,"funcion"],["ACTUALIZAR_MEZCLADOR_CANAL","C82E","madmix1_body.asm",3938,"funcion"],["OBTENER_PUNTERO_TRANSPOSICION","C882","madmix1_body.asm",4000,"funcion"],["MULTIPLICAR_8X16","C88D","madmix1_body.asm",4012,"funcion"],["DIVIDIR_16X16","C8A2","madmix1_body.asm",4031,"funcion"],["LEER_PALABRA_INDEXADA","C8BC","madmix1_body.asm",4056,"funcion"],["VOLCAR_REGISTROS_PSG","C8C9","madmix1_body.asm",4075,"funcion"],["TABLA_NOTAS_PSG","C8DE","madmix1_body.asm",4134,"dato"],["TABLA_COMANDOS_PSG","C99E","madmix1_body.asm",4231,"dato"],["AREA_TRABAJO_PSG","C9BC","madmix1_body.asm",4250,"dato"],["TABLA_ENVOLVENTE_RUIDO_PSG","CA53","madmix1_body.asm",4262,"dato"],["FLAGS_ENVOLVENTE_COMPARTIDA_PSG","CA5D","madmix1_body.asm",4264,"dato"],["TABLA_RETORNO_SUBPATRONES_PSG","CA61","madmix1_body.asm",4267,"dato"],["TABLA_TRANSPOSICION_PSG","CA67","madmix1_body.asm",4269,"dato"],["TABLA_INSTRUMENTOS_PSG","CA6A","madmix1_body.asm",4289,"dato"],["TABLA_ENVOLVENTES_PSG","CB5A","madmix1_body.asm",4306,"dato"],["TABLA_SUBPATRONES_PSG","CB72","madmix1_body.asm",4312,"dato"],["SUBPATRON_00_CB9C","CB9C","madmix1_body.asm",4351,"dato"],["SUBPATRON_12_CBB0","CBB0","madmix1_body.asm",4353,"dato"],["SUBPATRON_01_CBD3","CBD3","madmix1_body.asm",4355,"dato"],["SUBPATRON_02_CC1C","CC1C","madmix1_body.asm",4357,"dato"],["SUBPATRON_03_CC45","CC45","madmix1_body.asm",4359,"dato"],["SUBPATRON_04_CC96","CC96","madmix1_body.asm",4361,"dato"],["SUBPATRON_05_CCD0","CCD0","madmix1_body.asm",4363,"dato"],["SUBPATRON_06_CCEF","CCEF","madmix1_body.asm",4365,"dato"],["SUBPATRON_07_CD16","CD16","madmix1_body.asm",4367,"dato"],["SUBPATRON_08_CD3F","CD3F","madmix1_body.asm",4369,"dato"],["SUBPATRON_09_CD76","CD76","madmix1_body.asm",4371,"dato"],["SUBPATRON_10_CD91","CD91","madmix1_body.asm",4373,"dato"],["SUBPATRON_11_CDAB","CDAB","madmix1_body.asm",4375,"dato"],["GUION_MELODIA_CANAL_0","CDCB","madmix1_body.asm",4391,"dato"],["GUION_MELODIA_CANAL_1","CDFF","madmix1_body.asm",4393,"dato"],["GUION_MELODIA_CANAL_2","CE0C","madmix1_body.asm",4395,"dato"],["GUION_EVT09_TRAMPILLA_TRANSICION_CE5A","CE5A","madmix1_body.asm",4397,"dato"],["GUION_EVT04_DISPARO_AVION_CE72","CE72","madmix1_body.asm",4399,"dato"],["GUION_EVT07_PISTA_CE7E","CE7E","madmix1_body.asm",4401,"dato"],["GUION_EVT01_BOLA_CLAVADA_CE8B","CE8B","madmix1_body.asm",4403,"dato"],["GUION_EVT11_BOLA_PODER_CE9C","CE9C","madmix1_body.asm",4405,"dato"],["GUION_EVT06_PLANTA_CLAVADA_CEAC","CEAC","madmix1_body.asm",4407,"dato"],["GUION_EVT00_BOLITA_CEE2","CEE2","madmix1_body.asm",4409,"dato"],["GUION_EVT10_INICIO_NIVEL_CEF0","CEF0","madmix1_body.asm",4411,"dato"],["GUION_EVT08_ARMA_MODO_CF07","CF07","madmix1_body.asm",4414,"dato"],["GUION_EVT13_FIN_MODO_CF27","CF27","madmix1_body.asm",4416,"dato"],["GUION_EVT05_MARIQUITA_REPONE_CF44","CF44","madmix1_body.asm",4418,"dato"],["GUION_EVT02_FLECHA_CF62","CF62","madmix1_body.asm",4420,"dato"],["GUION_EVT03_MODO_ESPECIAL_CF70","CF70","madmix1_body.asm",4422,"dato"],["VACIAR_CANALES_SONIDO","CF8B","madmix1_body.asm",4426,"funcion"],["CUERPO_L13_CFA4","CFA4","madmix1_body.asm",4477,"dato"],["CUERPO_L14_D244","D244","madmix1_body.asm",4494,"dato"],["GUION_DEMO_NIVEL1","D524","madmix1_body.asm",4519,"dato"],["GUION_DEMO_NIVEL2","D564","madmix1_body.asm",4522,"dato"],["GUION_DEMO_SINREF_1","D5C2","madmix1_body.asm",4525,"dato"],["GUION_DEMO_NIVEL4","D5D4","madmix1_body.asm",4528,"dato"],["GUION_DEMO_SINREF_2","D616","madmix1_body.asm",4531,"dato"],["GUION_DEMO_SINREF_3","D61A","madmix1_body.asm",4534,"dato"],["GUION_DEMO_SINREF_4","D632","madmix1_body.asm",4537,"dato"],["GUION_DEMO_NIVEL5","D644","madmix1_body.asm",4540,"dato"],["GUION_DEMO_SINREF_5","D69C","madmix1_body.asm",4543,"dato"],["GUION_DEMO_SINREF_6","D6A2","madmix1_body.asm",4546,"dato"],["TABLA_RLE_MARCO_CARAMELO","D6B6","madmix1_body.asm",4579,"dato"],["REINICIO_SLOT_DD82","DD82","madmix1_body.asm",4590,"sinref"],["CONFIGURAR_Y_LEER_JOYSTICK_PSG","DD8A","madmix1_body.asm",4603,"funcion"],["END_OF_FILE_M1","DDA1","madmix1_body.asm",4632,"interna"],["SCR_BODY_START_PHYS","8807","main.asm",45,"interna"],["END_OF_FILE_SCR_DISK","DD08","main.asm",59,"interna"],["MADMIX0_HEADER_START","FA00","main.asm",80,"dato"],["DIBUJAR_PORTADA","1000","madmix_scr_body.asm",10,"funcion"],["BUCLE_DESCOMPRIMIR_COLOR_PORTADA","1055","madmix_scr_body.asm",66,"interna"],["ESCRIBIR_COLUMNA_COLOR","1080","madmix_scr_body.asm",102,"interna"],["PALETA_COLORES_PORTADA","10AC","madmix_scr_body.asm",137,"dato"],["APAGAR_PANTALLA_VDP","10BC","madmix_scr_body.asm",145,"funcion"],["ENCENDER_PANTALLA_VDP","10C7","madmix_scr_body.asm",156,"funcion"],["PROGRAMAR_APAGADO_PANTALLA","10D8","madmix_scr_body.asm",192,"funcion"],["PROGRAMAR_ENCENDIDO_PANTALLA","10DE","madmix_scr_body.asm",196,"funcion"],["VDP_REGISTRO1_PENDIENTE","10E4","madmix_scr_body.asm",200,"dato"],["TABLA_REGISTROS_SCREEN2_VDP","10E5","madmix_scr_body.asm",219,"dato"],["PORTADA_PATRON","10ED","madmix_scr_body.asm",229,"dato"],["PORTADA_COLOR","28F0","madmix_scr_body.asm",234,"dato"],["REGISTRO_NIVEL","2BF3","madmix_scr_body.asm",259,"dato"],["REGISTRO_NIVEL_CUERPO_PTR","2BF3","madmix_scr_body.asm",260,"dato"],["REGISTRO_NIVEL_CABECERA_PTR","2BF5","madmix_scr_body.asm",262,"dato"],["REGISTRO_NIVEL_PIE_PTR","2BF7","madmix_scr_body.asm",264,"dato"],["REGISTRO_NIVEL_FILAS","2BF9","madmix_scr_body.asm",266,"dato"],["REGISTRO_NIVEL_VIDA_EXTRA_FLAG","2BFA","madmix_scr_body.asm",268,"dato"],["REGISTRO_NIVEL_CONTADOR_PELMAZOIDES","2BFB","madmix_scr_body.asm",270,"dato"],["REGISTRO_NIVEL_CONTADOR_MARICOCOS","2BFC","madmix_scr_body.asm",272,"dato"],["REGISTRO_NIVEL_CONTADOR_REPUGNANTOSOS","2BFD","madmix_scr_body.asm",274,"dato"],["REGISTRO_NIVEL_DURACION_PARPADEO","2BFE","madmix_scr_body.asm",276,"dato"],["REGISTRO_NIVEL_LOSETA_COMODIN","2BFF","madmix_scr_body.asm",278,"dato"],["REGISTRO_NIVEL_FILA_COLUMNA","2C00","madmix_scr_body.asm",280,"dato"],["REGISTRO_NIVEL_POSICION_INICIAL","2C02","madmix_scr_body.asm",282,"dato"],["REGISTRO_NIVEL_POSICION_COMECOCOS","2C02","madmix_scr_body.asm",283,"dato"],["REGISTRO_NIVEL_ICONO_HUD","2C04","madmix_scr_body.asm",285,"dato"],["REGISTRO_NIVEL_OBJETIVO_BOLAS","2C05","madmix_scr_body.asm",287,"dato"],["NIVEL_ACTUAL","2C07","madmix_scr_body.asm",297,"dato"],["CONTADOR_BOLAS_COMIDAS","2C08","madmix_scr_body.asm",299,"dato"],["POSICION_PARPADEO_BOLA","2C0A","madmix_scr_body.asm",301,"dato"],["TEMPORIZADOR_PARPADEO_BOLA","2C0C","madmix_scr_body.asm",303,"dato"],["MODO_ESPECIAL_FLAG","2C0D","madmix_scr_body.asm",305,"dato"],["MODO_ESPECIAL_CUENTA_ATRAS","2C0E","madmix_scr_body.asm",307,"dato"],["MODO_ESPECIAL_ACTIVO","2C0F","madmix_scr_body.asm",309,"dato"],["DIRECCION_DE_MOVIMIENTO","2C10","madmix_scr_body.asm",311,"dato"],["SELECTOR_SPRITE_COMECOCOS","2C11","madmix_scr_body.asm",313,"dato"],["CACHE_TIPO_LOSETA","2C12","madmix_scr_body.asm",315,"dato"],["CACHE_COLUMNA_LOSETA","2C13","madmix_scr_body.asm",317,"dato"],["INDICE_SUBTABLA_DIRECCION","2C14","madmix_scr_body.asm",319,"dato"],["DIRECCION_SIN_PROCESAR","2C15","madmix_scr_body.asm",321,"dato"],["POSICION_ACTUAL_CAMARA","2C16","madmix_scr_body.asm",323,"dato"],["COLOR_GUARDADO","2C18","madmix_scr_body.asm",325,"dato"],["FLAG_NIVEL_RECIEN_CARGADO","2C19","madmix_scr_body.asm",327,"dato"],["DIRECCION_FORZADA","2C1A","madmix_scr_body.asm",329,"dato"],["TEMPORIZADOR_DIRECCION_FORZADA","2C1B","madmix_scr_body.asm",331,"dato"],["FLAG_DIRECCION_NUEVA","2C1C","madmix_scr_body.asm",333,"dato"],["COPIA_FLAG_DIRECCION_NUEVA","2C1D","madmix_scr_body.asm",335,"dato"],["LADO_APERTURA_TRAMPILLA","2C1E","madmix_scr_body.asm",337,"dato"],["PUNTO_REFERENCIA_CAMARA","2C1F","madmix_scr_body.asm",339,"dato"],["SEMILLA_ALEATORIA","2C22","madmix_scr_body.asm",342,"dato"],["COLOR_ACTUAL","2C24","madmix_scr_body.asm",344,"dato"],["PARAMETRO_DESPLAZAMIENTO_SCROLL","2C25","madmix_scr_body.asm",346,"dato"],["VIDAS_RESTANTES","2C27","madmix_scr_body.asm",348,"dato"],["PUNTUACION","2C29","madmix_scr_body.asm",351,"dato"],["FLAG_VIDA_EXTRA","2C2B","madmix_scr_body.asm",353,"dato"],["CONTADOR_VUELTAS_NIVELES","2C2C","madmix_scr_body.asm",355,"dato"],["MODO_ESPECIAL","2C2D","madmix_scr_body.asm",357,"dato"],["TABLA_PISTA_TANQUE_AVION","2C2E","madmix_scr_body.asm",359,"interna"],["ENLACE_MOTOR_MOVIMIENTO_COLISION","2C36","madmix_scr_body.asm",371,"funcion"],["TABLA_CLASE_ALINEAMIENTO","2C38","madmix_scr_body.asm",383,"dato"],["PUNTEROS_SUBTABLA_DIRECCION","2C48","madmix_scr_body.asm",386,"dato"],["SUBTABLA_DIRECCION_A","2C50","madmix_scr_body.asm",388,"dato"],["SUBTABLA_DIRECCION_B","2C64","madmix_scr_body.asm",390,"dato"],["SUBTABLA_DIRECCION_C","2C78","madmix_scr_body.asm",392,"dato"],["SUBTABLA_DIRECCION_D","2C8C","madmix_scr_body.asm",394,"dato"],["MOTOR_MOVIMIENTO_COLISION","2CA0","madmix_scr_body.asm",418,"interna"],["SALTAR_A_LEER_ENTRADA","2CAD","madmix_scr_body.asm",426,"interna"],["PROCESAR_DIRECCION","2CB0","madmix_scr_body.asm",428,"interna"],["LIMPIAR_FLAG_DIRECCION","2CC6","madmix_scr_body.asm",441,"interna"],["COPIAR_FLAG_DIRECCION","2CC8","madmix_scr_body.asm",443,"interna"],["CALCULAR_MASCARA_ALINEAMIENTO","2CDD","madmix_scr_body.asm",457,"interna"],["COMPROBAR_ALINEAMIENTO_Y","2CE7","madmix_scr_body.asm",464,"interna"],["APLICAR_MASCARA_ALINEAMIENTO","2CEE","madmix_scr_body.asm",471,"interna"],["FIJAR_DIRECCION_FINAL","2CF3","madmix_scr_body.asm",477,"interna"],["CALCULAR_INDICE_TIPO_LOSETA","2D04","madmix_scr_body.asm",486,"interna"],["OBTENER_MANEJADOR_LOSETA","2D0F","madmix_scr_body.asm",495,"interna"],["TICK_MODO_ESPECIAL","2D37","madmix_scr_body.asm",530,"interna"],["PARPADEO_COLOR_BOLA_PODER","2D52","madmix_scr_body.asm",545,"interna"],["FIN_MODO_BOLA_PODER","2D57","madmix_scr_body.asm",548,"interna"],["TICK_MODO_HIPOPOTAMO","2D61","madmix_scr_body.asm",559,"interna"],["PARPADEO_ICONO_HIPOPOTAMO","2D79","madmix_scr_body.asm",572,"interna"],["FIN_MODO_HIPOPOTAMO","2D81","madmix_scr_body.asm",576,"interna"],["OBTENER_SUBTABLA_DIRECCION","2D8E","madmix_scr_body.asm",589,"interna"],["BUCLE_SUBTABLA_DIRECCION","2D9C","madmix_scr_body.asm",616,"interna"],["GUARDAR_SELECTOR_SPRITE_COMECOCOS","2DB9","madmix_scr_body.asm",636,"interna"],["PREPARAR_SCROLL","2DBC","madmix_scr_body.asm",644,"interna"],["PREPARAR_LLAMADA_SCROLL","2DC6","madmix_scr_body.asm",652,"interna"],["DISPARAR_SCROLL_Y_ITEMS","2DD1","madmix_scr_body.asm",659,"interna"],["BUCLE_PISTA_TANQUE_AVION","2DFA","madmix_scr_body.asm",693,"interna"],["PISTA_FORMATO_B","2E11","madmix_scr_body.asm",709,"interna"],["PISTA_FORMATO_B_POS","2E21","madmix_scr_body.asm",719,"interna"],["PISTA_FILA_FIJA","2E2C","madmix_scr_body.asm",726,"interna"],["DIBUJAR_PISTA","2E2F","madmix_scr_body.asm",729,"interna"],["SIGUIENTE_PISTA","2E36","madmix_scr_body.asm",734,"interna"],["TABLA_MANEJADORES_LOSETA","2E3C","madmix_scr_body.asm",752,"dato"],["CONSULTAR_PROXIMA_LOSETA_EN_ESTA_DIRECCION","2E64","madmix_scr_body.asm",771,"funcion"],["COMPROBAR_LOSETA_IZQUIERDA","2E72","madmix_scr_body.asm",780,"interna"],["COMPROBAR_LOSETA_ABAJO","2E78","madmix_scr_body.asm",785,"interna"],["COMPROBAR_LOSETA_ARRIBA","2E81","madmix_scr_body.asm",792,"interna"],["IDENTIFICAR_PROXIMA_LOSETA","2E85","madmix_scr_body.asm",796,"interna"],["ENMASCARAR_TIPO_LOSETA","2E9B","madmix_scr_body.asm",806,"interna"],["DIBUJAR_CAMBIO_LOSETA","2E9F","madmix_scr_body.asm",813,"funcion"],["DIBUJAR_CAMBIO_LOSETA_CHECK_COL","2EAC","madmix_scr_body.asm",823,"interna"],["DIBUJAR_CAMBIO_LOSETA_REDRAW","2EB1","madmix_scr_body.asm",827,"interna"],["HNDLR_SUELO_NORMAL","2EB7","madmix_scr_body.asm",861,"interna"],["HNDLR_SUELO_NORMAL_CONT","2EBD","madmix_scr_body.asm",865,"interna"],["HNDLR_BOLITA_NORMAL","2EC7","madmix_scr_body.asm",881,"interna"],["HNDLR_BOLITA_NORMAL_EXIT","2EF7","madmix_scr_body.asm",908,"interna"],["HNDLR_BOLITA_CLAVADA","2EFC","madmix_scr_body.asm",923,"interna"],["HNDLR_BOLITA_CLAVADA_EXIT","2F14","madmix_scr_body.asm",937,"interna"],["HNDLR_AUTOCOCO_ARRIBA","2F18","madmix_scr_body.asm",952,"interna"],["HNDLR_AUTOCOCO_ARRIBA_EXIT","2F4C","madmix_scr_body.asm",979,"interna"],["HNDLR_AUTOCOCO_ABAJO","2F50","madmix_scr_body.asm",984,"interna"],["HNDLR_AUTOCOCO_ABAJO_EXIT","2F84","madmix_scr_body.asm",1011,"interna"],["HNDLR_AUTOCOCO_IZQUIERDA","2F88","madmix_scr_body.asm",1016,"interna"],["HNDLR_AUTOCOCO_IZQUIERDA_EXIT","2FBC","madmix_scr_body.asm",1043,"interna"],["HNDLR_AUTOCOCO_DERECHA","2FC0","madmix_scr_body.asm",1048,"interna"],["HNDLR_AUTOCOCO_DERECHA_EXIT","2FF4","madmix_scr_body.asm",1075,"interna"],["HNDLR_PISTA_COCOTANQUE","2FF8","madmix_scr_body.asm",1089,"interna"],["HNDLR_PISTA_COCOTANQUE_MODE_CHECK","3005","madmix_scr_body.asm",1098,"interna"],["HNDLR_PISTA_COCOTANQUE_ACTIVATE","300D","madmix_scr_body.asm",1103,"interna"],["HNDLR_PISTA_COCOTANQUE_TAIL","302B","madmix_scr_body.asm",1115,"interna"],["REGISTRAR_PISTA_TANQUE_AVION","3043","madmix_scr_body.asm",1133,"funcion"],["BUSCAR_HUECO_PISTA","3048","madmix_scr_body.asm",1136,"interna"],["FIJAR_PISTA","3051","madmix_scr_body.asm",1144,"interna"],["GUARDAR_PISTA","305F","madmix_scr_body.asm",1152,"interna"],["HNDLR_PISTA_COCONAVE","3067","madmix_scr_body.asm",1172,"interna"],["HNDLR_PISTA_COCONAVE_ACTIVATE","3070","madmix_scr_body.asm",1177,"interna"],["HNDLR_PISTA_COCONAVE_LOOP","309B","madmix_scr_body.asm",1195,"interna"],["MODO_ESPECIAL_EXIT_TAIL","30D5","madmix_scr_body.asm",1234,"interna"],["MODO_ESPECIAL_EXIT_REENTER","30EB","madmix_scr_body.asm",1249,"interna"],["HNDLR_ITEM_SUELO","30F3","madmix_scr_body.asm",1262,"interna"],["HNDLR_ITEM_SUELO_EXIT","3117","madmix_scr_body.asm",1283,"interna"],["HNDLR_BOLA_PODER","311B","madmix_scr_body.asm",1297,"interna"],["HNDLR_BOLA_PODER_EXIT","3159","madmix_scr_body.asm",1325,"interna"],["HNDLR_HIPODOSO","315D","madmix_scr_body.asm",1336,"interna"],["HNDLR_HIPODOSO_EXIT","318A","madmix_scr_body.asm",1356,"interna"],["HNDLR_EXCAVATOFONO","318E","madmix_scr_body.asm",1366,"interna"],["HNDLR_EXCAVATOFONO_EXIT","31B3","madmix_scr_body.asm",1384,"interna"],["HNDLR_SUELO_SIN_BOLA","31B7","madmix_scr_body.asm",1399,"interna"],["HNDLR_SUELO_SIN_BOLA_PLANE_CHECK","31D7","madmix_scr_body.asm",1414,"interna"],["HNDLR_SUELO_SIN_BOLA_PLANE_LOOP","31EA","madmix_scr_body.asm",1425,"interna"],["TEMPORIZADOR_DIRECCION_FORZADA_TICK","323A","madmix_scr_body.asm",1474,"interna"],["LIMPIAR_DIRECCION_FORZADA","3245","madmix_scr_body.asm",1482,"interna"],["FIN_TICK_DIRECCION_FORZADA","324C","madmix_scr_body.asm",1486,"interna"],["HNDLR_TRAMPILLA_ABIERTA_DERECHA","3252","madmix_scr_body.asm",1506,"interna"],["FIN_ANIMACION_TRAMPILLA","3295","madmix_scr_body.asm",1541,"interna"],["HNDLR_TRAMPILLA_ABIERTA_IZQUIERDA","3299","madmix_scr_body.asm",1545,"interna"],["HNDLR_TRAMPILLA_CERRADA","32E2","madmix_scr_body.asm",1583,"interna"],["HNDLR_TRAMPILLA_CERRADA_B","332A","madmix_scr_body.asm",1624,"interna"],["CUERPO_L01","335C","madmix_scr_body.asm",1657,"dato"],["CUERPO_L2","361C","madmix_scr_body.asm",1659,"dato"],["CUERPO_L3","37FC","madmix_scr_body.asm",1661,"dato"],["CUERPO_L9","39FC","madmix_scr_body.asm",1663,"dato"],["CUERPO_L5","3C3C","madmix_scr_body.asm",1665,"dato"],["CUERPO_L6","3E3C","madmix_scr_body.asm",1667,"dato"],["CUERPO_L4","407C","madmix_scr_body.asm",1669,"dato"],["CUERPO_L8","425C","madmix_scr_body.asm",1671,"dato"],["CUERPO_L7","443C","madmix_scr_body.asm",1673,"dato"],["CUERPO_L10","469C","madmix_scr_body.asm",1675,"dato"],["CUERPO_L15","48BC","madmix_scr_body.asm",1687,"dato"],["CABECERA_4AFC","4AFC","madmix_scr_body.asm",1690,"dato"],["CABECERA_4B5C","4B5C","madmix_scr_body.asm",1692,"dato"],["CUERPO_L11","4BBC","madmix_scr_body.asm",1694,"dato"],["CUERPO_L12","4E5C","madmix_scr_body.asm",1696,"dato"],["CABECERA_50BC","50BC","madmix_scr_body.asm",1698,"dato"],["TABLA_ITEMS_PELMAZOIDE","511C","madmix_scr_body.asm",1736,"dato"],["TABLA_ANIMACION_PELMAZOIDE","5154","madmix_scr_body.asm",1812,"dato"],["TABLA_ELECCION_DIRECCION","517E","madmix_scr_body.asm",1823,"dato"],["HNDLR_PELMAZOIDE","51FE","madmix_scr_body.asm",1848,"funcion"],["BUCLE_PELMAZOIDE","521C","madmix_scr_body.asm",1864,"interna"],["AJUSTAR_SPRITE_MODO_ESPECIAL","5242","madmix_scr_body.asm",1886,"interna"],["DIBUJAR_PELMAZOIDE","5248","madmix_scr_body.asm",1891,"interna"],["SIGUIENTE_PELMAZOIDE","526D","madmix_scr_body.asm",1920,"interna"],["FIN_PELMAZOIDE","5277","madmix_scr_body.asm",1926,"interna"],["MOTOR_MOVIMIENTO_ITEM","5278","madmix_scr_body.asm",1936,"funcion"],["CALCULAR_POSICION_VRAM_ITEM","53A2","madmix_scr_body.asm",2141,"funcion"],["CONSULTAR_LOSETA_LIBRE_DIRECCION","5414","madmix_scr_body.asm",2219,"funcion"],["MAPEAR_COORDENADA_A_DIRECCION","545F","madmix_scr_body.asm",2295,"funcion"],["GENERAR_ALEATORIO","5478","madmix_scr_body.asm",2328,"funcion"],["TABLA_ANIMACION_MARICOCO","5487","madmix_scr_body.asm",2348,"dato"],["TABLA_ITEMS_MARICOCO","549B","madmix_scr_body.asm",2355,"dato"],["HNDLR_MARICOCO","54A9","madmix_scr_body.asm",2379,"funcion"],["BUCLE_MARICOCO","54B3","madmix_scr_body.asm",2385,"interna"],["SIGUIENTE_MARICOCO","554B","madmix_scr_body.asm",2481,"interna"],["ESTADO_REGENERACION_MARICOCO","5556","madmix_scr_body.asm",2489,"dato"],["VRAM_REGENERACION_MARICOCO","5557","madmix_scr_body.asm",2491,"dato"],["MAPEAR_COORDENADA_A_DIRECCION_LOCAL","5559","madmix_scr_body.asm",2501,"funcion"],["TABLA_ANIMACION_REGPUNANTOSO","5574","madmix_scr_body.asm",2531,"dato"],["TABLA_ITEMS_REGPUNANTOSO","5588","madmix_scr_body.asm",2538,"dato"],["HNDLR_REGPUNANTOSO","55C0","madmix_scr_body.asm",2565,"funcion"],["BUCLE_REGPUNANTOSO","55CA","madmix_scr_body.asm",2571,"interna"],["SIGUIENTE_REGPUNANTOSO","565C","madmix_scr_body.asm",2663,"interna"],["ESTADO_PLANTADO_REGPUNANTOSO","5667","madmix_scr_body.asm",2671,"dato"],["VRAM_PLANTADO_REGPUNANTOSO","5668","madmix_scr_body.asm",2673,"dato"],["AVISAR_PROXIMIDAD_PISTA","566A","madmix_scr_body.asm",2681,"funcion"],["ARMAR_AVISO_DESTELLO","56CA","madmix_scr_body.asm",2772,"funcion"],["ITEM_TABLE_EFECTOS_DESTELLO","56F5","madmix_scr_body.asm",2846,"dato"],["EFECTOS_DESTELLO_SEQ_A","56F6","madmix_scr_body.asm",2848,"dato"],["EFECTOS_DESTELLO_SEQ_A_TAIL","570C","madmix_scr_body.asm",2850,"dato"],["EFECTOS_DESTELLO_SEQ_B_ENTRY","571C","madmix_scr_body.asm",2853,"dato"],["EFECTOS_DESTELLO_SEQ_B_MAIN","5722","madmix_scr_body.asm",2857,"dato"],["EFECTOS_DESTELLO_SEQ_B_TAIL","5742","madmix_scr_body.asm",2860,"dato"],["EFECTOS_DESTELLO_SEQ_C","574A","madmix_scr_body.asm",2863,"dato"],["EFECTOS_DESTELLO_SEQ_C_TAIL","5762","madmix_scr_body.asm",2865,"dato"],["TABLA_RANURAS_AVISO","5773","madmix_scr_body.asm",2875,"dato"],["ACTUALIZAR_DESTELLO_ITEMS","5782","madmix_scr_body.asm",2883,"funcion"],["ACTIVAR_EFECTO_ITEM","57D8","madmix_scr_body.asm",2945,"funcion"],["INICIALIZAR_ITEMS_NIVEL","5885","madmix_scr_body.asm",3072,"funcion"],["CONTINUAR_RESET_EXCAVATOFONO","58EC","madmix_scr_body.asm",3117,"interna"],["INICIALIZAR_PARCIAL_ITEMS_NIVEL","58F8","madmix_scr_body.asm",3122,"funcion"],["CARGAR_NIVEL","5904","madmix_scr_body.asm",3146,"funcion"],["FIN_CARGADOR_NIVEL","59A9","madmix_scr_body.asm",3244,"dato"],["TABLA_NIVELES","59A9","madmix_scr_body.asm",3250,"dato"],["GESTIONAR_INTRODUCCION","5AE9","madmix_scr_body.asm",3474,"interna"],["MOSTRAR_MENU_PRINCIPAL","5B56","madmix_scr_body.asm",3543,"funcion"],["REINICIAR_TIMEOUT_MENU","5B62","madmix_scr_body.asm",3554,"interna"],["ACTUALIZAR_MENU_PRINCIPAL","5B65","madmix_scr_body.asm",3556,"interna"],["RELLENAR_SOLIDO_AREA_JUEGO_BUFFER_VRAM","5B8C","madmix_scr_body.asm",3588,"funcion"],["DESPACHAR_ACCION_MENU","5BA7","madmix_scr_body.asm",3610,"interna"],["GESTIONAR_TIMEOUT_MENU","5BBB","madmix_scr_body.asm",3619,"interna"],["DIBUJAR_MENU_PRINCIPAL","5BCC","madmix_scr_body.asm",3640,"funcion"],["TEXTO_MENU_PRINCIPAL","5BF9","madmix_scr_body.asm",3663,"dato"],["TEXTO_OPCION_TECLADO","5BF9","madmix_scr_body.asm",3664,"dato"],["TEXTO_OPCION_JOYSTICK","5C06","madmix_scr_body.asm",3666,"dato"],["TEXTO_OPCION_REDEFINIR_TECLAS","5C14","madmix_scr_body.asm",3668,"dato"],["TEXTO_OPCION_DEMO","5C27","madmix_scr_body.asm",3670,"dato"],["TEXTO_OPCION_JUGAR","5C2F","madmix_scr_body.asm",3672,"dato"],["SELECCIONAR_OPCION_REDEFINIR_TECLAS","5C3A","madmix_scr_body.asm",3679,"interna"],["SELECCIONAR_OPCION_DEMO","5C53","madmix_scr_body.asm",3690,"interna"],["SELECCIONAR_OPCION_TECLADO","5C60","madmix_scr_body.asm",3696,"interna"],["SELECCIONAR_OPCION_JOYSTICK","5C70","madmix_scr_body.asm",3704,"interna"],["LEER_TECLAS_MENU_PRINCIPAL","5C80","madmix_scr_body.asm",3722,"funcion"],["TABLA_TECLAS_MENU_PRINCIPAL","5C93","madmix_scr_body.asm",3743,"dato"],["ACUMULADOR_TECLAS_MENU","5C9F","madmix_scr_body.asm",3758,"interna"],["LIMPIAR_VRAM_AREA_JUEGO","5CA0","madmix_scr_body.asm",3760,"funcion"],["ESCRIBIR_PATRON_VRAM","5CAF","madmix_scr_body.asm",3770,"funcion"],["DIBUJAR_TEXTO_VRAM","5CD1","madmix_scr_body.asm",3801,"funcion"],["ESPERAR_TECLA_PULSADA","5CFE","madmix_scr_body.asm",3842,"interna"],["ESPERAR_TECLA_SOLTADA","5D04","madmix_scr_body.asm",3847,"funcion"],["COMPROBAR_PULSACION","5D0A","madmix_scr_body.asm",3855,"funcion"],["DIBUJAR_MENU_REDEFINIR_TECLAS","5D1F","madmix_scr_body.asm",3875,"funcion"],["DIBUJAR_NOMBRE_TECLA_ASIGNADA","5DF1","madmix_scr_body.asm",3974,"funcion"],["TEXTO_MENU_REDEFINIR_TECLAS","5E03","madmix_scr_body.asm",3995,"dato"],["TEXTO_TECLA_PAUSA","5E03","madmix_scr_body.asm",3996,"dato"],["TEXTO_TECLA_FUEGO","5E0A","madmix_scr_body.asm",3998,"dato"],["TEXTO_TECLA_ARRIBA","5E11","madmix_scr_body.asm",4000,"dato"],["TEXTO_TECLA_ABAJO","5E19","madmix_scr_body.asm",4002,"dato"],["TEXTO_TECLA_IZQUIERDA","5E20","madmix_scr_body.asm",4004,"dato"],["TEXTO_TECLA_DERECHA","5E2B","madmix_scr_body.asm",4006,"dato"],["TEXTO_TECLA_ESPACIO_1","5E34","madmix_scr_body.asm",4008,"dato"],["TEXTO_TECLA_SSHIFT","5E3D","madmix_scr_body.asm",4010,"dato"],["TEXTO_TECLA_CSHIFT","5E46","madmix_scr_body.asm",4012,"dato"],["TEXTO_TECLA_ENTER_1","5E4F","madmix_scr_body.asm",4014,"dato"],["TABLA_NOMBRES_TECLA_ASIGNABLE","5E56","madmix_scr_body.asm",4016,"dato"],["TEXTO_TECLA_SHIFT","5E59","madmix_scr_body.asm",4018,"dato"],["TEXTO_TECLA_CTRL","5E60","madmix_scr_body.asm",4020,"dato"],["TEXTO_TECLA_GRAPH","5E66","madmix_scr_body.asm",4022,"dato"],["TEXTO_TECLA_CAPS","5E6D","madmix_scr_body.asm",4024,"dato"],["TEXTO_TECLA_CODE","5E73","madmix_scr_body.asm",4026,"dato"],["TEXTO_TECLA_F1","5E76","madmix_scr_body.asm",4028,"dato"],["TEXTO_TECLA_F2","5E7B","madmix_scr_body.asm",4030,"dato"],["TEXTO_TECLA_F3","5E80","madmix_scr_body.asm",4032,"dato"],["TEXTO_TECLA_F4","5E85","madmix_scr_body.asm",4034,"dato"],["TEXTO_TECLA_F5","5E8A","madmix_scr_body.asm",4036,"dato"],["TEXTO_TECLA_ESCAPE","5E8F","madmix_scr_body.asm",4038,"dato"],["TEXTO_TECLA_TAB","5E97","madmix_scr_body.asm",4040,"dato"],["TEXTO_TECLA_STOP","5E9C","madmix_scr_body.asm",4042,"dato"],["TEXTO_TECLA_BS","5EA2","madmix_scr_body.asm",4044,"dato"],["TEXTO_TECLA_SELECT","5EA6","madmix_scr_body.asm",4046,"dato"],["TEXTO_TECLA_ENTER_2","5EAE","madmix_scr_body.asm",4048,"dato"],["TEXTO_TECLA_ESPACIO_2","5EB5","madmix_scr_body.asm",4050,"dato"],["TEXTO_TECLA_HOME","5EBE","madmix_scr_body.asm",4052,"dato"],["TEXTO_TECLA_INS","5EC4","madmix_scr_body.asm",4054,"dato"],["TEXTO_TECLA_DEL","5EC9","madmix_scr_body.asm",4056,"dato"],["TEXTO_TECLA_EXCLAMACION","5ECE","madmix_scr_body.asm",4058,"dato"],["TEXTO_TECLA_COMILLAS","5ED1","madmix_scr_body.asm",4060,"dato"],["TEXTO_TECLA_ALMOHADILLA","5ED4","madmix_scr_body.asm",4062,"dato"],["TEXTO_TECLA_DOLAR","5ED7","madmix_scr_body.asm",4064,"dato"],["REINICIAR_TECLAS_USADAS","5EDA","madmix_scr_body.asm",4078,"funcion"],["ESPERAR_TECLA_NUEVA","5EEB","madmix_scr_body.asm",4095,"funcion"],["TABLA_CODIGOS_TECLA","5F2C","madmix_scr_body.asm",4151,"dato"],["PUNTERO_ESCRITURA_TECLA","5F74","madmix_scr_body.asm",4169,"dato"],["CODIGO_TECLA_ACTUAL","5F76","madmix_scr_body.asm",4171,"dato"],["DIBUJAR_CREDITOS","5F77","madmix_scr_body.asm",4178,"funcion"],["TEXTO_CREDITOS_PROGRAMADO_POR","5FC2","madmix_scr_body.asm",4221,"dato"],["TEXTO_CREDITOS_NOMBRE_PROGRAMADOR","5FD4","madmix_scr_body.asm",4223,"dato"],["TEXTO_CREDITOS_GRAFICOS_POR","5FE8","madmix_scr_body.asm",4225,"dato"],["TEXTO_CREDITOS_NOMBRE_GRAFICOS","5FFA","madmix_scr_body.asm",4227,"dato"],["TEXTO_CREDITOS_MUSICA_POR","600C","madmix_scr_body.asm",4229,"dato"],["TEXTO_CREDITOS_NOMBRE_MUSICA","6019","madmix_scr_body.asm",4231,"dato"],["TEXTO_CREDITOS_TOPOSHOW","6024","madmix_scr_body.asm",4233,"dato"],["TEXTO_CREDITOS_TITULO","6035","madmix_scr_body.asm",4244,"dato"],["GESTIONAR_CICLO_NIVELES","6045","madmix_scr_body.asm",4259,"funcion"],["INDICE_CICLO_NIVELES","60CA","madmix_scr_body.asm",4330,"dato"],["PUNTERO_GUION_DEMO","60CB","madmix_scr_body.asm",4332,"dato"],["CONTADOR_FRAME_GUION_DEMO","60CD","madmix_scr_body.asm",4334,"dato"],["TABLA_CICLO_NIVELES","60D0","madmix_scr_body.asm",4345,"dato"],["DESPACHAR_EFECTO_SONIDO","60DC","madmix_scr_body.asm",4363,"funcion"],["TABLA_RECURSOS_SONIDO_EVENTO","60FE","madmix_scr_body.asm",4394,"dato"],["EVENTO_SONIDO_PENDIENTE","6128","madmix_scr_body.asm",4402,"dato"],["TABLA_COLOR_MARCO_CARAMELO","6129","madmix_scr_body.asm",4409,"dato"],["DIBUJAR_MARCO_CARAMELO_VRAM","6429","madmix_scr_body.asm",4422,"funcion"],["APLICAR_COLOR_PANTALLA","6454","madmix_scr_body.asm",4460,"funcion"],["APLICAR_COLOR_DESDE_TABLA","6457","madmix_scr_body.asm",4462,"interna"],["APLICAR_COLOR_CICLO_NIVELES","647C","madmix_scr_body.asm",4492,"funcion"],["OBTENER_COLOR_VDP","6484","madmix_scr_body.asm",4506,"funcion"],["REUBICADOR_REINICIO_JUEGO","64AB","madmix_scr_body.asm",4545,"sinref"],["FIN_FICHERO_SCR","6500","madmix_scr_body.asm",4569,"sinref"],["RELOCATOR","FA07","madmix0_body.asm",31,"sinref"],["JUMP_TO_ENGINE","FA31","madmix0_body.asm",54,"sinref"],["END_OF_FILE_M0","FA3A","madmix0_body.asm",60,"interna"],["DETECTAR_SLOTS_RAM","C350","test_bin_body.asm",33,"funcion"],["SLOT_PRIMARIO_A","C395","test_bin_body.asm",69,"interna"],["EXPTBL_COMPLEMENTO_A","C395","test_bin_body.asm",70,"interna"],["SLOT_PRIMARIO_B","C395","test_bin_body.asm",71,"interna"],["EXPTBL_COMPLEMENTO_B","C395","test_bin_body.asm",72,"interna"],["GUARDAR_CONFIG_SLOT_A","C395","test_bin_body.asm",74,"funcion"],["GUARDAR_CONFIG_SLOT_B","C39A","test_bin_body.asm",77,"funcion"],["GUARDAR_SLOT_COMUN","C39D","test_bin_body.asm",79,"interna"],["DETECTAR_RAM_PAGINA","C3A7","test_bin_body.asm",89,"funcion"],["ENASLT_EXTENDIDO","C3D2","test_bin_body.asm",136,"interna"],["ENASLT_EXTENDIDO_GESTIONAR_SUBSLOT","C3DF","test_bin_body.asm",146,"sinref"],["ENASLT_EXTENDIDO_MASCARA_SLOT_PRIMARIO","C3F2","test_bin_body.asm",166,"sinref"],["ENASLT_EXTENDIDO_MASCARA_SUBSLOT","C416","test_bin_body.asm",203,"sinref"],["END_OF_FILE_TESTBIN","C44D","test_bin_body.asm",251,"interna"],["ORQUESTADOR_CARGA_CINTA","DDA0","load_bin_body.asm",27,"interna"],["LEER_CINTA","DDCC","load_bin_body.asm",52,"funcion"],["AYUDANTE_MOTOR_CINTA_A","DE6A","load_bin_body.asm",174,"sinref"],["AYUDANTE_MOTOR_CINTA_B","DE75","load_bin_body.asm",183,"sinref"],["APLICAR_SLOT_ORIGINAL_PAGINA_0","DE84","load_bin_body.asm",201,"sinref"],["APLICAR_SLOT_ORIGINAL_PAGINA_1","DE89","load_bin_body.asm",204,"sinref"],["APLICAR_SLOT_ORIGINAL_PAGINA_2","DE8E","load_bin_body.asm",207,"sinref"],["APLICAR_SLOT_PAGINA_0","DE93","load_bin_body.asm",210,"funcion"],["APLICAR_SLOT_PAGINA_1","DE98","load_bin_body.asm",213,"funcion"],["APLICAR_SLOT_PAGINA_2","DE9D","load_bin_body.asm",216,"funcion"],["CONFIGURAR_MASCARA_PAGINA_0","DEA2","load_bin_body.asm",219,"interna"],["CONFIGURAR_MASCARA_PAGINA_1","DEA8","load_bin_body.asm",225,"interna"],["CONFIGURAR_MASCARA_PAGINA_2","DEAE","load_bin_body.asm",229,"interna"],["APLICAR_CAMBIO_SLOT","DEB2","load_bin_body.asm",232,"interna"],["END_OF_FILE_LOADBIN","DECB","load_bin_body.asm",254,"interna"],["VRAM_TABLA_COLOR","9470","logotopo_cm_body.asm",39,"interna"],["VRAM_COLOR_ZONA_TOPO","9470","logotopo_cm_body.asm",40,"interna"],["VRAM_COLOR_ZONA_SOFT","9470","logotopo_cm_body.asm",41,"interna"],["ENTRADA_LOGOTOPO","9470","logotopo_cm_body.asm",43,"interna"],["ANIMAR_PUNTO_LUZ_SOFT","9473","logotopo_cm_body.asm",55,"funcion"],["ESCRIBIR_8_BYTES_VRAM","94A6","logotopo_cm_body.asm",93,"funcion"],["DIBUJAR_FORMA_ANIMADA","94B1","logotopo_cm_body.asm",119,"funcion"],["DIBUJAR_SOFT_ROTANDO","950B","logotopo_cm_body.asm",174,"funcion"],["DIBUJAR_T_TOPO","9532","logotopo_cm_body.asm",198,"funcion"],["DIBUJAR_P_TOPO_ANIMADA","954D","logotopo_cm_body.asm",213,"funcion"],["DIBUJAR_O1_TOPO","956B","logotopo_cm_body.asm",231,"funcion"],["DIBUJAR_O2_TOPO_ANIMADA","958E","logotopo_cm_body.asm",250,"funcion"],["DIBUJAR_ESTRELLA_ANIMADA","95AE","logotopo_cm_body.asm",269,"funcion"],["DIBUJAR_LOGO_TOPOSOFT","95D1","logotopo_cm_body.asm",304,"interna"],["LIMPIAR_TABLA_COLOR_VRAM","9602","logotopo_cm_body.asm",329,"funcion"],["RELLENAR_COLOR_TOPO","9614","logotopo_cm_body.asm",350,"funcion"],["ANIMAR_COLOR_TOPO","962B","logotopo_cm_body.asm",375,"funcion"],["ESCRIBIR_8_BYTES_VRAM_C","967E","logotopo_cm_body.asm",434,"funcion"],["LIMPIAR_TABLA_PATRONES_VRAM","9688","logotopo_cm_body.asm",450,"funcion"],["TABLA_PUNTEROS_FORMAS","9694","logotopo_cm_body.asm",464,"dato"],["TABLA_ANIMACION_SOFT","96B2","logotopo_cm_body.asm",478,"dato"],["TABLA_TRAZO_O2_TOPO","96CC","logotopo_cm_body.asm",492,"dato"],["TABLA_ANIMACION_ESTRELLA","96E9","logotopo_cm_body.asm",501,"dato"],["VARIABLES_TRABAJO_FORMA","96F2","logotopo_cm_body.asm",512,"dato"],["TABLA_DELTA_POSICION","96F8","logotopo_cm_body.asm",525,"dato"],["TABLA_FORMAS","9728","logotopo_cm_body.asm",542,"dato"],["FORMA_SOFT_1","9728","logotopo_cm_body.asm",543,"dato"],["FORMA_SOFT_2","97AA","logotopo_cm_body.asm",546,"dato"],["FORMA_SOFT_3","982C","logotopo_cm_body.asm",549,"dato"],["FORMA_SOFT_4","98AE","logotopo_cm_body.asm",552,"dato"],["FORMA_SOFT_5","9930","logotopo_cm_body.asm",555,"dato"],["FORMA_SOFT_6","99B2","logotopo_cm_body.asm",558,"dato"],["FORMA_SOFT_7","9A34","logotopo_cm_body.asm",561,"dato"],["FORMA_T_TOPO","9AB6","logotopo_cm_body.asm",564,"dato"],["FORMA_O1_TOPO","9DD0","logotopo_cm_body.asm",567,"dato"],["DATOS_HUERFANOS_9EEA","9EEA","logotopo_cm_body.asm",572,"dato"],["FORMA_P_TOPO","9F12","logotopo_cm_body.asm",575,"dato"],["FORMA_O2_TOPO","A0F4","logotopo_cm_body.asm",578,"dato"],["FORMA_ESTRELLA_1","A326","logotopo_cm_body.asm",581,"dato"],["FORMA_ESTRELLA_2","A3A0","logotopo_cm_body.asm",584,"dato"],["FORMA_ESTRELLA_3","A41A","logotopo_cm_body.asm",587,"dato"],["FORMA_ESTRELLA_4","A494","logotopo_cm_body.asm",590,"dato"],["END_OF_FILE_LOGOTOPO","A50E","logotopo_cm_body.asm",594,"interna"]];
+
+const invBody = document.getElementById('invBody');
+const filterInput = document.getElementById('filterInput');
+const invCount = document.getElementById('invCount');
+const tipoChecks = document.querySelectorAll('#tipoChecks input[type=checkbox]');
+
+const TIPO_LABEL = { funcion: 'función', interna: 'interna', dato: 'dato', sinref: 'sin ref.' };
+
+function getActiveTipos() {
+  const active = new Set();
+  tipoChecks.forEach(cb => { if (cb.checked) active.add(cb.value); });
+  return active;
+}
+
+function render() {
+  // filtro de texto: acepta nombre, direccion (con o sin "$" delante) y fichero
+  let textFilter = filterInput.value.trim().toLowerCase();
+  if (textFilter.startsWith('$')) textFilter = textFilter.slice(1);
+  const activeTipos = getActiveTipos();
+
+  const rows = [];
+  let shown = 0;
+  for (const [name, addr, file, line, tipo] of INVENTORY) {
+    if (!activeTipos.has(tipo)) continue;
+    if (textFilter && !name.toLowerCase().includes(textFilter) && !addr.toLowerCase().includes(textFilter) && !file.toLowerCase().includes(textFilter)) continue;
+    shown++;
+    const tipoTxt = TIPO_LABEL[tipo] || tipo;
+    rows.push(`<tr><td><code>${name}</code></td><td><code>$${addr}</code></td><td><span class="file-tag">${file}</span></td><td>${line}</td><td><span class="tipo-tag tipo-${tipo}">${tipoTxt}</span></td></tr>`);
+  }
+  invBody.innerHTML = rows.join('');
+  invCount.textContent = `${shown} de ${INVENTORY.length} etiquetas`;
+}
+
+filterInput.addEventListener('input', render);
+tipoChecks.forEach(cb => cb.addEventListener('change', render));
+render();
+</script>
+
+</body>
+</html>

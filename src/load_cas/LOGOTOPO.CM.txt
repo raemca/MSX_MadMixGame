@@ -1,0 +1,23 @@
+Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+
+LOGOTOPO.CM -- SIN ANALIZAR (fuera de alcance de esta ronda)
+=============================================================
+
+Copia binaria tal cual, extraida directamente del bloque "LOGOTO"
+del .cas de 1988 (sync en offset 312, start=$9470 end=$A50D
+exec=$9470, 4254 bytes). Cargado por TOPO.bas linea 20
+("BLOAD"CAS:LOGOTOPO.CM",R") -- dibuja/ejecuta el logo de Topo Soft
+al arrancar la cinta, antes de que "RUN"CAS:" ceda el control a
+MADMIX.bas.
+
+Primeros bytes: C3 D1 95 21 78 2F 11 B8 2F 01 F7 00 A7 ED 52 C8 19
+3E 81 CD A6 94 E5 09 3E 81... -- empieza con "JP $95D1", confirma
+que es codigo Z80 real ejecutable (no solo datos de imagen).
+
+TODO: pendiente desensamblar por completo y reconstruir como
+load_bin_body.asm/test_bin_body.asm -- el usuario decidio
+explicitamente posponerlo ("Organizar todo excepto el logo") por ser
+un sub-proyecto de RE en si mismo, comparable en tamano/esfuerzo a
+otros bloques ya trabajados en sesiones enteras. Hasta entonces,
+main.asm NO genera build/LOGOTOPO.CM -- solo existe esta copia
+binaria de referencia.

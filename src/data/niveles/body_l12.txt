@@ -1,0 +1,32 @@
+; !!! AVISO -- LEE ESTO ANTES DE EDITAR !!!
+; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+; Rejilla de losetas de body_l12.bin -- 19 filas x 32 columnas.
+; Cada celda es el byte crudo en hex (2 digitos): bits 0-6 = indice de
+; loseta (ver data/tiles/*.til, 00-90), bit 7 = flag sin confirmar en
+; tiempo de ejecucion (LEVEL_LOADER lo borra al cargar el nivel, ver
+; FINDINGS.md) pero presente de verdad en el binario original.
+; NO añadas ni quites filas ni columnas: el tamaño es FIJO. Si cambia,
+; todo lo que va detras en madmix_scr.asm/madmix1.asm se desplaza de
+; direccion -- el juego compilaria sin error pero cargaria niveles o
+; datos incorrectos en tiempo de ejecucion. Ver FINDINGS.md/README.md.
+; filas=19 columnas=32
+
+29 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 2A
+22 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 22
+22 C1 2F C1 2F C1 2F 41 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F 22
+22 2F C1 2F 21 37 21 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 21 37 21 41 2F 41 22
+22 41 2F 41 22 37 22 C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F 22 37 22 2F 41 2F 22
+22 2F 41 2F 22 37 22 2F C1 2F C1 2F C1 2F C1 2F C1 C1 C1 2F C1 2F C1 2F C1 22 37 22 41 2F 41 22
+22 41 2F 41 22 37 22 C1 2F C1 2F C1 2F C1 2F 24 2A 38 29 26 2F C1 2F C1 2F 22 37 22 2F 41 2F 22
+22 2F 41 2F 22 37 22 2F C1 2F C1 2F C1 2F C1 2F 23 3F 23 2F C1 2F C1 2F C1 22 37 22 41 2F 41 22
+22 41 2F 41 22 37 22 C1 2F C1 2F C1 2F C1 2F 23 3F 3F 3F 23 2F C1 2F C1 2F 22 37 22 2F 41 2F 22
+22 2F 41 2F 22 37 22 2F C1 2F C1 2F C1 2F 21 3F 3F 3F 3F 3F 21 2F C1 2F C1 22 37 22 41 2F 41 22
+22 41 2F 41 22 37 22 41 2F C1 2F C1 2F C1 23 3F 3F 3F 3F 3F 23 C1 2F C1 2F 22 37 22 2F 41 2F 22
+22 2F 41 2F 22 37 22 2F C1 2F C1 2F C1 2F C1 20 3F 3F 3F 20 C1 2F C1 2F C1 22 37 22 41 2F 41 22
+22 41 2F 41 22 37 22 C1 2F C1 2F C1 2F C1 2F C1 24 25 26 C1 2F C1 2F C1 2F 22 37 22 2F 41 2F 22
+22 2F 41 2F 22 37 22 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 22 37 22 41 2F 41 22
+22 41 2F 41 23 37 23 C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F 23 37 23 2F C1 2F 22
+23 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 2F C1 23
+25 25 25 25 25 25 25 25 25 25 25 25 25 25 26 C1 2F 3E 2F C1 24 25 25 25 25 25 25 25 25 25 25 25
+3A 3A 3A 3A 3A 3A 3A 3A 3A 3A 3A 3A 3A 53 C1 2F C1 2F C1 2F C1 52 3A 3A 3A 3A 3A 3A 3A 3A 3A 3A
+25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25

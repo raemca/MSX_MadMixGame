@@ -1,0 +1,32 @@
+; !!! AVISO -- LEE ESTO ANTES DE EDITAR !!!
+; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+; Rejilla de losetas de body_l7.bin -- 19 filas x 32 columnas.
+; Cada celda es el byte crudo en hex (2 digitos): bits 0-6 = indice de
+; loseta (ver data/tiles/*.til, 00-90), bit 7 = flag sin confirmar en
+; tiempo de ejecucion (LEVEL_LOADER lo borra al cargar el nivel, ver
+; FINDINGS.md) pero presente de verdad en el binario original.
+; NO añadas ni quites filas ni columnas: el tamaño es FIJO. Si cambia,
+; todo lo que va detras en madmix_scr.asm/madmix1.asm se desplaza de
+; direccion -- el juego compilaria sin error pero cargaria niveles o
+; datos incorrectos en tiempo de ejecucion. Ver FINDINGS.md/README.md.
+; filas=19 columnas=32
+
+19 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 1A 42 58 19 15 15 15 15 15 15 15 15 1A 42
+12 BF 2D BF 2D BF 2D BF 2D 3F 2D BF 2D BF 2D BF 2D BF 12 42 42 12 2D BF 2D BF 2D BF 2D BF 12 42
+12 3F 11 2D 11 2D 19 15 1A 2D 14 15 15 1B 15 15 16 2D 12 5A 42 12 BF 19 16 2D 14 15 1A 2D 12 42
+12 37 12 BF 13 BF 12 3F 12 BF 36 36 34 13 36 36 36 3F 12 42 42 12 2D 12 2D BF 2D BF 12 BF 12 42
+12 37 12 2D 3F 2D 17 15 18 2D 14 16 34 3E 33 14 16 2D 12 42 58 12 BF 17 15 16 BF 14 18 2D 12 42
+12 37 12 BF 11 BF 2D BF 2D BF 35 35 35 11 33 35 35 3F 12 42 42 12 2D BF 2D BF 2D BF 2D BF 12 42
+12 37 12 2D 13 2D 11 19 16 BF 14 15 15 1C 15 15 16 2D 12 42 42 12 11 2D 11 2D 14 1A BF 11 12 42
+12 37 12 BF 2D BF 12 12 2D BF 52 3A 3A 3A 3A 3A 53 BF 12 59 42 12 12 BF 12 BF 2D 12 2D 12 12 42
+12 37 12 2D 11 2D 12 12 BF 19 15 15 15 15 15 15 15 15 18 42 42 12 13 2D 17 16 BF 13 BF 13 12 42
+12 BF 13 BF 13 BF 17 18 2D 12 42 42 42 5A 42 42 42 59 42 42 5A 12 2D BF 2D BF 2D BF 2D BF 12 42
+12 2D BF 2D BF 2D BF 2D BF 12 58 42 19 15 15 15 15 15 15 15 15 18 BF 11 BF 14 15 15 1A 2D 12 42
+1C 15 15 15 15 16 2D 11 2D 12 42 42 12 BF 2D BF 2D BF 2D BF 2D BF 2D 12 2D 34 35 35 13 BF 17 15
+3F 2D BF 2D BF 2D BF 12 BF 12 42 59 12 2D 14 15 15 1B 15 15 16 2D 14 1C 16 34 11 33 35 2D 3F 2D
+1B 15 15 15 15 16 2D 13 2D 12 5A 42 12 BF 2D 3F 2D 13 2D BF 2D BF 2D BF 2D 34 1D 15 16 BF 19 15
+12 2D BF 2D BF 2D BF 2D BF 12 42 58 12 2D 14 16 BF 2D BF 14 16 2D 14 1B 16 34 13 36 36 BF 12 42
+1D 50 38 51 1A BF 19 1A 2D 12 42 42 12 BF 2D BF 2D 11 2D BF 2D BF 2D 12 2D 36 36 33 11 BF 12 42
+12 BF BF BF 12 2D 17 18 3D 12 5A 42 12 BF 14 15 15 1C 15 15 16 BF BF 13 BF 14 15 15 18 2D 12 42
+12 BF BF BF 12 BF 2D BF 2D 12 42 5A 12 BF 52 3A 3A 3A 3A 3A 53 BF 2D BF 2D BF 2D BF 2D 3D 12 42
+17 15 15 15 1C 15 15 15 15 18 42 42 17 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 18 42

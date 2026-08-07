@@ -1,0 +1,28 @@
+; !!! AVISO -- LEE ESTO ANTES DE EDITAR !!!
+; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+; Rejilla de losetas de body_l2.bin -- 15 filas x 32 columnas.
+; Cada celda es el byte crudo en hex (2 digitos): bits 0-6 = indice de
+; loseta (ver data/tiles/*.til, 00-90), bit 7 = flag sin confirmar en
+; tiempo de ejecucion (LEVEL_LOADER lo borra al cargar el nivel, ver
+; FINDINGS.md) pero presente de verdad en el binario original.
+; NO añadas ni quites filas ni columnas: el tamaño es FIJO. Si cambia,
+; todo lo que va detras en madmix_scr.asm/madmix1.asm se desplaza de
+; direccion -- el juego compilaria sin error pero cargaria niveles o
+; datos incorrectos en tiempo de ejecucion. Ver FINDINGS.md/README.md.
+; filas=15 columnas=32
+
+2B 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25
+22 34 35 35 35 2E 3D 2E C0 2E 34 35 35 35 2E C0 C0 C0 2E 36 36 36 34 C0 2E C0 2E 3D 34 35 35 35
+22 34 29 2A 33 29 2A C0 29 2A 34 29 2A 2E 29 2A C0 29 2A 2E 29 2A 34 29 2A 2E 29 2A 34 29 2A 33
+22 34 27 28 33 27 28 2E 27 28 34 27 28 C0 27 28 2E 27 28 C0 27 28 34 27 28 C0 27 28 34 27 28 33
+22 36 36 36 33 C0 2E 34 35 35 35 2E C0 2E C0 2E C0 2E C0 2E C0 2E 36 36 36 34 C0 2E 36 36 36 33
+22 2E 29 2A C0 29 2A 34 29 2A 2E 29 2A C0 29 2A 2E 29 2A C0 29 2A 2E 29 2A 34 29 2A 2E 29 2A C0
+22 C0 27 28 2E 27 28 34 27 28 C0 27 28 2E 27 28 C0 27 28 2E 27 28 C0 27 28 34 27 28 C0 27 28 2E
+22 2E C0 2E 3C 35 35 35 2E C0 2E C0 2E C0 2E C0 2E C0 2E C0 2E C0 2E C0 2E 36 36 36 3C C0 2E C0
+22 C0 29 2A 2E 29 2A 2E 29 2A C0 29 2A 2E 29 2A C0 29 2A 2E 29 2A C0 29 2A 2E 29 2A C0 29 2A 2E
+22 2E 27 28 C0 27 28 C0 27 28 2E 27 28 C0 27 28 2E 27 28 C0 27 28 2E 27 28 C0 27 28 2E 27 28 C0
+22 36 36 36 34 2E C0 2E C0 2E C0 2E C0 2E C0 2E 3C 2E C0 2E C0 2E C0 2E C0 2E C0 2E 34 35 35 35
+22 33 29 2A C0 24 25 25 25 25 25 25 26 C0 29 50 38 51 2A C0 29 2A 2E 29 2A C0 29 2A 34 29 2A 33
+22 33 27 28 C0 52 3A 3A 3A 3A 3A 3A 53 C0 22 BF BF BF 22 2E 27 28 C0 27 28 2E 27 28 34 27 28 33
+22 33 35 35 35 29 25 25 25 25 25 25 25 26 22 BF BF BF 22 C0 2E C0 2E C0 2E C0 2E C0 36 36 36 33
+2C 25 25 25 25 28 42 42 42 42 42 42 42 42 27 25 25 25 2C 25 25 25 25 25 25 25 25 25 25 25 25 25

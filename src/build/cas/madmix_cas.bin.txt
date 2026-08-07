@@ -1,0 +1,15 @@
+; madmix_cas.bin -- fichero unificado para la version de cinta (.cas)
+; Generado por tools/gen_cas_bin.py a partir de main.asm. Concatenado
+; SIN relleno (verificado contra el .cas real, ver FINDINGS.md).
+; Ingenieria inversa, herramientas y documentacion de este proyecto:
+; Rafael Eduardo Martin Candial
+;
+; tramo 1: offset 0x0000-0x5500 (21760 bytes) -> cargar en $1000
+; tramo 2: offset 0x5500-0xAEA1 (22945 bytes) -> cargar en $8400
+;
+; Pendiente (fuera de alcance de este script): empaquetar estos 2
+; tramos en bloques de cinta reales (marcas de sincronismo, cabecera
+; de destino de 6 bytes, checksum) y el propio cargador (LOAD.BIN/
+; TEST.BIN equivalentes, ver FINDINGS.md 'estructura completa de la
+; version de cinta') -- este script solo genera el contenido, no el
+; formato de cinta completo.

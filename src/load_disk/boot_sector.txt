@@ -1,0 +1,21 @@
+Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+
+boot_sector.bin -- sector de arranque MSX-DOS estandar (720KB), NO especifico de este juego
+=============================================================================================
+
+512 bytes, extraidos verbatim del sector 0 del .dsk original. Contiene
+el BPB (BIOS Parameter Block) estandar de un disco MSX-DOS de 720KB
+(512 bytes/sector, 2 sectores/cluster, 2 copias de FAT de 3 sectores
+cada una, 112 entradas de directorio raiz, 1440 sectores totales,
+descriptor de medio $F9, 9 sectores/pista, 2 caras) mas el codigo de
+arranque generico que imprime "Boot error / Press any key for retry"
+si se intenta arrancar el disco sin el sistema operativo cargado --
+boilerplate identico en cualquier disco formateado con la misma
+herramienta (identificador OEM "DSKTOOL " en el propio sector, bytes
+3-10), nada relacionado con Mad Mix Game en concreto.
+
+Se conserva como recurso verbatim (no como formula derivada) porque
+es codigo/datos de un programa de formateo de terceros, fuera del
+alcance de este proyecto -- lo unico que nos interesa de el es
+reproducirlo exacto para que el .dsk generado desde cero sea
+byte a byte identico al original en esta parte.

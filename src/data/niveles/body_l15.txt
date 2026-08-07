@@ -1,0 +1,31 @@
+; !!! AVISO -- LEE ESTO ANTES DE EDITAR !!!
+; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+; Rejilla de losetas de body_l15.bin -- 18 filas x 32 columnas.
+; Cada celda es el byte crudo en hex (2 digitos): bits 0-6 = indice de
+; loseta (ver data/tiles/*.til, 00-90), bit 7 = flag sin confirmar en
+; tiempo de ejecucion (LEVEL_LOADER lo borra al cargar el nivel, ver
+; FINDINGS.md) pero presente de verdad en el binario original.
+; NO añadas ni quites filas ni columnas: el tamaño es FIJO. Si cambia,
+; todo lo que va detras en madmix_scr.asm/madmix1.asm se desplaza de
+; direccion -- el juego compilaria sin error pero cargaria niveles o
+; datos incorrectos en tiempo de ejecucion. Ver FINDINGS.md/README.md.
+; filas=18 columnas=32
+
+42 42 42 09 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 0B 05 05 05 05 0B 0A 42 42
+42 42 42 02 2D BF 2D BF 2D BF 2D BF 2D 36 36 36 36 36 36 34 2D BF 2D 07 0B 05 0B 05 0E 02 42 42
+42 42 42 02 BF 09 05 0B 06 2D BF 36 36 33 09 05 0B 05 0A 36 36 34 BF 2D 02 2D 02 2D 03 02 42 42
+42 42 42 02 2D 02 3C 02 2D BF 36 33 09 0B 08 BF 03 BF 07 05 0A 36 34 BF 02 BF 03 BF 2D 02 42 42
+42 42 42 02 BF 02 BF 03 BF 36 33 09 08 02 BF 2D BF 2D BF 2D 0D 06 34 2D 03 2D BF 2D 09 0E 42 42
+42 42 42 02 2D 03 2D BF 2D 33 09 08 2D 03 2D 09 06 BF 2D 09 08 34 35 BF 2D BF 2D 04 0E 02 42 42
+42 42 42 02 BF 2D 3F 2D 36 33 02 2D BF 2D BF 03 00 2D 09 08 34 35 BF 2D 00 2D BF 2D 07 0E 42 42
+42 42 42 07 0A BF 01 BF 33 09 08 BF 09 06 2D BF 2D 09 08 34 35 BF 2D BF 2D BF 2D BF 2D 02 42 42
+05 05 05 05 08 2D 02 2D BF 02 BF 2D 02 2D BF 2D 04 08 34 35 BF 2D 09 50 38 51 0A 2D 84 8C 85 85
+2D 3F 2D 3F 2D BF 02 BF 2D 02 2D BF 02 BF 2D BF 2D BF 34 BF 2D BF 02 BF BF BF 02 BF 2D BF 2D BF
+05 05 05 05 0A 2D 02 2D 33 07 0A 2D 07 06 BF 2D 04 0A 36 34 BF 2D 07 05 05 05 88 2D 04 0B 05 85
+42 42 42 09 08 BF 03 BF 33 35 02 BF 2D BF 2D BF 2D 07 0A 36 34 BF 2D BF 2D BF 2D BF 2D 02 42 42
+42 42 42 02 BF 2D BF 2D BF 33 07 0A BF 2D 04 06 BF 2D 07 0A 36 36 34 2D 81 2D 81 2D 04 0E 42 42
+42 42 42 02 2D 01 2D 01 2D 33 35 07 0A BF 2D BF 00 3F 2D 07 0B 06 34 BF 82 BF 82 BF 2D 02 42 42
+42 42 42 02 BF 02 04 08 BF 2D 33 35 07 05 0A 2D BF 2D 09 05 08 34 35 2D 82 2D 0D 8A BF 02 42 42
+42 42 42 02 2D 07 05 05 06 BF 2D 33 35 35 07 05 05 05 08 34 35 35 2D BF 82 2D 82 82 2D 02 42 42
+42 42 42 02 3E 2D BF 2D BF 2D BF 2D BF 33 35 35 35 35 35 35 BF 2D BF 84 8C 85 88 82 2D 02 42 42
+42 42 42 07 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 05 0C 05 08 42 42
