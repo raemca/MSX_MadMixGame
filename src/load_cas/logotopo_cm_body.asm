@@ -29,7 +29,7 @@
 ;  bucle tienen ya nombre real (ninguna `L_XXXX` placeholder pendiente).
 ;  NO comparte espacio de simbolos con madmix1_body.asm/madmix_scr_body.asm
 ;  todavia (se ejecuta antes de que esos binarios existan en RAM).
-; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial (raemca@hotmail.com)
 ; ============================================================
 
 ; --- direcciones VRAM (tabla de color de SCREEN2, $2000-$37FF) que

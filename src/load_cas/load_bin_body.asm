@@ -21,7 +21,7 @@
 ;  Comparte espacio de simbolos con madmix1_body.asm/madmix_scr_body.asm
 ;  (via main.asm) -- referencia DIBUJAR_PORTADA/START en vez de $1000/$8400
 ;  literales, y DETECTAR_SLOTS_RAM (test_bin_body.asm) en vez de $C350.
-; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial (raemca@hotmail.com)
 ; ============================================================
 
 ORQUESTADOR_CARGA_CINTA:

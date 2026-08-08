@@ -21,7 +21,7 @@ Uso:
   sjasmplus src/main.asm --lst=src/build/main.lst   (generar el listado primero)
   py tools/gen_flow_diagram.py
 
-Autor de esta herramienta: Rafael Eduardo Martín Candial
+Autor de esta herramienta: Rafael Eduardo Martín Candial (raemca@hotmail.com)
 """
 import os
 import re
@@ -242,7 +242,7 @@ def build_mermaid(labels, funcion_set, edges):
 
 
 HTML_TEMPLATE = """<!doctype html>
-<!-- Ingeniería inversa, herramientas y documentación: Rafael Eduardo Martín Candial -->
+<!-- Ingeniería inversa, herramientas y documentación: Rafael Eduardo Martín Candial (raemca@hotmail.com) -->
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -312,7 +312,7 @@ HTML_TEMPLATE = """<!doctype html>
 </head>
 <body>
 <h1>Mad Mix Game — flujo detallado de llamadas (grafo real)</h1>
-<p class="attribution-line" style="color:var(--muted);font-size:0.85rem;margin:-0.3rem 0 1.2rem 0;">Ingeniería inversa, herramientas y documentación: Rafael Eduardo Martín Candial</p>
+<p class="attribution-line" style="color:var(--muted);font-size:0.85rem;margin:-0.3rem 0 1.2rem 0;">Ingeniería inversa, herramientas y documentación: Rafael Eduardo Martín Candial (raemca@hotmail.com)</p>
 <p class="subtitle">Compañero de <code>flujo_programa.html</code> (inventario + diagrama a mano de ~35 piezas). Generado automáticamente por <code>tools/gen_flow_diagram.py</code> a partir del grafo de llamadas real (<code>src/build/main.lst</code>).</p>
 
 <div class="note">

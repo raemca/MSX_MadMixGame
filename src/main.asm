@@ -21,7 +21,7 @@
 ;  compartiendo este mismo espacio de simbolos -- pueden referenciar
 ;  DIBUJAR_PORTADA/START en vez de $1000/$8400 literales.
 ;  Ver FINDINGS.md para el detalle completo de esta unificacion.
-; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial (raemca@hotmail.com)
 ; ============================================================
 
     DEVICE NOSLOT64K

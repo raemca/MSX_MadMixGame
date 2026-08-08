@@ -19,7 +19,7 @@ Uso:
     py msxbasic_tool.py tok <entrada.txt> <salida.bas>
     py msxbasic_tool.py roundtrip <original.bas>   -- detok+tok y compara bytes
 
-Autor de esta herramienta: Rafael Eduardo Martín Candial
+Autor de esta herramienta: Rafael Eduardo Martín Candial (raemca@hotmail.com)
 """
 import sys
 

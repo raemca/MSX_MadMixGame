@@ -1,4 +1,4 @@
-Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial (raemca@hotmail.com)
 
 boot_sector.bin -- sector de arranque MSX-DOS estandar (720KB), NO especifico de este juego
 =============================================================================================

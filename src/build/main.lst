@@ -22,7 +22,7 @@
   21  0000              ;  compartiendo este mismo espacio de simbolos -- pueden referenciar
   22  0000              ;  DIBUJAR_PORTADA/START en vez de $1000/$8400 literales.
   23  0000              ;  Ver FINDINGS.md para el detalle completo de esta unificacion.
-  24  0000              ; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+  24  0000              ; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial (raemca@hotmail.com)
   25  0000              ; ============================================================
   26  0000
   27  0000                  DEVICE NOSLOT64K
@@ -35,7 +35,7 @@
   33  8400
   34  8400                  INCLUDE "madmix1_body.asm"
 # file opened: madmix1_body.asm
-   1+ 8400              ; Reconstrucción, comentarios y etiquetas de este fichero: Rafael Eduardo Martín Candial
+   1+ 8400              ; Reconstrucción, comentarios y etiquetas de este fichero: Rafael Eduardo Martín Candial (raemca@hotmail.com)
    2+ 8400
    3+ 8400              START:
    4+ 8400 31 F0 FF         LD SP, $FFF0
@@ -4828,7 +4828,7 @@
   49  8807                  PHASE $1000
   50  1000                  INCLUDE "madmix_scr_body.asm"
 # file opened: madmix_scr_body.asm
-   1+ 1000              ; Reconstrucción, comentarios y etiquetas de este fichero: Rafael Eduardo Martín Candial
+   1+ 1000              ; Reconstrucción, comentarios y etiquetas de este fichero: Rafael Eduardo Martín Candial (raemca@hotmail.com)
    2+ 1000
    3+ 1000
    4+ 1000              ; --- Punto de entrada real (CALL $1000 desde RELOCATOR en
@@ -9675,7 +9675,7 @@ madmix_scr_body.asm(3248): warning[shortblock]: init data for block truncated to
   25+ FA07              ;    orquestador, DESPUES de haber cargado tambien MADMIX1.BIN (que
   26+ FA07              ;    en su propio BLOAD no lleva ",R" -- alguien tiene que arrancarlo
   27+ FA07              ;    a mano, y esta es la pieza que falta para ese hilo).
-  28+ FA07              ; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+  28+ FA07              ; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial (raemca@hotmail.com)
   29+ FA07              ; ============================================================
   30+ FA07
   31+ FA07              RELOCATOR:
@@ -9756,7 +9756,7 @@ madmix_scr_body.asm(3248): warning[shortblock]: init data for block truncated to
   27+ C350              ;  bloque equivalen. Sus saltos JR/DJNZ, al ser relativos, SI se
   28+ C350              ;  han convertido a etiquetas reales (funcionan igual reubicados o
   29+ C350              ;  no).
-  30+ C350              ; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+  30+ C350              ; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial (raemca@hotmail.com)
   31+ C350              ; ============================================================
   32+ C350
   33+ C350              DETECTAR_SLOTS_RAM:
@@ -10016,7 +10016,7 @@ madmix_scr_body.asm(3248): warning[shortblock]: init data for block truncated to
   21+ DDA0              ;  Comparte espacio de simbolos con madmix1_body.asm/madmix_scr_body.asm
   22+ DDA0              ;  (via main.asm) -- referencia DIBUJAR_PORTADA/START en vez de $1000/$8400
   23+ DDA0              ;  literales, y DETECTAR_SLOTS_RAM (test_bin_body.asm) en vez de $C350.
-  24+ DDA0              ; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+  24+ DDA0              ; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial (raemca@hotmail.com)
   25+ DDA0              ; ============================================================
   26+ DDA0
   27+ DDA0              ORQUESTADOR_CARGA_CINTA:
@@ -10295,7 +10295,7 @@ madmix_scr_body.asm(3248): warning[shortblock]: init data for block truncated to
   29+ 9470              ;  bucle tienen ya nombre real (ninguna `L_XXXX` placeholder pendiente).
   30+ 9470              ;  NO comparte espacio de simbolos con madmix1_body.asm/madmix_scr_body.asm
   31+ 9470              ;  todavia (se ejecuta antes de que esos binarios existan en RAM).
-  32+ 9470              ; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+  32+ 9470              ; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial (raemca@hotmail.com)
   33+ 9470              ; ============================================================
   34+ 9470
   35+ 9470              ; --- direcciones VRAM (tabla de color de SCREEN2, $2000-$37FF) que

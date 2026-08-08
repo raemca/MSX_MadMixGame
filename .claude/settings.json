@@ -6,7 +6,23 @@
       "PowerShell(Get-Command mtools -ErrorAction SilentlyContinue)",
       "PowerShell(Get-Command mcopy -ErrorAction SilentlyContinue)",
       "PowerShell(Get-Command mformat -ErrorAction SilentlyContinue)",
-      "PowerShell(py \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User-Documents-Programacion-MSX-proyectos-madmixgame\\\\64af8c43-e34c-4a8d-ada7-025cec0632b1\\\\scratchpad\\\\rename_handlers.py\")"
+      "PowerShell(py \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User-Documents-Programacion-MSX-proyectos-madmixgame\\\\64af8c43-e34c-4a8d-ada7-025cec0632b1\\\\scratchpad\\\\rename_handlers.py\")",
+      "Bash(python \"C:/Users/User/AppData/Local/Temp/claude/c--Users-User-Documents-Programacion-MSX-proyectos-madmixgame/64af8c43-e34c-4a8d-ada7-025cec0632b1/scratchpad/add_email.py\")",
+      "Bash(py --version)",
+      "Bash(where python *)",
+      "Bash(py \"C:/Users/User/AppData/Local/Temp/claude/c--Users-User-Documents-Programacion-MSX-proyectos-madmixgame/64af8c43-e34c-4a8d-ada7-025cec0632b1/scratchpad/add_email.py\")",
+      "Bash(py tools/build_all.py)",
+      "Bash(where sjasmplus *)",
+      "Bash(where sjasmplus.exe)",
+      "Bash(\"/c/Program Files/sjasmplus-1.23.0.win/sjasmplus.exe\" --help)",
+      "Bash(\"/c/Program Files/sjasmplus-1.23.0.win/sjasmplus.exe\" main.asm --lst=build/main.lst)",
+      "Bash(py tools/gen_cas_bin.py)",
+      "PowerShell(Get-Process msedge -ErrorAction SilentlyContinue)",
+      "PowerShell(powershell -File \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User-Documents-Programacion-MSX-proyectos-madmixgame\\\\64af8c43-e34c-4a8d-ada7-025cec0632b1\\\\scratchpad\\\\crop_poster.ps1\")",
+      "Bash(rm -rf \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\edge_headless_profile_zoom2\")"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\User\\AppData\\Local\\Temp\\claude"
     ]
   }
 }

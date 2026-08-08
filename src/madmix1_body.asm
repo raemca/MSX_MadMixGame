@@ -1,4 +1,4 @@
-; Reconstrucción, comentarios y etiquetas de este fichero: Rafael Eduardo Martín Candial
+; Reconstrucción, comentarios y etiquetas de este fichero: Rafael Eduardo Martín Candial (raemca@hotmail.com)
 
 START:
     LD SP, $FFF0

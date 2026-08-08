@@ -37,7 +37,7 @@ Uso:
   sjasmplus src/main.asm --lst=src/build/main.lst   (generar el listado primero)
   py tools/gen_inventory.py                          (lee el .lst, escribe el HTML)
 
-Autor de esta herramienta: Rafael Eduardo Martín Candial
+Autor de esta herramienta: Rafael Eduardo Martín Candial (raemca@hotmail.com)
 """
 import os
 import re

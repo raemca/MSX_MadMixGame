@@ -27,7 +27,7 @@
 ;  bloque equivalen. Sus saltos JR/DJNZ, al ser relativos, SI se
 ;  han convertido a etiquetas reales (funcionan igual reubicados o
 ;  no).
-; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial (raemca@hotmail.com)
 ; ============================================================
 
 DETECTAR_SLOTS_RAM:

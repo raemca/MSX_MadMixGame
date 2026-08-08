@@ -38,7 +38,7 @@ Opciones:
   --max-ticks N     limite de seguridad de ticks a renderizar (defecto 300)
   --clock HZ        reloj del PSG (defecto 1789772, estandar MSX)
 
-Autor de esta herramienta: Rafael Eduardo Martín Candial
+Autor de esta herramienta: Rafael Eduardo Martín Candial (raemca@hotmail.com)
 """
 
 import sys

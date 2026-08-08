@@ -1,6 +1,6 @@
 # Mad Mix Game — flujo del programa e inventario de funciones
 
-*Ingeniería inversa, análisis y documentación: Rafael Eduardo Martín Candial*
+*Ingeniería inversa, análisis y documentación: Rafael Eduardo Martín Candial (raemca@hotmail.com)*
 
 Este documento es el complemento de `FINDINGS.md` (que es un **diario
 de descubrimientos**, cronológico) organizado por **flujo de

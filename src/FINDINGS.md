@@ -1,6 +1,6 @@
 # Mad Mix Game (Topo Soft, 1987/88) — hallazgos de ingeniería inversa
 
-*Ingeniería inversa, análisis y documentación: Rafael Eduardo Martín Candial*
+*Ingeniería inversa, análisis y documentación: Rafael Eduardo Martín Candial (raemca@hotmail.com)*
 
 Contexto para retomar el trabajo. Origen: análisis estático de
 `MADMIX1.BIN` extraído del `.dsk` original con `mtools`, usando
@@ -17451,4 +17451,153 @@ antiguos conocidos del driver (`LOAD_RESOURCE_SLOT_*`, `RM_*`,
 `IML_900F`, `$6128` suelto): 0 coincidencias fuera de las 2
 menciones deliberadas con framing "antes/ahora". No es un cambio de
 codigo (solo documentacion), no aplica recompilacion.
+
+
+
+### Nuevo manual: `manuales/manual_motor_colision_ia.md` (motor de movimiento/colision + IA de los 3 tipos de item)
+
+A peticion del usuario, tras sugerirlo yo mismo como segundo candidato
+al terminar la revision del manual de sonido. Documento nuevo (no una
+correccion de uno existente), mismo estilo/estructura que
+`manual_driver_sonido.md`. Releido el codigo fuente real de
+`madmix_scr_body.asm` seccion a seccion (motor de colision
+`$2CA0-$335C`, tabla de despacho de 20 tipos `$2E3C`, motor generico de
+movimiento de item `$5278`, y los 3 manejadores de item
+`HNDLR_PELMAZOIDE`/`HNDLR_MARICOCO`/`HNDLR_REGPUNANTOSO` mas
+`ACTIVAR_EFECTO_ITEM`/`AVISAR_PROXIMIDAD_PISTA`/`ARMAR_AVISO_DESTELLO`/
+`ACTUALIZAR_DESTELLO_ITEMS`) para reconstruir la explicacion desde
+cero, en vez de resumir solo lo ya escrito en `FLUJO_PROGRAMA.md`.
+
+Contenido nuevo, no solo reorganizacion de lo ya sabido: aclara que
+`HNDLR_MARICOCO` (mariquita) y `HNDLR_REGPUNANTOSO` (repugnantoso) son
+un PAR con efecto contrario sobre la misma franja de indices de loseta
+(63-65 "sin bola" -> regenera a 45-47 "con bola" vs. 45-47 -> planta a
+48-50 "con bola clavada"), comparten motor de movimiento
+(`MOTOR_MOVIMIENTO_ITEM`) y helper de coordenadas
+(`MAPEAR_COORDENADA_A_DIRECCION_LOCAL`, uno de los 5 sitios del bug del
+nivel 13 ya documentado), y se diferencian en cuando fijan su flag de
+"plantado" ((IX+2), al final vs. al entrar) y en si tocan
+`CONTADOR_BOLAS_COMIDAS`. Tambien deja constancia expresa de que este
+motor NO es pathfinding real (sin BFS/A*, solo mira las 4 losetas
+adyacentes) y de que los 8 fantasmas de `TABLA_ITEMS_PELMAZOIDE`
+ejecutan el mismo codigo sin distincion de personalidad por fantasma
+(a diferencia del Pac-Man original).
+
+**Verificado**: grep final sobre el manual de las 56 etiquetas citadas
+(manejadores, tablas, variables de estado) contra `madmix_scr_body.asm`:
+las 56 existen tal cual en el codigo actual, 0 inventadas. No es un
+cambio de codigo (solo documentacion nueva), no aplica recompilacion.
+
+
+
+### Nuevo manual: `manuales/manual_subsistema_grafico.md` (VDP en SCREEN 2, motor de actores sin sprites hardware, losetas y scroll por software)
+
+A peticion del usuario, tercer manual de la serie, siguiendo mi propia
+sugerencia inicial (la primera vez que se hablo de "que otros manuales
+podriamos hacer" en esta sesion, antes de escribir el de colision/IA).
+Releido el codigo fuente real de `madmix1_body.asm` (motor de actores
+completo `MOTOR_ACTORES`/`COMPONER_ACTORES_EN_BUFFER`/inversion de
+patron, API de VDP `FILVRM`/`LDIRVM`/`SETVRAM`, sistema de losetas
+`MAPEAR_LOSETA_A_GRAFICO`/`ACTUALIZAR_VRAM_FRAME`) y `madmix_scr_body.asm`
+(`DIBUJAR_PORTADA` con su descompresion de color, `APLICAR_COLOR_PANTALLA`/
+`OBTENER_COLOR_VDP`).
+
+**Verificacion expresa del punto central del manual** (la hipotesis
+"hereda el funcionamiento del Spectrum" que motivo la idea): grep de
+`SPRT`/menciones de tabla de atributos o registros 5/6 del VDP
+(sprites hardware) en todo `src/*.asm` -- 0 coincidencias. Confirma que
+el motor de actores nunca toca el plano de sprites hardware del VDP:
+compone cada personaje con mascaras AND/OR + desplazamiento sub-pixel
+bit a bit directamente sobre la tabla de patrones de `SCREEN 2`, el
+mismo algoritmo de blitting que usaria un juego de Spectrum (que no
+tiene sprites hardware). Documentado tambien un hallazgo ya conocido
+pero no explicado antes en un solo sitio: `CALCULAR_DIRECCION_MASCARA_ACTOR`
+reutiliza un subtramo de `TABLA_RLE_MARCO_CARAMELO` (la tabla RLE del
+marco de caramelo del HUD) como mascaras de recorte de actor -- doble
+proposito de la misma tabla, economia de memoria tipica de un MSX1 de
+64KB (ver FINDINGS.md, "Zona 0xDC00", entrada mucho mas antigua).
+
+**Verificado**: grep final sobre el manual de las ~42 etiquetas citadas
+contra `madmix1_body.asm`/`madmix_scr_body.asm`: todas existen tal cual
+en el codigo actual, 0 inventadas. No es un cambio de codigo (solo
+documentacion nueva), no aplica recompilacion.
+
+
+
+### Nuevo manual: `manuales/manual_niveles.md` (formato de los 15 niveles, registro de 20 bytes, carga y fin de nivel)
+
+A peticion del usuario, cuarto manual de la serie -- el candidato "mas
+practico" que yo mismo propuse. Releido el codigo fuente real de
+`madmix_scr_body.asm` (`CARGAR_NIVEL`/`INICIALIZAR_ITEMS_NIVEL`/
+`INICIALIZAR_PARCIAL_ITEMS_NIVEL`, el registro de nivel completo de 20
+bytes campo a campo, la cabecera de `TABLA_NIVELES` con el registro 0
+muerto y los 3 ficheros de cabecera compartida, `GESTIONAR_CICLO_NIVELES`)
+y de `madmix1_body.asm` (`VERIFICAR_FIN_NIVEL`).
+
+De paso, corregidos 3 nombres antiguos que quedaban sueltos en el
+docstring de `tools/mmlvl_tool.py` (no se habian actualizado en la
+ronda de renombrado que les dio nombre real): `LEVEL_LOADER` ->
+`CARGAR_NIVEL`, `LEVEL_TABLE` -> `TABLA_NIVELES`, `MAP_COORD_TO_ADDR`
+-> `MAPEAR_LOSETA_RELATIVA_A_ABSOLUTA`/`MAPEAR_COORDENADA_A_DIRECCION`.
+Verificado que el script sigue siendo Python valido tras el cambio
+(`py -m py_compile`).
+
+Contenido nuevo, no solo reorganizacion: documenta por primera vez en
+un solo sitio la alternancia de sustitucion del comodin `$3C` segun
+`CONTADOR_VUELTAS_NIVELES` (nunca se sustituye en la primera vuelta al
+ciclo de 15 niveles; en vueltas posteriores, alterna) y deja constancia
+expresa de que el "nivel oculto" (15) es alcanzable en partida normal
+sin ningun truco, completando el 14 -- `VERIFICAR_FIN_NIVEL` no le da
+ningun trato especial.
+
+**Verificado**: grep final sobre el manual de las 35 etiquetas citadas
+(registro de nivel, cargador, tablas) contra `madmix_scr_body.asm`/
+`madmix1_body.asm`: todas existen tal cual en el codigo actual, 0
+inventadas. Cambio de codigo minimo (3 nombres en un docstring,
+verificado con py_compile), no aplica recompilacion de sjasmplus.
+
+
+
+### Confirmado por datos reales: el punto de referencia del registro de nivel es siempre la casa de los fantasmas
+
+A raiz de una pregunta directa del usuario ("en todos los niveles los
+enemigos salen todos siempre desde la casa de los fantasmas?"),
+verificado cruzando `REGISTRO_NIVEL_FILA_COLUMNA` (offset 13-14 del
+registro, el punto donde `INICIALIZAR_ITEMS_NIVEL` coloca las 3 tablas
+de item) contra el cuerpo real de cada nivel. El catalogo de losetas
+tiene una estructura dedicada de 3 losetas
+`puerta_fantasmas_inicio_izquierdo`/`linea_electrica_puerta_fantasmas_a`/
+`puerta_fantasmas_inicio_derecho` (`$50`/`$38`/`$51`) que marca
+visualmente la casa en el mapa -- la loseta central (`$38`, tipo 8 en
+`TABLA_MANEJADORES_LOSETA`) es de las pocas NO transitables por estos
+items (ver `manual_motor_colision_ia.md` §5).
+
+**Nivel 1** (`body_l01.bin`): la puerta aparece en el cuerpo en la
+columna 12 (fila de cuerpo 9, columnas 11-13, centro 12).
+`REGISTRO_NIVEL_FILA_COLUMNA` = `$30,$34` = columna cruda 48/4=12
+(EXACTA), fila cruda 52/4=13 -- un desfase de +1 fila respecto a la
+puerta real (fila de buffer completo 12), coherente con que los items
+aparecen justo debajo de la puerta (la loseta central esta bloqueada).
+
+**Nivel 2** (`body_l2.bin`): la puerta aparece en columna 16 (fila de
+cuerpo 11, columnas 15-17, centro 16). `REGISTRO_NIVEL_FILA_COLUMNA` =
+`$40,$3C` = columna cruda 64/4=16 (EXACTA), mismo desfase de +1 fila.
+
+Mismo patron exacto en ambos niveles pese a tener dimensiones y
+valores de referencia completamente distintos -- confirma con
+evidencia de datos, no solo por el mecanismo del codigo, que el diseño
+original coloca deliberadamente el punto de referencia de cada nivel
+en su propia casa de fantasmas. Documentado en `manual_niveles.md`
+§5.1 (no verificado exhaustivamente en los 15 niveles, pero el patron
+es sistemico y no hay razon para esperar una excepcion).
+
+**Aparte**: corregido `LEVEL_LOADER` (nombre antiguo de `CARGAR_NIVEL`)
+en la plantilla `WARNING_BANNER`/`FLAT_BANNER` de `tools/mmlvl_tool.py`
+y, para que el arreglo sea real y no solo de cara a futuras
+regeneraciones, en los 18 ficheros `.txt` de `data/niveles/` que ya
+tenian el aviso grabado con el nombre viejo.
+
+**Verificado**: `py -m py_compile` sobre `mmlvl_tool.py` sin errores;
+`roundtrip-all` de los 18 ficheros de nivel tras el cambio: 18/18
+identicos (cambio de solo un comentario, 0 bytes de datos afectados).
 

@@ -5,7 +5,7 @@ de nivel (data/niveles/*.bin: 13 cuerpos + 3 cabeceras; el nivel 15,
 antes "oculto", es un cuerpo mas -- body_l15.bin -- ver FINDINGS.md).
 Cada byte es un indice de loseta (bits 0-6, ver
 data/tiles/*.til, 00-90) con un bit 7 sin significado confirmado en
-tiempo de ejecucion (LEVEL_LOADER lo borra al cargar, ver
+tiempo de ejecucion (CARGAR_NIVEL lo borra al cargar, ver
 FINDINGS.md), pero presente de verdad en los binarios originales, asi
 que el formato de texto lo preserva byte a byte.
 
@@ -19,14 +19,14 @@ Uso:
       enmascarado) en fichero.txt y lo compara contra el objetivo real
       del nivel NIVEL (0-15; el 0 es el registro muerto, el 15 es el
       nivel oculto/BODY_L15 -- ver FINDINGS.md), leido directamente de
-      LEVEL_TABLE en madmix_scr_body.asm (sin fichero de manifiesto
+      TABLA_NIVELES en madmix_scr_body.asm (sin fichero de manifiesto
       aparte que se pueda desincronizar).
 
-COLUMNS = 32 siempre (stride fijo de MAP_COORD_TO_ADDR, ver
-FINDINGS.md) -- las filas varian por nivel (15-23) y se autodetectan
-del tamano del fichero.
+COLUMNS = 32 siempre (stride fijo de MAPEAR_LOSETA_RELATIVA_A_ABSOLUTA/
+MAPEAR_COORDENADA_A_DIRECCION, ver FINDINGS.md) -- las filas varian por
+nivel (15-23) y se autodetectan del tamano del fichero.
 
-Autor de esta herramienta: Rafael Eduardo Martín Candial
+Autor de esta herramienta: Rafael Eduardo Martín Candial (raemca@hotmail.com)
 """
 
 import sys
@@ -41,11 +41,11 @@ COLUMNS = 32
 BALL_TILES = {0x2D, 0x2E, 0x2F, 0x33, 0x34, 0x35, 0x36}
 
 WARNING_BANNER = """; !!! AVISO -- LEE ESTO ANTES DE EDITAR !!!
-; Ingenieria inversa, herramientas y documentacion de este proyecto: Rafael Eduardo Martin Candial
+; Ingenieria inversa, herramientas y documentacion de este proyecto: Rafael Eduardo Martin Candial (raemca@hotmail.com)
 ; Rejilla de losetas de {name} -- {rows} filas x {cols} columnas.
 ; Cada celda es el byte crudo en hex (2 digitos): bits 0-6 = indice de
 ; loseta (ver data/tiles/*.til, 00-90), bit 7 = flag sin confirmar en
-; tiempo de ejecucion (LEVEL_LOADER lo borra al cargar el nivel, ver
+; tiempo de ejecucion (CARGAR_NIVEL lo borra al cargar el nivel, ver
 ; FINDINGS.md) pero presente de verdad en el binario original.
 ; NO añadas ni quites filas ni columnas: el tamaño es FIJO. Si cambia,
 ; todo lo que va detras en madmix_scr.asm/madmix1.asm se desplaza de
@@ -56,7 +56,7 @@ WARNING_BANNER = """; !!! AVISO -- LEE ESTO ANTES DE EDITAR !!!
 
 
 FLAT_BANNER = """; !!! AVISO -- LEE ESTO ANTES DE EDITAR !!!
-; Ingenieria inversa, herramientas y documentacion de este proyecto: Rafael Eduardo Martin Candial
+; Ingenieria inversa, herramientas y documentacion de este proyecto: Rafael Eduardo Martin Candial (raemca@hotmail.com)
 ; Fragmento de {name} -- {n} bytes SIN alinear a fila de 32 columnas
 ; (empieza/termina a mitad de una fila real del nivel al que
 ; pertenece -- es un trozo prestado de memoria compartida, ver

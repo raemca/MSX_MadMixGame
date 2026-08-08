@@ -42,7 +42,7 @@ FISICO/Mad Mix Game (1988).../...cas, ver FINDINGS.md):
 
 Uso: py tools/gen_cas_file.py
 
-Autor de esta herramienta: Rafael Eduardo Martín Candial
+Autor de esta herramienta: Rafael Eduardo Martín Candial (raemca@hotmail.com)
 """
 import os
 

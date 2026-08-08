@@ -21,7 +21,7 @@ etiquetas en el visor HTML.
 
 Uso: py tools/build_all.py
 
-Autor de esta herramienta: Rafael Eduardo Martín Candial
+Autor de esta herramienta: Rafael Eduardo Martín Candial (raemca@hotmail.com)
 """
 import os
 import subprocess

@@ -25,7 +25,7 @@
 ;    orquestador, DESPUES de haber cargado tambien MADMIX1.BIN (que
 ;    en su propio BLOAD no lleva ",R" -- alguien tiene que arrancarlo
 ;    a mano, y esta es la pieza que falta para ese hilo).
-; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial (raemca@hotmail.com)
 ; ============================================================
 
 RELOCATOR:

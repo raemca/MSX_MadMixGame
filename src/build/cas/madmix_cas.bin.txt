@@ -2,7 +2,7 @@
 ; Generado por tools/gen_cas_bin.py a partir de main.asm. Concatenado
 ; SIN relleno (verificado contra el .cas real, ver FINDINGS.md).
 ; Ingenieria inversa, herramientas y documentacion de este proyecto:
-; Rafael Eduardo Martin Candial
+; Rafael Eduardo Martin Candial (raemca@hotmail.com)
 ;
 ; tramo 1: offset 0x0000-0x5500 (21760 bytes) -> cargar en $1000
 ; tramo 2: offset 0x5500-0xAEA1 (22945 bytes) -> cargar en $8400

@@ -1,9 +1,9 @@
 ; !!! AVISO -- LEE ESTO ANTES DE EDITAR !!!
-; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial (raemca@hotmail.com)
 ; Rejilla de losetas de body_l3.bin -- 16 filas x 32 columnas.
 ; Cada celda es el byte crudo en hex (2 digitos): bits 0-6 = indice de
 ; loseta (ver data/tiles/*.til, 00-90), bit 7 = flag sin confirmar en
-; tiempo de ejecucion (LEVEL_LOADER lo borra al cargar el nivel, ver
+; tiempo de ejecucion (CARGAR_NIVEL lo borra al cargar el nivel, ver
 ; FINDINGS.md) pero presente de verdad en el binario original.
 ; NO añadas ni quites filas ni columnas: el tamaño es FIJO. Si cambia,
 ; todo lo que va detras en madmix_scr.asm/madmix1.asm se desplaza de

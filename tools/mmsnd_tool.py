@@ -24,7 +24,7 @@ Uso:
   py mmsnd_tool.py roundtrip fichero.snd     (verifica disasm+asm=identico)
   py mmsnd_tool.py roundtrip-all carpeta/     (roundtrip de todos los .snd/.spt de la carpeta)
 
-Autor de esta herramienta: Rafael Eduardo Martín Candial
+Autor de esta herramienta: Rafael Eduardo Martín Candial (raemca@hotmail.com)
 """
 
 import sys
@@ -147,7 +147,7 @@ def warning_banner(inpath: str) -> str:
         consumer = "LEVELCYCLE_RESOURCE_TABLE (madmix_scr.asm)"
     return (
         "; !!! AVISO -- LEE ESTO ANTES DE EDITAR !!!\n"
-        "; Ingenieria inversa, herramientas y documentacion de este proyecto: Rafael Eduardo Martin Candial\n"
+        "; Ingenieria inversa, herramientas y documentacion de este proyecto: Rafael Eduardo Martin Candial (raemca@hotmail.com)\n"
         "; Este fichero se compila con INCBIN a una direccion FIJA, calcada del\n"
         "; binario original de 1987. Puedes cambiar valores de una instruccion ya\n"
         "; existente (otra nota, duracion, instrumento...) sin ningun problema.\n"

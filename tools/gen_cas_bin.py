@@ -27,7 +27,7 @@ destinos/longitudes, para un futuro empaquetador de bloques de cinta
 
 Uso: py tools/gen_cas_bin.py
 
-Autor de esta herramienta: Rafael Eduardo Martín Candial
+Autor de esta herramienta: Rafael Eduardo Martín Candial (raemca@hotmail.com)
 """
 import os
 
@@ -59,7 +59,7 @@ def main():
         "; Generado por tools/gen_cas_bin.py a partir de main.asm. Concatenado\n"
         "; SIN relleno (verificado contra el .cas real, ver FINDINGS.md).\n"
         "; Ingenieria inversa, herramientas y documentacion de este proyecto:\n"
-        "; Rafael Eduardo Martin Candial\n"
+        "; Rafael Eduardo Martin Candial (raemca@hotmail.com)\n"
         ";\n"
         f"; tramo 1: offset 0x{0:04X}-0x{len(scr):04X} ({len(scr)} bytes) -> cargar en ${SCR_DEST:04X}\n"
         f"; tramo 2: offset 0x{len(scr):04X}-0x{len(combined):04X} ({len(engine)} bytes) -> cargar en ${ENGINE_DEST:04X}\n"

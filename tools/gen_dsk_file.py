@@ -44,7 +44,7 @@ esas zonas de relleno (ver FINDINGS.md para el recuento exacto).
 
 Uso: py tools/gen_dsk_file.py
 
-Autor de esta herramienta: Rafael Eduardo Martín Candial
+Autor de esta herramienta: Rafael Eduardo Martín Candial (raemca@hotmail.com)
 """
 import os
 import struct

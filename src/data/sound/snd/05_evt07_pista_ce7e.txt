@@ -1,5 +1,5 @@
 ; !!! AVISO -- LEE ESTO ANTES DE EDITAR !!!
-; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial
+; Ingeniería inversa, herramientas y documentación de este proyecto: Rafael Eduardo Martín Candial (raemca@hotmail.com)
 ; Este fichero se compila con INCBIN a una direccion FIJA, calcada del
 ; binario original de 1987. Puedes cambiar valores de una instruccion ya
 ; existente (otra nota, duracion, instrumento...) sin ningun problema.

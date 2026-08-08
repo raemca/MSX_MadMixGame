@@ -16,7 +16,7 @@ esos ficheros para el detalle del formato.
 
 Uso: py tools/gen_disk_and_cas.py
 
-Autor de esta herramienta: Rafael Eduardo Martín Candial
+Autor de esta herramienta: Rafael Eduardo Martín Candial (raemca@hotmail.com)
 """
 import os
 import sys
