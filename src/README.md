@@ -172,7 +172,7 @@ madmixgame/
     │   └── LOGOTOPO.CM.txt             ← nota explicando el estado/historia de LOGOTOPO.CM
     ├── data/
     │   ├── tiles/                      ← las 91 losetas del laberinto, 1 fichero .til por loseta (32 bytes, formato 16x16)
-    │   ├── sprites/                    ← los 64 sprites de personajes, 1 fichero .spr por sprite (144 bytes, formato 24x48)
+    │   ├── sprites/                    ← los 64 sprites de personajes, 1 fichero .spr por sprite (144 bytes, formato 24x24 con 2 planos entrelazados: máscara+patrón, 6 bytes/fila x 24 filas)
     │   ├── fonts/                      ← fuentes de texto (extensión .fnt), un único fichero por fuente completa (la posición de cada glifo se calcula por fórmula, exige un bloque contiguo):
     │   │   └── fuente_caracteres.fnt   ← fuente de texto (59 glifos de 8 bytes, códigos $21-$5B)
     │   ├── img/                        ← el resto de gráficos que no son loseta, sprite ni fuente (extensión .img):
@@ -228,14 +228,18 @@ registro.
 
 ### Tamaños en píxeles de cada formato (para verlos/editarlos con YY-CHR, Tilemap Studio, GIMP, etc.)
 
-Todos son monocromo, 1 bit por píxel, bytes en orden lineal fila a
-fila (sin entrelazado), MSB primero — el formato "crudo" más simple
-que soporta cualquier editor de tiles/CHR:
+Todos son monocromo, 1 bit por píxel, MSB primero — el formato
+"crudo" más simple que soporta cualquier editor de tiles/CHR. Todos
+van en orden lineal fila a fila sin entrelazado, **excepto
+`data/sprites/`**, que entrelaza 2 planos (máscara AND + patrón/tinta
+OR, ver `recursos/ptrtable_sprites.html` y `manual_subsistema_grafico.md`
+§4) fila a fila: 3 bytes de máscara + 3 bytes de patrón por cada una
+de las 24 filas reales:
 
 | Carpeta | Extensión | Tamaño en píxeles | Bytes/fila | Bytes por fichero |
 |---|---|---|---|---|
 | `data/tiles/` | `.til` | 16×16 | 2 | 32 |
-| `data/sprites/` | `.spr` | 24×48 | 3 | 144 |
+| `data/sprites/` | `.spr` | 24×24, 2 planos entrelazados (máscara+patrón) | 6 (3+3) | 144 |
 | `data/fonts/` | `.fnt` | 8×8 por glifo (59 glifos seguidos) | 1 | 472 (59×8) |
 | `data/img/marco_caramelo_forma.img` | `.img` | — (tabla RLE, no bitmap plano) | — | 1740 |
 | `data/img/marco_caramelo_color.img` | `.img` | — (atributos de color VRAM, no bitmap) | — | 768 |

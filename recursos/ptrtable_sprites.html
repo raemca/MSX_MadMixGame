@@ -103,7 +103,8 @@
 <p class="subtitle">Mad Mix Game (Topo Soft, 1987/88) -- reconstruccion de <code>madmix1.asm</code></p>
 
 <div class="note">
-  <strong>RESUELTO -- estos son los sprites de los personajes.</strong>
+  <strong>RESUELTO -- estos son los sprites de los personajes, 24×24 px, 2 planos
+  entrelazados (máscara + patrón).</strong>
   <code>PTR_TABLA_SPRITES</code> (dentro de <code>MOTOR_ACTORES</code>, ya transcrita y verificada
   al 100%, con cada entrada escrita como <code>DW SPRxx_...</code> en vez de hex crudo) es una
   tabla de 64 punteros de 16 bits con paso fijo de 144 bytes, de
@@ -114,14 +115,21 @@
   Dato de jugabilidad con implicacion directa en el codigo: <strong>no hay sprites hacia la
   izquierda</strong>, solo derecha/abajo/arriba -- se invierte horizontalmente el de la derecha
   en tiempo de ejecucion. Ya transcritas en <code>madmix1.asm</code> (0 diferencias byte a
-  byte) y documentadas en <code>FINDINGS.md</code>. Formato de pixel CONFIRMADO visualmente:
-  cada entrada de 144 bytes se reagrupa en 48 filas de 24 px de ancho (3 bytes/fila) -- las 3
-  vistas de abajo ya usan ese formato. Lo que sigue sin descifrarse es el ALGORITMO de codigo
-  que lee cada entrada asi (que rutina de <code>MOTOR_ACTORES</code> la consume byte a byte) --
-  se identifico el formato visualmente, no todavia en el propio codigo Z80.
+  byte) y documentadas en <code>FINDINGS.md</code>.<br><br>
+  <strong>Formato de píxel CORREGIDO (segunda pasada)</strong>: no son 48 filas de una sola
+  imagen de 24×48 (esa lectura inicial daba una silueta reconocible pero con rayas
+  horizontales de fondo y aspecto alargado -- fue el propio usuario quien notó esto y
+  preguntó si en realidad eran 24×24 con dos patrones, como en la versión de Spectrum).
+  Comprobado byte a byte: cada entrada de 144 bytes son <strong>24 filas de 6 bytes</strong>
+  (3 bytes de máscara + 3 bytes de patrón/tinta, 24 px de ancho cada plano), NO 48 filas de
+  3 bytes seguidas. Encaja exacto con el algoritmo de blitting ya documentado en
+  <code>manual_subsistema_grafico.md</code> §4 ("máscara AND conserva el fondo, luego OR
+  aplica el patrón") y con lo ya visto en <code>FINDINGS.md</code>: el código real lee 3
+  bytes, 48 veces seguidas -- son 24 pares [máscara, patrón], no 48 filas de una imagen.
+  Las 3 vistas de abajo ya usan el formato corregido.
 </div>
 
-<h2>Vista 1 -- las 64 entradas en fila (24 px de ancho cada una, 48 filas)</h2>
+<h2>Vista 1 -- las 64 entradas en fila (24 px de ancho cada una, plano de patrón/tinta)</h2>
 <div class="canvas-wrap">
   <canvas id="stripCanvas"></canvas>
 </div>
@@ -129,15 +137,26 @@
 <h2>Vista 2 -- rejilla, cada entrada como sprite independiente (con nombre)</h2>
 <div id="grid" class="entry-grid"></div>
 
-<h2>Vista 3 -- una entrada ampliada y con zoom (24 x 48 px)</h2>
+<h2>Vista 3 -- una entrada ampliada y con zoom (24 x 24 px), patrón y máscara</h2>
 <div class="controls">
   <label for="entrySel">Entrada:</label>
   <select id="entrySel"></select>
   <label for="zoomRange">Zoom:</label>
   <input type="range" id="zoomRange" min="2" max="16" value="8">
 </div>
-<div class="canvas-wrap">
-  <canvas id="zoomCanvas"></canvas>
+<div class="controls" style="gap:2rem;">
+  <div>
+    <div class="subtitle" style="margin:0 0 0.3rem 0;">Patrón / tinta (lo que se ve como "el sprite")</div>
+    <div class="canvas-wrap">
+      <canvas id="zoomCanvasPattern"></canvas>
+    </div>
+  </div>
+  <div>
+    <div class="subtitle" style="margin:0 0 0.3rem 0;">Máscara AND (recorte de fondo)</div>
+    <div class="canvas-wrap">
+      <canvas id="zoomCanvasMask"></canvas>
+    </div>
+  </div>
 </div>
 
 <footer>
@@ -226,17 +245,29 @@ function byteToBits(b) {
   return arr;
 }
 
-// Formato confirmado (viendo Vista 3): cada entrada de 144 bytes se
-// reagrupa en 48 filas de 24 px de ancho (3 bytes/fila), NO en 144
-// filas de 8 px -- ese era el bug de las Vistas 1 y 2 (usaban el
-// mapeo crudo sin reagrupar, por eso no se reconocia nada en ellas).
+// FORMATO REAL, CORREGIDO: cada entrada de 144 bytes es un sprite de
+// 24x24 px (no 24x48) en DOS PLANOS ENTRELAZADOS fila a fila --
+// mascara (3 bytes) + patron/tinta (3 bytes) por cada una de las 24
+// filas (6 bytes/fila x 24 = 144). Encaja exacto con el algoritmo de
+// blitting ya documentado en manual_subsistema_grafico.md SS4: "mascara
+// AND (conserva el fondo donde el sprite es transparente) seguida de
+// OR (aplica el patron)" -- de ahi que el codigo real lea 3 bytes 48
+// veces seguidas (FINDINGS.md): son 24 pares [mascara,patron], no 48
+// filas de una sola imagen. La version anterior de esta pagina
+// interpretaba las 144 bytes como una sola imagen de 48 filas, lo que
+// producia una silueta reconocible pero con rayas horizontales
+// blancas/negras de fondo y un aspecto "alargado" -- exactamente lo
+// que llevo a cuestionar el formato y encontrar el entrelazado real.
 const SPRITE_W = 24;
-const SPRITE_H = ENTRY_LEN / 3; // 48
+const SPRITE_H = 24;
 
-function drawSpriteInto(img, imgW, entryIndex, destX, destY) {
+// plane: 'pattern' (tinta visible, lo que se ve normalmente como "el
+// sprite") o 'mask' (mascara AND de recorte).
+function drawSpriteInto(img, imgW, entryIndex, destX, destY, plane) {
+  const planeOffset = plane === 'mask' ? 0 : 3;
   for (let r = 0; r < SPRITE_H; r++) {
     for (let bIdx = 0; bIdx < 3; bIdx++) {
-      const byteVal = bytes[entryIndex*ENTRY_LEN + r*3 + bIdx];
+      const byteVal = bytes[entryIndex*ENTRY_LEN + r*6 + planeOffset + bIdx];
       const bits = byteToBits(byteVal);
       for (let col = 0; col < 8; col++) {
         const x = destX + bIdx*8 + col;
@@ -252,7 +283,7 @@ function drawSpriteInto(img, imgW, entryIndex, destX, destY) {
   }
 }
 
-// --- Vista 1: strip of all entries side by side, formato correcto 24x48 ---
+// --- Vista 1: strip of all entries side by side, plano de patron/tinta (24x24) ---
 function drawStrip() {
   const canvas = document.getElementById('stripCanvas');
   const w = NUM_ENTRIES * SPRITE_W;
@@ -262,14 +293,14 @@ function drawStrip() {
   const ctx = canvas.getContext('2d');
   const img = ctx.createImageData(w, h);
   for (let e = 0; e < NUM_ENTRIES; e++) {
-    drawSpriteInto(img, w, e, e*SPRITE_W, 0);
+    drawSpriteInto(img, w, e, e*SPRITE_W, 0, 'pattern');
   }
   ctx.putImageData(img, 0, 0);
   canvas.style.width = (w*3) + 'px';
   canvas.style.height = (h*3) + 'px';
 }
 
-// --- Vista 2: grid of 64 thumbnails, formato correcto 24x48 ---
+// --- Vista 2: grid of 64 thumbnails, plano de patron/tinta (24x24) ---
 function drawGrid() {
   const grid = document.getElementById('grid');
   for (let e = 0; e < NUM_ENTRIES; e++) {
@@ -282,7 +313,7 @@ function drawGrid() {
     canvas.style.height = (SPRITE_H*4) + 'px';
     const ctx = canvas.getContext('2d');
     const img = ctx.createImageData(SPRITE_W, SPRITE_H);
-    drawSpriteInto(img, SPRITE_W, e, 0, 0);
+    drawSpriteInto(img, SPRITE_W, e, 0, 0, 'pattern');
     ctx.putImageData(img, 0, 0);
     const lbl = document.createElement('div');
     lbl.className = 'lbl';
@@ -294,21 +325,32 @@ function drawGrid() {
   }
 }
 
-// --- Vista 3: zoomable single entry, formato correcto 24x48 ---
+// --- Vista 3: entrada seleccionada, con zoom -- mascara y patron lado a lado (24x24 cada uno) ---
 function drawZoom() {
   const sel = document.getElementById('entrySel');
   const e = parseInt(sel.value, 10);
   const zoom = parseInt(document.getElementById('zoomRange').value, 10);
   const w = SPRITE_W, h = SPRITE_H;
-  const canvas = document.getElementById('zoomCanvas');
-  canvas.width = w;
-  canvas.height = h;
-  const ctx = canvas.getContext('2d');
-  const img = ctx.createImageData(w, h);
-  drawSpriteInto(img, w, e, 0, 0);
-  ctx.putImageData(img, 0, 0);
-  canvas.style.width = (w*zoom) + 'px';
-  canvas.style.height = (h*zoom) + 'px';
+
+  const patternCanvas = document.getElementById('zoomCanvasPattern');
+  patternCanvas.width = w;
+  patternCanvas.height = h;
+  const patternCtx = patternCanvas.getContext('2d');
+  const patternImg = patternCtx.createImageData(w, h);
+  drawSpriteInto(patternImg, w, e, 0, 0, 'pattern');
+  patternCtx.putImageData(patternImg, 0, 0);
+  patternCanvas.style.width = (w*zoom) + 'px';
+  patternCanvas.style.height = (h*zoom) + 'px';
+
+  const maskCanvas = document.getElementById('zoomCanvasMask');
+  maskCanvas.width = w;
+  maskCanvas.height = h;
+  const maskCtx = maskCanvas.getContext('2d');
+  const maskImg = maskCtx.createImageData(w, h);
+  drawSpriteInto(maskImg, w, e, 0, 0, 'mask');
+  maskCtx.putImageData(maskImg, 0, 0);
+  maskCanvas.style.width = (w*zoom) + 'px';
+  maskCanvas.style.height = (h*zoom) + 'px';
 }
 
 function populateSelect() {

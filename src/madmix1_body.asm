@@ -3106,7 +3106,8 @@ TABLA_FUENTE_CARACTERES:
 ; ==============================================================
 ;  64 SPRITES DE PERSONAJES (0x953B-0xB93B, 9216 bytes, 144 cada
 ;  uno) -- extraidos a fichero individual por sprite en
-;  data/sprites/ (formato 24x48 reagrupado, ver
+;  data/sprites/ (formato real 24x24, 2 planos entrelazados fila a
+;  fila: 3 bytes mascara AND + 3 bytes patron/tinta OR, ver
 ;  recursos/ptrtable_sprites.html para el catalogo visual
 ;  completo y FINDINGS.md para el detalle de la identificacion).
 ; ==============================================================

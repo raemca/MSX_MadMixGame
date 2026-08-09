@@ -17601,3 +17601,67 @@ tenian el aviso grabado con el nombre viejo.
 `roundtrip-all` de los 18 ficheros de nivel tras el cambio: 18/18
 identicos (cambio de solo un comentario, 0 bytes de datos afectados).
 
+## CORREGIDO: el formato real de los 64 sprites de personajes es 24×24 con 2 planos entrelazados (máscara+patrón), NO 24×48 de una sola imagen
+
+El milestone que resolvió `PTR_TABLA_SPRITES` (más arriba, "MILESTONE
+GRANDE: los 64 SPRITES DE PERSONAJES identificados y transcritos")
+dejó documentado que cada entrada de 144 bytes se reagrupaba en 48
+filas de 24 px de ancho, formato que el usuario identificó a simple
+vista sobre `ptrtable_sprites.html` en su momento. Esa lectura
+producía sprites reconocibles pero **con rayas horizontales
+blancas/negras de fondo y aspecto alargado** -- fue el propio usuario
+quien, viendo el catálogo ya publicado (`recursos/ptrtable_sprites.html`
+y el mosaico de actores del póster), notó ese defecto visual y
+preguntó si en realidad los datos de dos patrones se estaban
+mezclando, ya que en la versión de ZX Spectrum del juego los sprites
+son de 24×24 con dos patrones.
+
+**Comprobación empírica** (antes de tocar ningún fichero): se
+renderizaron por separado, para varios `.spr` reales
+(`27_fantasma_der_1.spr`, `00_pm_vuln_der_cerrada.spr`), tres
+hipótesis de reagrupado de los 144 bytes:
+
+1. 48 filas de 3 bytes seguidas (la lectura antigua) -- rayas de
+   fondo en todas las filas, aspecto alargado. Confirma el defecto
+   que reportó el usuario.
+2. Dos bloques de 24 filas (bytes 0-71 y 72-143 como dos imágenes
+   24×24 apiladas) -- **sigue con rayas** en ambas mitades. Descarta
+   esta hipótesis.
+3. Filas entrelazadas par/impar (fila real 0 = bytes 0-2, fila 1 =
+   bytes 3-5, fila 2 = bytes 6-8, ...) -- **sin rayas, dos imágenes
+   24×24 limpias y reconocibles**: la fantasma sale perfecta en ambos
+   planos, igual el comecocos (círculo con ojo y boca).
+
+Es decir: cada una de las 24 filas reales del sprite ocupa **6 bytes
+consecutivos** (3 de un plano + 3 del otro), no 3 bytes sueltos
+repetidos 48 veces como se asumió. Encaja exacto con el algoritmo de
+blitting que ya estaba documentado en `manual_subsistema_grafico.md`
+§4 desde antes de este hallazgo: "máscara AND (conserva el fondo
+donde el sprite es transparente) seguida de OR (aplica el patrón del
+sprite)" -- un mask+bitmap clásico necesita dos planos del mismo
+tamaño, uno por operación. También encaja con lo que ya se sabía y no
+se terminaba de explicar: `JTS2_XOR_TRANSFORM` lee 3 bytes, 48 veces
+seguidas, con auto-modificación -- son 24 pares [máscara, patrón], no
+48 filas de una imagen única.
+
+De los dos planos, el que produce el aspecto "normal" de cada
+personaje (cuerpo claro con detalles oscuros, ej. el comecocos como
+círculo blanco con ojo/boca oscuros) es el que se etiqueta aquí como
+**patrón/tinta** (offset +3 de cada grupo de 6 bytes); el otro, con
+aspecto mayormente sólido y los mismos huecos en negativo, se etiqueta
+como **máscara** (offset +0). La asignación mask=primeros 3 bytes /
+patrón=siguientes 3 bytes es la interpretación más coherente con el
+algoritmo AND-luego-OR ya documentado, pero el propio código Z80 que
+consume esta tabla (qué rutina exacta de `MOTOR_ACTORES` lee cada
+plano) sigue sin localizarse línea a línea -- igual que ya constaba
+sin resolver en el milestone original.
+
+**Actualizado**: `recursos/ptrtable_sprites.html` (decodificador y
+las 3 vistas, ahora Vista 3 muestra patrón y máscara lado a lado),
+`recursos/mmg_poster_dossier.html` (mosaico "Catálogo real de
+actores"), `src/README.md` (tabla de formatos de píxel y árbol de
+ficheros), comentario de cabecera en `src/madmix1_body.asm` antes de
+`SPR00_PM_VULN_DER_CERRADA`. No afecta a ningún byte de datos ni de
+binario compilado -- es una corrección de cómo se INTERPRETA/muestra
+el mismo `.spr` ya transcrito al 100%, no de los bytes en sí.
+
