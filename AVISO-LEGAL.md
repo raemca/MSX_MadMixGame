@@ -29,7 +29,7 @@ explican qué hace cada rutina y por qué. Se acompaña de las herramientas
 (`tools/`) que permiten recompilar esa fuente y regenerar, byte a byte, los
 mismos `.dsk`/`.cas` que arrancan en un MSX real o en un emulador — la
 verificación de que el análisis es correcto es, precisamente, que reproduce el
-original con exactitud. Con este trabajo recuperamos lo más cercano posible al
+original con exactitud. Con este trabajo recupero lo más cercano posible al
 código fuente perdido del juego, y la documentación que nunca se publicó junto
 a él.
 
