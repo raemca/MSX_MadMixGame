@@ -1,0 +1,6 @@
+# Configuración local de Claude Code (específica de esta máquina, no se comparte)
+.claude/settings.local.json
+
+# Cachés compiladas de Python (regeneradas automáticamente, no son código fuente)
+__pycache__/
+*.pyc
