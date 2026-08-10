@@ -4,7 +4,7 @@
 
 ## De quién es cada cosa
 
-**El juego no es nuestro.** *Mad Mix Game* lo publicó **Topo Soft** (catalogado
+**El juego no es mío.** *Mad Mix Game* lo publicó **Topo Soft** (catalogado
 de 1987; la propia pantalla de créditos del juego lo firma como
 "TOPOSHOW -1988-"). El programa acredita su autoría, tal cual aparece en esa
 pantalla, a **"RAPHAEL GOMEZZZ"** (programación), **"ROBERTO P.ACEBES"**
@@ -13,7 +13,7 @@ como aparecen en el binario. La propiedad intelectual del juego original — có
 gráficos, sonido y diseño — sigue siendo de Topo Soft, de las personas detrás
 de esos créditos, o de quien haya heredado esos derechos a día de hoy.
 
-**Lo que sí es nuestro** son las herramientas de este repositorio, los
+**Lo que sí es mío** son las herramientas de este repositorio, los
 comentarios del código fuente reconstruido, el análisis y la documentación
 (`FINDINGS.md`, `FLUJO_PROGRAMA.md`, `README.md` y los recursos HTML que los
 acompañan). Eso se publica bajo la licencia que conste en `LICENSE`.
@@ -29,7 +29,7 @@ explican qué hace cada rutina y por qué. Se acompaña de las herramientas
 (`tools/`) que permiten recompilar esa fuente y regenerar, byte a byte, los
 mismos `.dsk`/`.cas` que arrancan en un MSX real o en un emulador — la
 verificación de que el análisis es correcto es, precisamente, que reproduce el
-original con exactitud. Con este trabajo recuperamos lo más cercano posible al
+original con exactitud. Con este trabajo recupero lo más cercano posible al
 código fuente perdido del juego, y la documentación que nunca se publicó junto
 a él.
 
