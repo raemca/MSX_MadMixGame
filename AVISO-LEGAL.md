@@ -4,17 +4,16 @@
 
 ## De quién es cada cosa
 
-**El juego no es nuestro.** *Mad Mix Game* lo publicó **Topo Soft** (catalogado
+**El juego no es mío.** *Mad Mix Game* lo publicó **Topo Soft** (catalogado
 de 1987; la propia pantalla de créditos del juego lo firma como
 "TOPOSHOW -1988-"). El programa acredita su autoría, tal cual aparece en esa
 pantalla, a **"RAPHAEL GOMEZZZ"** (programación), **"ROBERTO P.ACEBES"**
 (gráficos) y **"COMILONAS"** (música) — pseudónimos o grafías de la época tal
-como aparecen en el binario; no se ha confirmado la identidad civil real de
-ninguno de los tres. La propiedad intelectual del juego original — código,
+como aparecen en el binario. La propiedad intelectual del juego original — código,
 gráficos, sonido y diseño — sigue siendo de Topo Soft, de las personas detrás
 de esos créditos, o de quien haya heredado esos derechos a día de hoy.
 
-**Lo que sí es nuestro** son las herramientas de este repositorio, los
+**Lo que sí es mío** son las herramientas de este repositorio, los
 comentarios del código fuente reconstruido, el análisis y la documentación
 (`FINDINGS.md`, `FLUJO_PROGRAMA.md`, `README.md` y los recursos HTML que los
 acompañan). Eso se publica bajo la licencia que conste en `LICENSE`.
