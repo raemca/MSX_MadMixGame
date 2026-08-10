@@ -4513,8 +4513,9 @@ CUERPO_L14_D244:                       ; $D244 (736 bytes) -- cuerpo completo de
 ;  byte sobrante): solo 4 estan referenciados por TABLA_CICLO_NIVELES
 ;  (niveles 1, 2, 4 y 5). Los otros 6 guiones NO tienen ningun
 ;  puntero que los referencie -- contenido real y bien formado, pero
-;  sin conectar, mismo patron que el nivel oculto y el hueco de
-;  TABLA_NIVELES (ver FINDINGS.md).
+;  sin conectar (a diferencia del nivel 15, que en su momento tambien
+;  parecia sin conectar pero resulto tener registro real en
+;  TABLA_NIVELES -- ver FINDINGS.md).
 ; ==============================================================
 ; 0xD524: nivel 1 -- referenciado exacto por TABLA_CICLO_NIVELES
 GUION_DEMO_NIVEL1:

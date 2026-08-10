@@ -4691,125 +4691,126 @@
 4513+ D524              ;  byte sobrante): solo 4 estan referenciados por TABLA_CICLO_NIVELES
 4514+ D524              ;  (niveles 1, 2, 4 y 5). Los otros 6 guiones NO tienen ningun
 4515+ D524              ;  puntero que los referencie -- contenido real y bien formado, pero
-4516+ D524              ;  sin conectar, mismo patron que el nivel oculto y el hueco de
-4517+ D524              ;  TABLA_NIVELES (ver FINDINGS.md).
-4518+ D524              ; ==============================================================
-4519+ D524              ; 0xD524: nivel 1 -- referenciado exacto por TABLA_CICLO_NIVELES
-4520+ D524              GUION_DEMO_NIVEL1:
-4521+ D524                  INCBIN "data/demos/01_nivel1.dem"
-4522+ D564              ; 0xD564: nivel 2 -- referenciado exacto por TABLA_CICLO_NIVELES
-4523+ D564              GUION_DEMO_NIVEL2:
-4524+ D564                  INCBIN "data/demos/02_nivel2.dem"
-4525+ D5C2              ; 0xD5C2: sin referenciar -- candidato a nivel 3 (hueco logico entre 2 y 4)
-4526+ D5C2              GUION_DEMO_SINREF_1:
-4527+ D5C2                  INCBIN "data/demos/03_sinref.dem"
-4528+ D5D4              ; 0xD5D4: nivel 4 -- referenciado exacto por TABLA_CICLO_NIVELES
-4529+ D5D4              GUION_DEMO_NIVEL4:
-4530+ D5D4                  INCBIN "data/demos/04_nivel4.dem"
-4531+ D616              ; 0xD616: sin referenciar
-4532+ D616              GUION_DEMO_SINREF_2:
-4533+ D616                  INCBIN "data/demos/05_sinref.dem"
-4534+ D61A              ; 0xD61A: sin referenciar
-4535+ D61A              GUION_DEMO_SINREF_3:
-4536+ D61A                  INCBIN "data/demos/06_sinref.dem"
-4537+ D632              ; 0xD632: sin referenciar
-4538+ D632              GUION_DEMO_SINREF_4:
-4539+ D632                  INCBIN "data/demos/07_sinref.dem"
-4540+ D644              ; 0xD644: nivel 5 -- referenciado exacto por TABLA_CICLO_NIVELES
-4541+ D644              GUION_DEMO_NIVEL5:
-4542+ D644                  INCBIN "data/demos/08_nivel5.dem"
-4543+ D69C              ; 0xD69C: sin referenciar
-4544+ D69C              GUION_DEMO_SINREF_5:
-4545+ D69C                  INCBIN "data/demos/09_sinref.dem"
-4546+ D6A2              ; 0xD6A2: sin referenciar, termina justo donde empieza TABLA_RLE_MARCO_CARAMELO
-4547+ D6A2              GUION_DEMO_SINREF_6:
-4548+ D6A2                  INCBIN "data/demos/10_sinref.dem"
-4549+ D6B6
-4550+ D6B6              ; ==============================================================
-4551+ D6B6              ;  0xD6B6-0xDD82 (1740 bytes): ES EL MARCO DE CARAMELO -- CONFIRMADO
-4552+ D6B6              ;  VISUALMENTE. Es una tabla RLE que DIBUJAR_MARCO_CARAMELO_VRAM
-4553+ D6B6              ;  (madmix_scr.asm, $6429) vuelca SECUENCIALMENTE en la tabla de
-4554+ D6B6              ;  patrones de VRAM completa ($0000-$17FF, 6144 bytes): 870 pares
-4555+ D6B6              ;  (valor,repeticion), BC=$0366 iteraciones x 2 bytes = exacto 1740
-4556+ D6B6              ;  bytes de tabla, terminando justo en $DD82 (donde empieza el
-4557+ D6B6              ;  codigo de mas abajo -- verificado por aritmetica exacta:
-4558+ D6B6              ;  $D6B6 + 2*$0366 = $DD82), y la SUMA de las 870 repeticiones da
-4559+ D6B6              ;  EXACTO 6144 = $1800, el tamano completo de la tabla de patrones
-4560+ D6B6              ;  de SCREEN2. Expandiendo el RLE y renderizando con la tabla de
-4561+ D6B6              ;  nombres identidad (ya confirmada en volcado de VRAM real, ver
-4562+ D6B6              ;  FINDINGS.md) sale el marco de caramelo COMPLETO Y RECONOCIBLE:
-4563+ D6B6              ;  rayas diagonales rojiblancas arriba/abajo, remates redondeados en
-4564+ D6B6              ;  las 4 esquinas y el motivo de "brillo" cerca de la esquina
-4565+ D6B6              ;  inferior izquierda -- pixel a pixel igual que
-4566+ D6B6              ;  `dump_openmsx/screen_reconstructed.png` (ver render en
-4567+ D6B6              ;  `dump_openmsx/candy_frame_reconstructed.png`). El centro sale
-4568+ D6B6              ;  negro en el render aislado porque ese es precisamente el area que
-4569+ D6B6              ;  las losetas del laberinto (GRAFICOS_LOSETAS) sobrescriben despues -- el
-4570+ D6B6              ;  marco sobrevive porque el laberinto nunca dibuja ahi.
-4571+ D6B6              ;
-4572+ D6B6              ;  Aparte de este uso principal, CALCULAR_DIRECCION_MASCARA_ACTOR ($8988, en este
-4573+ D6B6              ;  fichero) + COMPONER_ACTORES_EN_BUFFER acceden a un SUBTRAMO de esta
-4574+ D6B6              ;  misma tabla ($DC00 en adelante) de forma ALEATORIA (offset segun
-4575+ D6B6              ;  la posicion en pantalla del actor), leyendo pares de 16 bits como
-4576+ D6B6              ;  mascaras AND/OR de composicion de sprite contra el fondo (ver
-4577+ D6B6              ;  hallazgo "Zona 0xDC00" en FINDINGS.md) -- confirmado en vivo que
-4578+ D6B6              ;  esta subzona es completamente estatica en RAM durante el juego.
-4579+ D6B6              ; ==============================================================
-4580+ D6B6              TABLA_RLE_MARCO_CARAMELO:
-4581+ D6B6                  INCBIN "data/img/marco_caramelo_forma.img"
-4582+ DD82
-4583+ DD82              ; ==============================================================
-4584+ DD82              ;  0xDD82-0xDD8A (8 bytes): CODIGO real, sin llamador conocido en
-4585+ DD82              ;  el codigo ya transcrito (posible punto de entrada externo, p.ej.
-4586+ DD82              ;  desde MADMIX0.BIN u otro mecanismo de reinicio/comprobacion --
-4587+ DD82              ;  disparador sin confirmar, ver FINDINGS.md). Conmuta la
-4588+ DD82              ;  configuracion de slot primario (A=$55, mismo patron que usa
-4589+ DD82              ;  MADMIX0.BIN via el puerto $A8) y salta de vuelta al arranque.
-4590+ DD82              ; ==============================================================
-4591+ DD82              REINICIO_SLOT_DD82:
-4592+ DD82 F3               DI
-4593+ DD83 3E 55            LD     A,$55
-4594+ DD85 D3 A8            OUT    ($A8),A
-4595+ DD87 C3 00 84         JP     START             ; = $8400
-4596+ DD8A
-4597+ DD8A              ; ==============================================================
-4598+ DD8A              ;  0xDD8A-0xDD93 (9 bytes): CODIGO real, CON llamador confirmado --
-4599+ DD8A              ;  es el destino real de "CALL $DD8A" en LEER_JOYSTICK. Escribe A
-4600+ DD8A              ;  (el valor de mezcla del PSG ya preparado por el llamador) y
-4601+ DD8A              ;  despues selecciona el registro 14 del PSG (Puerto de E/S A,
-4602+ DD8A              ;  usado en MSX para leer el joystick 1) y devuelve su valor en A.
-4603+ DD8A              ; ==============================================================
-4604+ DD8A              CONFIGURAR_Y_LEER_JOYSTICK_PSG:
-4605+ DD8A D3 A1            OUT    ($A1),A
-4606+ DD8C 3E 0E            LD     A,14                   ; registro 14 del PSG (Puerto de E/S A, usado en MSX para leer el joystick 1)
-4607+ DD8E D3 A0            OUT    ($A0),A
-4608+ DD90 DB A2            IN     A,($A2)
-4609+ DD92 C9               RET
-4610+ DD93
-4611+ DD93              ; --- 0xDD93-0xDD96 (3 bytes): CODIGO MUERTO confirmado -- POP HL /
-4612+ DD93              ; EI / RET, sin NINGUN JP/JR/CALL en todo el codigo fuente
-4613+ DD93              ; reconstruido que apunte aqui (busqueda exhaustiva, ver FINDINGS.md).
-4614+ DD93              ; Mismo patron exacto en 0x2BF0 de madmix_scr_body.asm (tambien
-4615+ DD93              ; muerto, mismo hallazgo). ---
-4616+ DD93 E1               POP    HL
-4617+ DD94 FB               EI
-4618+ DD95 C9               RET
-4619+ DD96
-4620+ DD96 FF FF FF...      DS $DDA0-$, $FF   ; 0xDD96-0xDD9F (10 bytes): relleno solido $FF
-4621+ DDA0
-4622+ DDA0              ; ==============================================================
-4623+ DDA0              ;  Byte final $DDA0 ($CD): fuera de los datos reales del juego.
-4624+ DDA0              ;  $DDA0 es el ultimo byte INCLUSIVE del rango real cargado (ver
-4625+ DDA0              ;  nota de mas arriba sobre por que el limite real es $DDA1
-4626+ DDA0              ;  exclusivo); este $CD es simplemente el primer byte de lo que
-4627+ DDA0              ;  seria la siguiente instruccion si el fichero continuara, pero
-4628+ DDA0              ;  el .BIN termina aqui -- relleno de sector de disco, no parte
-4629+ DDA0              ;  del programa.
-4630+ DDA0              ; ==============================================================
-4631+ DDA0 CD               DB $CD
-4632+ DDA1
-4633+ DDA1              END_OF_FILE_M1:
-4634+ DDA1
+4516+ D524              ;  sin conectar (a diferencia del nivel 15, que en su momento tambien
+4517+ D524              ;  parecia sin conectar pero resulto tener registro real en
+4518+ D524              ;  TABLA_NIVELES -- ver FINDINGS.md).
+4519+ D524              ; ==============================================================
+4520+ D524              ; 0xD524: nivel 1 -- referenciado exacto por TABLA_CICLO_NIVELES
+4521+ D524              GUION_DEMO_NIVEL1:
+4522+ D524                  INCBIN "data/demos/01_nivel1.dem"
+4523+ D564              ; 0xD564: nivel 2 -- referenciado exacto por TABLA_CICLO_NIVELES
+4524+ D564              GUION_DEMO_NIVEL2:
+4525+ D564                  INCBIN "data/demos/02_nivel2.dem"
+4526+ D5C2              ; 0xD5C2: sin referenciar -- candidato a nivel 3 (hueco logico entre 2 y 4)
+4527+ D5C2              GUION_DEMO_SINREF_1:
+4528+ D5C2                  INCBIN "data/demos/03_sinref.dem"
+4529+ D5D4              ; 0xD5D4: nivel 4 -- referenciado exacto por TABLA_CICLO_NIVELES
+4530+ D5D4              GUION_DEMO_NIVEL4:
+4531+ D5D4                  INCBIN "data/demos/04_nivel4.dem"
+4532+ D616              ; 0xD616: sin referenciar
+4533+ D616              GUION_DEMO_SINREF_2:
+4534+ D616                  INCBIN "data/demos/05_sinref.dem"
+4535+ D61A              ; 0xD61A: sin referenciar
+4536+ D61A              GUION_DEMO_SINREF_3:
+4537+ D61A                  INCBIN "data/demos/06_sinref.dem"
+4538+ D632              ; 0xD632: sin referenciar
+4539+ D632              GUION_DEMO_SINREF_4:
+4540+ D632                  INCBIN "data/demos/07_sinref.dem"
+4541+ D644              ; 0xD644: nivel 5 -- referenciado exacto por TABLA_CICLO_NIVELES
+4542+ D644              GUION_DEMO_NIVEL5:
+4543+ D644                  INCBIN "data/demos/08_nivel5.dem"
+4544+ D69C              ; 0xD69C: sin referenciar
+4545+ D69C              GUION_DEMO_SINREF_5:
+4546+ D69C                  INCBIN "data/demos/09_sinref.dem"
+4547+ D6A2              ; 0xD6A2: sin referenciar, termina justo donde empieza TABLA_RLE_MARCO_CARAMELO
+4548+ D6A2              GUION_DEMO_SINREF_6:
+4549+ D6A2                  INCBIN "data/demos/10_sinref.dem"
+4550+ D6B6
+4551+ D6B6              ; ==============================================================
+4552+ D6B6              ;  0xD6B6-0xDD82 (1740 bytes): ES EL MARCO DE CARAMELO -- CONFIRMADO
+4553+ D6B6              ;  VISUALMENTE. Es una tabla RLE que DIBUJAR_MARCO_CARAMELO_VRAM
+4554+ D6B6              ;  (madmix_scr.asm, $6429) vuelca SECUENCIALMENTE en la tabla de
+4555+ D6B6              ;  patrones de VRAM completa ($0000-$17FF, 6144 bytes): 870 pares
+4556+ D6B6              ;  (valor,repeticion), BC=$0366 iteraciones x 2 bytes = exacto 1740
+4557+ D6B6              ;  bytes de tabla, terminando justo en $DD82 (donde empieza el
+4558+ D6B6              ;  codigo de mas abajo -- verificado por aritmetica exacta:
+4559+ D6B6              ;  $D6B6 + 2*$0366 = $DD82), y la SUMA de las 870 repeticiones da
+4560+ D6B6              ;  EXACTO 6144 = $1800, el tamano completo de la tabla de patrones
+4561+ D6B6              ;  de SCREEN2. Expandiendo el RLE y renderizando con la tabla de
+4562+ D6B6              ;  nombres identidad (ya confirmada en volcado de VRAM real, ver
+4563+ D6B6              ;  FINDINGS.md) sale el marco de caramelo COMPLETO Y RECONOCIBLE:
+4564+ D6B6              ;  rayas diagonales rojiblancas arriba/abajo, remates redondeados en
+4565+ D6B6              ;  las 4 esquinas y el motivo de "brillo" cerca de la esquina
+4566+ D6B6              ;  inferior izquierda -- pixel a pixel igual que
+4567+ D6B6              ;  `dump_openmsx/screen_reconstructed.png` (ver render en
+4568+ D6B6              ;  `dump_openmsx/candy_frame_reconstructed.png`). El centro sale
+4569+ D6B6              ;  negro en el render aislado porque ese es precisamente el area que
+4570+ D6B6              ;  las losetas del laberinto (GRAFICOS_LOSETAS) sobrescriben despues -- el
+4571+ D6B6              ;  marco sobrevive porque el laberinto nunca dibuja ahi.
+4572+ D6B6              ;
+4573+ D6B6              ;  Aparte de este uso principal, CALCULAR_DIRECCION_MASCARA_ACTOR ($8988, en este
+4574+ D6B6              ;  fichero) + COMPONER_ACTORES_EN_BUFFER acceden a un SUBTRAMO de esta
+4575+ D6B6              ;  misma tabla ($DC00 en adelante) de forma ALEATORIA (offset segun
+4576+ D6B6              ;  la posicion en pantalla del actor), leyendo pares de 16 bits como
+4577+ D6B6              ;  mascaras AND/OR de composicion de sprite contra el fondo (ver
+4578+ D6B6              ;  hallazgo "Zona 0xDC00" en FINDINGS.md) -- confirmado en vivo que
+4579+ D6B6              ;  esta subzona es completamente estatica en RAM durante el juego.
+4580+ D6B6              ; ==============================================================
+4581+ D6B6              TABLA_RLE_MARCO_CARAMELO:
+4582+ D6B6                  INCBIN "data/img/marco_caramelo_forma.img"
+4583+ DD82
+4584+ DD82              ; ==============================================================
+4585+ DD82              ;  0xDD82-0xDD8A (8 bytes): CODIGO real, sin llamador conocido en
+4586+ DD82              ;  el codigo ya transcrito (posible punto de entrada externo, p.ej.
+4587+ DD82              ;  desde MADMIX0.BIN u otro mecanismo de reinicio/comprobacion --
+4588+ DD82              ;  disparador sin confirmar, ver FINDINGS.md). Conmuta la
+4589+ DD82              ;  configuracion de slot primario (A=$55, mismo patron que usa
+4590+ DD82              ;  MADMIX0.BIN via el puerto $A8) y salta de vuelta al arranque.
+4591+ DD82              ; ==============================================================
+4592+ DD82              REINICIO_SLOT_DD82:
+4593+ DD82 F3               DI
+4594+ DD83 3E 55            LD     A,$55
+4595+ DD85 D3 A8            OUT    ($A8),A
+4596+ DD87 C3 00 84         JP     START             ; = $8400
+4597+ DD8A
+4598+ DD8A              ; ==============================================================
+4599+ DD8A              ;  0xDD8A-0xDD93 (9 bytes): CODIGO real, CON llamador confirmado --
+4600+ DD8A              ;  es el destino real de "CALL $DD8A" en LEER_JOYSTICK. Escribe A
+4601+ DD8A              ;  (el valor de mezcla del PSG ya preparado por el llamador) y
+4602+ DD8A              ;  despues selecciona el registro 14 del PSG (Puerto de E/S A,
+4603+ DD8A              ;  usado en MSX para leer el joystick 1) y devuelve su valor en A.
+4604+ DD8A              ; ==============================================================
+4605+ DD8A              CONFIGURAR_Y_LEER_JOYSTICK_PSG:
+4606+ DD8A D3 A1            OUT    ($A1),A
+4607+ DD8C 3E 0E            LD     A,14                   ; registro 14 del PSG (Puerto de E/S A, usado en MSX para leer el joystick 1)
+4608+ DD8E D3 A0            OUT    ($A0),A
+4609+ DD90 DB A2            IN     A,($A2)
+4610+ DD92 C9               RET
+4611+ DD93
+4612+ DD93              ; --- 0xDD93-0xDD96 (3 bytes): CODIGO MUERTO confirmado -- POP HL /
+4613+ DD93              ; EI / RET, sin NINGUN JP/JR/CALL en todo el codigo fuente
+4614+ DD93              ; reconstruido que apunte aqui (busqueda exhaustiva, ver FINDINGS.md).
+4615+ DD93              ; Mismo patron exacto en 0x2BF0 de madmix_scr_body.asm (tambien
+4616+ DD93              ; muerto, mismo hallazgo). ---
+4617+ DD93 E1               POP    HL
+4618+ DD94 FB               EI
+4619+ DD95 C9               RET
+4620+ DD96
+4621+ DD96 FF FF FF...      DS $DDA0-$, $FF   ; 0xDD96-0xDD9F (10 bytes): relleno solido $FF
+4622+ DDA0
+4623+ DDA0              ; ==============================================================
+4624+ DDA0              ;  Byte final $DDA0 ($CD): fuera de los datos reales del juego.
+4625+ DDA0              ;  $DDA0 es el ultimo byte INCLUSIVE del rango real cargado (ver
+4626+ DDA0              ;  nota de mas arriba sobre por que el limite real es $DDA1
+4627+ DDA0              ;  exclusivo); este $CD es simplemente el primer byte de lo que
+4628+ DDA0              ;  seria la siguiente instruccion si el fichero continuara, pero
+4629+ DDA0              ;  el .BIN termina aqui -- relleno de sector de disco, no parte
+4630+ DDA0              ;  del programa.
+4631+ DDA0              ; ==============================================================
+4632+ DDA0 CD               DB $CD
+4633+ DDA1
+4634+ DDA1              END_OF_FILE_M1:
+4635+ DDA1
 # file closed: madmix1_body.asm
   35  DDA1
   36  DDA1                  SAVEBIN "build/disk/MADMIX1.BIN", START, END_OF_FILE_M1-START

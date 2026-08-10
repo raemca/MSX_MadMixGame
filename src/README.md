@@ -191,7 +191,7 @@ madmixgame/
     │   │   │   └── 03_evt09_....snd/.txt a 15_evt03_....snd/.txt  ← 13 efectos de sonido individuales, uno por evento de `$6128` (antes tratados como un solo bloque de 383 bytes junto al canal 2 — separados esta sesión, cada uno con su índice de evento y candidato del catálogo de sonidos en el nombre/comentario)
     │   │   ├── spt/                     ← los 13 subpatrones compartidos ($CB9C-$CDCB, llamados via `CALL_SUBPATTERN` desde los scripts de música), extensión `.spt` (mismo bytecode que `.snd`, `mmsnd_tool.py` los trata sin ningún cambio — solo se distinguen para no mezclarlos con los 16 scripts reales) — antes `DB` inline en `madmix1_body.asm`, consolidados a fichero propio esta sesión, ver FINDINGS.md. Nombrados por índice de entrada en `TABLA_SUBPATRONES_PSG` (00-12), no por orden de memoria (la entrada 12, `$CBB0`, cae en memoria entre las entradas 0 y 1): `00_subpatron00_cb9c.spt/.txt` .. `12_subpatron12_cbb0.spt/.txt`
     │   │   └── _engine_tables.bin      ← copia de trabajo de `$C8DE-$CDCB` completo (tono, instrumentos, formas de envolvente Y los 13 subpatrones) para que `mmsnd_render.py` tenga un único bloque de memoria simulada donde resolver `CALL_SUBPATTERN` — sigue siendo solo una instantánea de los bytes compilados, no una fuente editable; la tabla de tono/instrumentos/envolvente sigue viviendo como `DB` inline en `madmix1_body.asm`, los subpatrones vienen de sus `.spt` propios (INCBIN) en `spt/`, pero los bytes finales son idénticos en ambos casos, así que esta copia no necesitó regenerarse
-    │   └── niveles/                    ← cuerpos/cabeceras crudos de cada nivel (12 cuerpos + 3 cabeceras + 1 nivel oculto sin usar, ver FINDINGS.md). Rejillas de losetas ya DESCIFRADAS (índice 0-90 = catálogo real de `data/tiles/*.til`, bit 7 = flag sin confirmar en tiempo de ejecución). Cada `.bin` (el que se compila con INCBIN) tiene un `.txt` gemelo (formato de texto propio, un byte hex por celda, una fila por línea — ver `tools/mmlvl_tool.py`) que es el que se edita a mano, igual que el `.snd`/`.txt` del sonido:
+    │   └── niveles/                    ← cuerpos/cabeceras crudos de cada nivel (13 cuerpos + 3 cabeceras, incluye el nivel 15 -- antes creído "oculto/sin usar", confirmado real y jugable en partida normal, ver manual_niveles.md y FINDINGS.md). Rejillas de losetas ya DESCIFRADAS (índice 0-90 = catálogo real de `data/tiles/*.til`, bit 7 = flag sin confirmar en tiempo de ejecución). Cada `.bin` (el que se compila con INCBIN) tiene un `.txt` gemelo (formato de texto propio, un byte hex por celda, una fila por línea — ver `tools/mmlvl_tool.py`) que es el que se edita a mano, igual que el `.snd`/`.txt` del sonido:
     │       ├── body_l13.bin/.txt       ← cuerpo COMPLETO del nivel 13 (672 bytes = 21×32, rejilla completa). A DIFERENCIA del resto de este directorio, este fichero y `body_l14.bin` compilan dentro de MADMIX1.BIN (INCBIN en madmix1_body.asm), no en MADMIX.SCR — RESUELTO: es el antiguo `maze_data.bin` partido y luego reunificado, ver FINDINGS.md "RESUELTO EL PROPÓSITO DE maze_data.bin". Antes partido en `body_l13_head_cfa4.bin` (92B; antes `RM_TABLE_CFA4`/`BODY_L13_HEAD_CFA4`) + `body_l13_maze.bin` (580B) — unificados: los primeros 92 bytes NUNCA fueron dato de sonido (etiqueta antigua descartada), decodifican a una sala de laberinto coherente, misma factura que el resto de niveles reales
     │       └── body_l14.bin/.txt       ← cuerpo COMPLETO del nivel 14 (736 bytes = 23×32, rejilla completa). Antes partido en `body_l14_maze.bin` (700B) + `body_l14_tail_demo1.bin`/`DEMO_SCRIPT_NIVEL1` (36B, antes creído el arranque de un guion de demo) — unificado tras confirmar que LEVELCYCLE_TABLE SIEMPRE apuntó a `$D524`, nunca a `$D500`, así que esos 36 bytes nunca fueron guion de demo: siempre fueron cola del cuerpo del nivel 14, mismo tipo de error que `body_l13.bin`, ver FINDINGS.md
 
@@ -327,24 +327,25 @@ directo en el navegador:
   Documento vivo, regenerar tras renombrados con
   `py tools/gen_flow_diagram.py`.
 - **`editor_niveles.html`** — editor visual de las rejillas de losetas
-  de `data/niveles/` (12 cuerpos + 3 cabeceras + niveles 13/14 + el
-  nivel oculto, ver abajo): paleta de las 91 losetas reales (reutiliza
-  el decodificador de `graficos.html`), pinta con clic/arrastre,
-  contador de bolitas en vivo contra el objetivo real de
-  `LEVEL_TABLE`, y botones para abrir/descargar el mismo formato
-  `.txt` que usa `tools/mmlvl_tool.py` (autocontenido, sin servidor —
-  el guardado es una descarga de fichero, no escritura directa a
-  disco). Las cabeceras son de solo lectura (compartidas por varios
-  niveles). Los niveles 13 (`body_l13.bin`, 21×32) y 14 (`body_l14.bin`,
-  23×32) son cada uno un único fichero, como cualquier otro nivel —
-  ambos estuvieron partidos en dos ficheros hasta que se confirmó que
-  esas particiones venían de deducciones erróneas de sesiones
-  antiguas (el nivel 13 no compartía nada con sonido; los últimos 36
-  bytes del nivel 14 no eran un guion de demo reasignado); unificados
-  y consolidados (ver `FINDINGS.md`). El nivel oculto se etiqueta como
-  "nivel 15"
-  a modo de referencia (numeración de conveniencia, sin ningún
-  enganche real a `LEVEL_TABLE` todavía). No valida posiciones de
+  de `data/niveles/` (13 cuerpos + 3 cabeceras, los 15 niveles reales):
+  paleta de las 91 losetas reales (reutiliza el decodificador de
+  `graficos.html`), pinta con clic/arrastre, contador de bolitas en
+  vivo contra el objetivo real de `LEVEL_TABLE`, y botones para
+  abrir/descargar el mismo formato `.txt` que usa `tools/mmlvl_tool.py`
+  (autocontenido, sin servidor — el guardado es una descarga de
+  fichero, no escritura directa a disco). Las cabeceras son de solo
+  lectura (compartidas por varios niveles). Los niveles 13
+  (`body_l13.bin`, 21×32) y 14 (`body_l14.bin`, 23×32) son cada uno un
+  único fichero, como cualquier otro nivel — ambos estuvieron
+  partidos en dos ficheros hasta que se confirmó que esas particiones
+  venían de deducciones erróneas de sesiones antiguas (el nivel 13 no
+  compartía nada con sonido; los últimos 36 bytes del nivel 14 no eran
+  un guion de demo reasignado); unificados y consolidados (ver
+  `FINDINGS.md`). El nivel 15 (`body_l15.bin`) es igual de normal:
+  tiene registro propio en `LEVEL_TABLE` (el registro 15) y se alcanza
+  jugando con normalidad tras completar el 14 — la etiqueta "nivel
+  oculto" de análisis previos de este mismo proyecto queda descartada,
+  ver `manual_niveles.md` §4 y `FINDINGS.md`. No valida posiciones de
   ítems/enemigos (tablas de coordenadas aparte, fuera de esta primera
   pasada).
 
@@ -517,7 +518,10 @@ Y luego arrancar `copia.dsk` en openMSX como el disco original.
    fotogramas, dirección simulada]` terminados en `$FF`) —
    consumidos por `TAIL_LEVELCYCLE_MAIN` vía `LEVELCYCLE_TABLE`, que
    solo referencia 4 de los 10 (niveles 1/2/4/5); los otros 6 son
-   guiones reales sin conectar, mismo patrón que el nivel oculto;
+   guiones reales sin conectar (a diferencia del nivel 15, que en su
+   momento también parecía "sin conectar" pero resultó tener registro
+   real en `LEVEL_TABLE` — ver más abajo; estos 6 guiones siguen sin
+   ningún puntero conocido que los use);
    **¡EL MARCO DE CARAMELO EN SÍ!** (`TABLA_RLE_MARCO_CARAMELO`,
    `0xD6B6-0xDD82`, 1740 bytes) — una tabla RLE cuyas 870
    repeticiones suman exacto 6144 bytes (la tabla de patrones de
@@ -623,14 +627,18 @@ Y luego arrancar `copia.dsk` en openMSX como el disco original.
    — hecho, 0 diferencias byte a byte. ~~Transcribir los cuerpos y
    cabeceras de los 14 niveles (`0x335C-0x511C`)~~ — hecho, 0
    diferencias byte a byte en los 7616 bytes (ver
-   `src/data/niveles/`); de paso se descubrió un **15º nivel oculto
-   sin usar** en `0x48BC-0x4AFC` (`BODY_HIDDEN_48BC`), no
-   referenciado por ningún registro de `LEVEL_TABLE` — **confirmado
+   `src/data/niveles/`); de paso se descubrió un **15º nivel** en
+   `0x48BC-0x4AFC` (`BODY_HIDDEN_48BC`), en aquel momento sin
+   registro conocido en `LEVEL_TABLE` — **confirmado
    visualmente** (ver `recursos/nivel_oculto.html`): las paredes
    dibujan la silueta de un comecocos bordeada de losetas de
    dirección única. Encaja con que el juego "se supone" que tiene 15
    niveles pero nunca se localizaron los 15 jugando ni en fuentes
-   externas. ~~Transcribir el subsistema de activación de ítems
+   externas. **Actualización posterior**: sí tiene registro real en
+   `LEVEL_TABLE` (el registro 15, antes mal etiquetado) y se alcanza
+   jugando con normalidad tras completar el nivel 14 — no es un nivel
+   "oculto/sin usar", es un nivel normal más; ver `manual_niveles.md`
+   §4 y `FINDINGS.md`. ~~Transcribir el subsistema de activación de ítems
    especiales (`0x5478-0x5904`)~~ — hecho, 0 diferencias byte a byte
    en los 1164 bytes. ~~Transcribir `0x511C-0x545F`~~ — hecho, 0
    diferencias byte a byte en los 835 bytes; resultó ser mucho más
