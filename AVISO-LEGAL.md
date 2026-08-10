@@ -8,7 +8,7 @@
 de 1987; la propia pantalla de créditos del juego lo firma como
 "TOPOSHOW -1988-"). El programa acredita su autoría, tal cual aparece en esa
 pantalla, a **"RAPHAEL GOMEZZZ"** (programación), **"ROBERTO P.ACEBES"**
-(gráficos) y **"COMILONAS"** (música) — pseudónimos o grafías de la época tal
+(gráficos) y **"GOMILONAS"** (música) — pseudónimos o grafías de la época tal
 como aparecen en el binario. La propiedad intelectual del juego original — código,
 gráficos, sonido y diseño — sigue siendo de Topo Soft, de las personas detrás
 de esos créditos, o de quien haya heredado esos derechos a día de hoy.
