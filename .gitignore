@@ -4,3 +4,6 @@
 # Cachés compiladas de Python (regeneradas automáticamente, no son código fuente)
 __pycache__/
 *.pyc
+
+# Volcados de RAM/VRAM y capturas de openMSX usados como referencia de trabajo (solo local)
+dump_openmsx/
