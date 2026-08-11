@@ -40,7 +40,7 @@ musician credited in the game's credits, believing he was fixing a
 typo (`"COMILONAS"` → `"GOMILONAS"`). When merging that branch,
 instead of simply accepting the developer's change (it's his project, his
 edit, made in good faith) or simply dismissing it (he might be right
-— he actually played the game), the check was mechanical:
+— the developer knows the game firsthand), the check was mechanical:
 look up the literal byte in the already-verified source code
 (`DB "COMILONAS"`, extracted directly from the ROM). The data won,
 not the person nor the AI. That was explained to the developer with the
@@ -60,8 +60,8 @@ reconstruct on its own:**
 - Identifying the 64 character sprites at a glance on a
   raw render, with no naming hints at all — recognizing "this is
   Pac-Man with his mouth half-open", "this is the vulnerable
-  ghost" is visual recognition trained by actually having played the
-  game, not something deducible from the structure of the
+  ghost" is visual recognition trained by direct familiarity with
+  the game, not something deducible from the structure of the
   data.
 - Explaining game mechanics that aren't obvious from the code
   (the L-shaped trapdoor that flips over, the real order of

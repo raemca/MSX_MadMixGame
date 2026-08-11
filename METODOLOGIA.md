@@ -94,8 +94,8 @@ Ejemplos concretos de esta disciplina aplicada en la práctica:
 - Los **64 sprites de personajes** se localizaron primero por una
   pista estructural (una tabla de 64 punteros con paso fijo de 144
   bytes cayendo dentro de un hueco sin descifrar), pero **no se dieron
-  por resueltos hasta que el propio técnico, jugador original del
-  juego, los identificó a simple vista** sobre un render crudo sin
+  por resueltos hasta que el propio técnico los identificó a simple
+  vista** sobre un render crudo sin
   ninguna hipótesis de formato previa — combinando evidencia
   estructural (de la IA) con conocimiento vivido (del técnico).
 - El **`.dsk`/`.cas` reconstruidos** no se consideran terminados
@@ -106,8 +106,9 @@ Ejemplos concretos de esta disciplina aplicada en la práctica:
   deliberadamente corregido del nivel 13, y un puñado de bytes ajenos
   ya documentados) — nunca una lista abierta de "cosas raras sin
   explicar".
-- Esta misma sesión, al corregir el formato real de los sprites
-  (ver §10), la verificación fue empírica antes que teórica: se
+- Esta misma sesión, al corregir el formato real de los sprites (ver
+  Fase 3 más abajo, y el caso completo en `REFLEXION_COLABORACION_IA.md`),
+  la verificación fue empírica antes que teórica: se
   probaron tres hipótesis de reagrupado de los mismos bytes
   renderizándolas, y solo se adoptó la que no dejaba ningún artefacto
   visual sin explicar — no se aceptó "parece razonable", se exigió
@@ -205,9 +206,9 @@ compartidas) y de un 15º nivel que en un primer momento parecía
 sesión posterior encontró que sí tenía registro real en la tabla de
 niveles (mal etiquetado como "20 bytes sin identificar") y que se
 alcanza jugando con total normalidad al completar el nivel 14. Este
-caso concreto se explica con más detalle en §10 y en
-`REFLEXION_COLABORACION_IA.md`, porque se repitió — con matices
-distintos — dos veces en la historia del proyecto.
+caso concreto se explica con más detalle en §5 (más abajo), porque se
+repitió — con matices distintos — dos veces en la historia del
+proyecto.
 
 ### Fase 8 — Unificación: de ficheros sueltos a un proyecto compilable de verdad
 
@@ -276,13 +277,14 @@ y cómo se detectaron:
   real en la tabla de niveles. Vuelto a corregir en esta misma sesión
   (agosto de 2026), porque la documentación seguía usando la etiqueta
   "oculto" en varios sitios como si fuera el estado vigente en vez de
-  una fase ya superada — ver `REFLEXION_COLABORACION_IA.md` §4.
+  una fase ya superada.
 - **El formato de los 64 sprites de personajes**: se documentó
   primero como una única imagen de 24×48 píxeles por entrada, lectura
   que producía sprites reconocibles pero con rayas horizontales de
   fondo. Corregido en esta sesión al comprobar empíricamente que son
   en realidad 24×24 con dos planos entrelazados fila a fila
-  (máscara + patrón) — ver §10.
+  (máscara + patrón) — ver el caso completo en
+  `REFLEXION_COLABORACION_IA.md`.
 - **El crédito musical del juego**: una edición hecha directamente en
   GitHub "corrigió" el nombre real del músico (extraído literalmente
   de la ROM, `"COMILONAS"`) a `"GOMILONAS"`, creyendo que era una

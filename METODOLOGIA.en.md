@@ -94,9 +94,9 @@ Concrete examples of this discipline applied in practice:
 - The **64 character sprites** were first located by a
   structural clue (a table of 64 pointers with a fixed 144-byte
   stride falling inside an undeciphered gap), but they were **not
-  considered resolved until the developer, the game's original
-  player, identified them at a glance** on a raw render with no
-  prior format hypothesis at all — combining structural
+  considered resolved until the developer identified them at a
+  glance** on a raw render with no prior format hypothesis at
+  all — combining structural
   evidence (from the AI) with lived knowledge (from the developer).
 - The reconstructed **`.dsk`/`.cas`** are not considered finished
   because "they compile with no errors" — they're considered
@@ -106,8 +106,9 @@ Concrete examples of this discipline applied in practice:
   explained** list of differences (the deliberately fixed
   level-13 bug, and a handful of already-documented unrelated bytes)
   — never an open list of "weird unexplained stuff".
-- In this very session, while correcting the real sprite format
-  (see §10), the verification was empirical before it was
+- In this very session, while correcting the real sprite format (see
+  Phase 3 below, and the full case in `REFLEXION_COLABORACION_IA.md`),
+  the verification was empirical before it was
   theoretical: three regrouping hypotheses for the same bytes were
   tested by rendering them, and only the one that left no
   visual artifact unexplained was adopted — "looks reasonable" was
@@ -205,9 +206,8 @@ headers) and a 15th level that at first looked like
 later session found that it did have a real register in the
 level table (mislabeled as "20 bytes unidentified") and that it's
 reached by playing entirely normally after completing level 14. This
-specific case is explained in more detail in §10 and in
-`REFLEXION_COLABORACION_IA.md`, because it repeated — with
-different nuances — twice in the project's history.
+specific case is explained in more detail in §5 (below), because it
+repeated — with different nuances — twice in the project's history.
 
 ### Phase 8 — Unification: from loose files to a truly compilable project
 
@@ -276,14 +276,14 @@ and how they were caught:
   its real register in the level table. Corrected again in this
   same session (August 2026), because the documentation kept
   using the "hidden" label in several places as if it were the
-  current state instead of an already-superseded phase — see
-  `REFLEXION_COLABORACION_IA.md` §4.
+  current state instead of an already-superseded phase.
 - **The format of the 64 character sprites**: first documented
   as a single 24×48-pixel image per entry, a reading that
   produced recognizable sprites but with horizontal background
   stripes. Corrected in this session by empirically checking that they
   are actually 24×24 with two planes interleaved row by row
-  (mask + pattern) — see §10.
+  (mask + pattern) — see the full case in
+  `REFLEXION_COLABORACION_IA.md`.
 - **The game's music credit**: an edit made directly on
   GitHub "fixed" the real musician's name (extracted literally
   from the ROM, `"COMILONAS"`) to `"GOMILONAS"`, believing it was

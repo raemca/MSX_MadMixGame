@@ -40,7 +40,8 @@ acreditado en los créditos del juego, creyendo corregir una errata
 (`"COMILONAS"` → `"GOMILONAS"`). Al fusionar esa rama, en vez de
 aceptar sin más el cambio del técnico (es su proyecto, su edición,
 hecha con buena intención) ni descartarlo sin más (podría tener razón
-— el técnico jugó el juego de verdad), la comprobación fue mecánica:
+— el técnico conoce el juego de primera mano), la comprobación fue
+mecánica:
 buscar el byte literal en el código fuente ya verificado
 (`DB "COMILONAS"`, extraído directamente de la ROM). El dato ganó, no
 la persona ni la IA. Eso se le explicó al técnico con la evidencia
@@ -59,8 +60,8 @@ bytes puede reconstruir por sí solo:**
 - Identificar los 64 sprites de personajes a simple vista sobre un
   render crudo, sin ninguna pista de nombres — reconocer "esto es el
   comecocos con la boca a medio abrir", "esto es el fantasma
-  vulnerable" es reconocimiento visual entrenado por haber jugado el
-  juego de verdad, no algo que se deduzca de la estructura de los
+  vulnerable" es reconocimiento visual entrenado por familiaridad
+  directa con el juego, no algo que se deduzca de la estructura de los
   datos.
 - Explicar mecánicas de juego que no son evidentes desde el código
   (la trampilla en L que se voltea, el orden real de la secuencia de
