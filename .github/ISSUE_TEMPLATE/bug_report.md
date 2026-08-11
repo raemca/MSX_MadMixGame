@@ -1,50 +1,64 @@
 ---
-name: "Reporte de Error de Desensamblado / Etiquetado Z80"
-about: Plantilla para reportar errores en la delimitación de datos/código, naming de funciones/variables, o divergencias en la reconstrucción del binario original.
-title: "[$XXXX] <Resumen del problema de desensamblado o etiqueta>"
-labels: disassembly, data-structure, byte-match, z80
+name: "Reporte de error en la reconstrucción (Mad Mix Game / MSX1)"
+about: Plantilla para reportar errores en el desensamblado, etiquetado, datos o herramientas de este proyecto.
+title: "[$XXXX] <Resumen del problema>"
+labels: bug, desensamblado
 assignees: ''
 ---
 
-## 📌 Resumen del Problema (Overview)
-<!-- Describe el error encontrado en la traducción del binario al código fuente (ej. datos interpretados como código, rutina mal identificada, variable con tipo/tamaño incorrecto, o desalineación al reensamblar). -->
+## 📌 Resumen del Problema
 
-**Interpretación actual en el fuente:**
-<!-- Cómo está nombrada o estructurada actualmente esta sección en el proyecto. -->
+<!-- Describe el error encontrado: datos interpretados como código, rutina mal
+identificada, variable con tamaño incorrecto, divergencia byte a byte,
+herramienta de tools/ que falla, documentación desactualizada, etc. -->
 
-**Interpretación corregida / propuesta:**
-<!-- Cómo debería estructurarse, nombrarse o delimitarse según el análisis del binario original. -->
+**Estado actual en el proyecto:**
+<!-- Cómo está nombrado/estructurado/documentado actualmente. -->
 
----
-
-## 📍 Ubicación en Memoria y Archivos (Location)
-
-- **Dirección de Memoria (PC / Org):** `$XXXX` (ej. `$8000` / `#8000`)
-- **Offset en el Binario Original:** `0xXXXX`
-- **Archivo afectado en el repo:** `[ej. src/engine/player.asm, data/sprites.inc]`
-- **Plataforma / Arquitectura target:** [ej. ZX Spectrum 48K/128K, Amstrad CPC, MSX, Game Boy, ColecoVision]
-- **Ensamblador / Toolchain de reconstrucción:** [ej. sjasmplus, Pasmo, z80asm, SkoolKit]
+**Corrección propuesta:**
+<!-- Cómo debería ser, según tu análisis del binario original o de la ejecución en vivo. -->
 
 ---
 
-## 🏷️ Tipo de Error en la Traducción (Issue Category)
-<!-- Marca con una [x] la opción correspondiente -->
-- [ ] **Data vs. Code (Delimitación de datos/código):** Se ha desensamblado un bloque de datos como instrucciones Z80 (o código executable identificado como bytes `.db`/`.dw`).
-- [ ] **Dimensionamiento de Datos / Tablas:** Una tabla, gráfico o buffer tiene una longitud o estructura de bytes incorrecta (ej. `.db` en lugar de `.dw`, o tamaño de sprite equivocado).
-- [ ] **Etiquetado / Naming Erróneo:** Nombre de función, rutina o variable que no se corresponde con su comportamiento real en el juego.
-- [ ] **Punteros y Tablas de Salto (Jump Tables):** Punteros de memoria no detectados, tablas de saltos desalineadas o referencias indirectas (`JP (HL)`, `LD A, (IX+d)`) mal asociadas a etiquetas.
-- [ ] **Divergencia Byte-Match (Non-matching reassembly):** Al ensamblar el código fuente actual, el ejecutable generado no coincide al 100% (bit a bit) con el binario original.
-- [ ] **Documentación / Comentarios:** Interpretación errónea de la lógica interna en las notas/comentarios de la función.
+## 📍 Ubicación
+
+- **Dirección de memoria real (si aplica):** `$XXXX` (ej. `$8400`, dentro de `MADMIX1.BIN`)
+- **Fichero(s) afectado(s):** `[ej. src/madmix1_body.asm, tools/mmlvl_tool.py, manuales/manual_niveles.md]`
+- **Versión / binario:** disco (`MADMIX1.BIN`/`MADMIX.SCR`/`MADMIX0.BIN`) o cinta (`LOAD.BIN`/`TEST.BIN`/`LOGOTOPO.CM`) — indica cuál, ya que se reconstruyen por separado.
 
 ---
 
-## 🔬 Comparativa de Código / Desensamblado (Code Comparison)
+## 🏷️ Tipo de Problema
 
-### Estado Actual en el Repositorio:
+<!-- Marca con [x] la opción correspondiente -->
+- [ ] **Dato interpretado como código (o viceversa):** un bloque de datos se desensambló como instrucciones Z80, o al revés.
+- [ ] **Dimensionamiento de datos:** una tabla, tile, sprite o buffer tiene tamaño o formato incorrecto (ver `manuales/` para los formatos ya documentados).
+- [ ] **Etiquetado erróneo:** un nombre no se corresponde con el comportamiento real de la rutina/variable.
+- [ ] **Divergencia byte a byte:** al recompilar (`py tools/build_all.py` + `py tools/gen_disk_and_cas.py`), el resultado no coincide con el original y no es la desviación ya documentada del nivel 13.
+- [ ] **Herramienta rota:** algún script de `tools/` falla o produce un resultado incorrecto (roundtrip, verificación, etc.).
+- [ ] **Documentación desactualizada o inconsistente:** algo en `src/FINDINGS.md`, `src/FLUJO_PROGRAMA.md`, `manuales/` o los `.en.md` ya no coincide con el código real.
+
+---
+
+## 🔬 Comparativa (si aplica)
+
+### Estado actual en el repositorio
+
 ```z80
-; Dirección actual: $8000
-; [Describir lo que hay actualmente en el archivo del repo]
-lbl_8000:
-    LD A, $05
-    OUT ($FE), A
-    RET
+; Dirección real: $XXXX
+; [pega aquí el fragmento actual de src/madmix1_body.asm o src/madmix_scr_body.asm]
+```
+
+### Propuesta / evidencia
+
+```z80
+; [pega aquí tu propuesta, o describe cómo lo verificaste: volcado real, ejecución en vivo con openMSX, etc.]
+```
+
+---
+
+## ✅ Cómo lo verificaste (si lo hiciste)
+
+- [ ] Recompilé (`py tools/build_all.py`) y comparé contra el binario original.
+- [ ] Lo verifiqué en vivo con openMSX (breakpoints/watchpoints, ver `src/FINDINGS.md` para ejemplos de este método).
+- [ ] Es una observación sin verificar todavía (indícalo igualmente, es útil como pista).

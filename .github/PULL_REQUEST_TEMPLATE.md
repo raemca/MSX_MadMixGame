@@ -1,62 +1,78 @@
 ---
-name: "Pull Request - Reconstrucción / Traducción Z80"
-about: Plantilla para proponer cambios en la traducción del binario, etiquetado de memoria o estructura de datos.
+name: "Pull Request - Reconstrucción Mad Mix Game (MSX1 / Z80)"
+about: Plantilla para proponer cambios en la reconstrucción del binario, etiquetado de memoria, herramientas o documentación.
 ---
 
-## 📝 Resumen del Cambio (Summary)
-<!-- Describe brevemente los cambios introducidos en este Pull Request y su objetivo principal. -->
+## 📝 Resumen del Cambio
 
-- [ ] **Etiquetado / Naming:** Identificación y renombrado de etiquetas (funciones, variables o constantes).
-- [ ] **Delimitación de Datos:** Reestructuración o corrección de bloques de datos (`.db`, `.dw`, tablas, gráficos, audio).
-- [ ] **Desensamblado de Código:** Conversión de bytes crudos a instrucciones Z80 ejecutables.
-- [ ] **Formato / Refactor:** Mejoras en la estructura del código, comentarios o legibilidad sin alterar el ensamblado.
-- [ ] **Fix / Corrección:** Corrección de un fallo previo en la traducción o en la delimitación de memoria.
+<!-- Describe brevemente los cambios y su objetivo principal. -->
 
----
-
-## 📍 Rangos de Memoria / Archivos Modificados (Scope)
-
-- **Rango de direcciones de memoria (PC / Org):** `$XXXX` - `$YYYY`
-- **Archivos principales modificados:**
-  - `[ej. src/engine/player.asm]`
-  - `[ej. data/sprites.inc]`
-- **Issue(s) relacionada(s):** Closes #<!-- Número de Issue si aplica, ej. #12 -->
+- [ ] **Etiquetado / naming:** identificación y renombrado de etiquetas (funciones, variables, constantes) — en español descriptivo, siguiendo la convención ya establecida.
+- [ ] **Delimitación de datos:** reestructuración o corrección de bloques de datos (tiles, sprites, niveles, sonido, texto).
+- [ ] **Desensamblado de código:** conversión de bytes crudos (`DS`, huecos sin identificar) a instrucciones Z80 reales.
+- [ ] **Herramientas (`tools/`):** cambios en los scripts Python de compilación/generación/verificación.
+- [ ] **Documentación:** cambios en `src/FINDINGS.md`, `src/FLUJO_PROGRAMA.md`, `manuales/`, `METODOLOGIA.md` o los visores HTML de `recursos/`.
+- [ ] **Fix / corrección:** corrección de un fallo previo en la reconstrucción o en el etiquetado.
 
 ---
 
-## 🔬 Descripción Detallada de los Cambios (Detailed Changes)
+## 📍 Alcance (rangos de memoria / ficheros modificados)
 
-### 1. Funciones y Variables Identificadas / Renombradas:
-- `lbl_8200` ➡️ `UPDATE_SPRITE_ANIMATION`: Subrutina encargada de actualizar el frame actual del sprite principal.
-- `data_9100` ➡️ `PLAYER_POS_X`: Variable de 1 byte con la coordenada X del jugador en la pantalla.
-
-### 2. Estructuras / Bloques de Datos Delimitados:
-- Se delimitó la tabla de saltos en `$8500` - `$8510` (previamente desensamblada por error como instrucciones `NOP` / `LD`).
-- Se formateó la tabla de atributos de color/VRAM en bloques `.db`.
+- **Rango de direcciones reales (si aplica):** `$XXXX` - `$YYYY`
+- **Ficheros principales modificados:**
+  - `[ej. src/madmix1_body.asm]`
+  - `[ej. tools/mmlvl_tool.py]`
+- **Issue(s) relacionada(s):** Closes #<!-- número de Issue si aplica -->
 
 ---
 
-## 🧪 Verificación de Fidelidad 1:1 (Byte-Matching)
+## 🔬 Descripción Detallada
 
-Es fundamental verificar si los cambios mantienen la integridad de la compilación frente al ejecutable original.
+### 1. Etiquetas identificadas / renombradas
 
-- [ ] **BYTE-MATCH EXACTO:** El ejecutable/ROM generado tras este PR es **100% idéntico** (bit a bit) al binario original.
-- [ ] **NON-MATCHING (Con divergencias):** El binario difiere. *(Justificar en la sección de notas el motivo de la divergencia).*
+<!-- Ejemplo real del estilo del proyecto (español descriptivo, no inglés ni abreviaturas crípticas): -->
+- `RM_C4CC` ➡️ `INSTALAR_RECURSO_SONIDO_EN_A`: variante de entrada con el índice ya cargado en A.
+- `$8437` ➡️ `CONTADOR_ACTORES_ACTIVOS`: variable de 1 byte, número de actores dibujados este frame.
 
-**Comando de verificación utilizado:**
+### 2. Bloques de datos / hallazgos
+
+<!-- Ejemplo: -->
+- Se identificó el bloque `$5AD5`-`$5B50` como la pantalla de menú principal (antes hueco `DS` sin explorar).
+- Se corrigió el tamaño documentado de `AREA_TRABAJO_PSG` (171 → 151 bytes).
+
+---
+
+## 🧪 Verificación de Fidelidad (Byte-Matching)
+
+Este proyecto reconstruye el binario original **byte a byte**, con una única
+desviación deliberada ya documentada (el fix del contador de bolitas del
+nivel 13, ver `src/FINDINGS.md`). Cualquier otro cambio debe reproducir
+exactamente el original.
+
+- [ ] Recompila sin errores: `py tools/build_all.py`
+- [ ] Regenera los entregables: `py tools/gen_disk_and_cas.py`
+- [ ] **BYTE-MATCH:** comparado contra el binario original (si tienes una
+      copia), **0 diferencias nuevas** respecto al estado anterior de la rama.
+- [ ] **No aplica / sin copia del original:** el cambio es solo
+      documentación/comentarios/herramientas, sin tocar bytes compilados.
+
+**Comando(s) de verificación utilizados:**
+
 ```bash
-# Ejemplo: md5sum / cmp entre el ejecutable generado y la ROM/disco original
-md5sum build/game_rebuilt.bin original/game_original.bin
+py tools/build_all.py
+py tools/gen_disk_and_cas.py
+# comparación byte a byte, si tienes el original:
+py -c "a=open('src/build/madmix_reconstruido.dsk','rb').read(); b=open('ruta/al/original.dsk','rb').read(); print(sum(1 for x,y in zip(a,b) if x!=y), 'diferencias')"
 ```
-**Resultado del HASH / Checksum:**
-- Original: `XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX`
-- Reconstruido: `XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX`
+
+**Resultado:** <!-- ej. "0 diferencias, igual que antes del cambio" -->
 
 ---
 
 ## 📋 Checklist del Autor
 
-- [ ] El código ensambla correctamente con la toolchain del proyecto (`sjasmplus`, `pasmo`, etc.) sin errores ni warnings.
-- [ ] Se han documentado adecuadamente las nuevas etiquetas y los bloques de datos.
-- [ ] No se han dejado etiquetas temporales o ambiguas (ej. `temp_1`, `fix_here`).
-- [ ] Se ha verificado que no hay solapamiento de direcciones o saltos a posiciones fuera de rango.
+- [ ] El código compila con `sjasmplus` (vía `py tools/build_all.py`) sin errores ni warnings nuevos.
+- [ ] Las etiquetas nuevas siguen la convención del proyecto (español descriptivo; `.NOMBRE` con punto para marcas internas de salto, no funciones con entidad propia).
+- [ ] No quedan etiquetas temporales o ambiguas.
+- [ ] Si el cambio es un hallazgo real (no solo limpieza), se ha añadido la entrada correspondiente en `src/FINDINGS.md`.
+- [ ] Si el cambio afecta a un documento con traducción al inglés (`README.md`, los manuales, `FLUJO_PROGRAMA.md`, `METODOLOGIA.md`...), se ha actualizado también su `.en.md`.
