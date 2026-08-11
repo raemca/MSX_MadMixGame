@@ -1,5 +1,7 @@
 # Mad Mix Game — reconstruction project (MSX1)
 
+*[Leer esto en español](README.md)*
+
 *Reverse engineering, analysis and documentation: Rafael Eduardo Martín Candial (raemca@hotmail.com)*
 
 Reverse-engineered reconstruction of **all 3 binaries** from the

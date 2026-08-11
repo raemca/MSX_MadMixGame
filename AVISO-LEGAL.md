@@ -1,5 +1,7 @@
 # Aviso legal y de atribución
 
+*[Read this in English](AVISO-LEGAL.en.md)*
+
 *Ingeniería inversa, análisis y documentación: Rafael Eduardo Martín Candial (raemca@hotmail.com)*
 
 ## De quién es cada cosa

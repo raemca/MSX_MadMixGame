@@ -1,5 +1,7 @@
 # Level format manual — Mad Mix Game (MSX1)
 
+*[Leer esto en español](manual_niveles.md)*
+
 *Reverse engineering, analysis and documentation: Rafael Eduardo Martín Candial (raemca@hotmail.com)*
 
 > Source: `madmix_scr.asm` (`CARGAR_NIVEL`, `TABLA_NIVELES`, the 13

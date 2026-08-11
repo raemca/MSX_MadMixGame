@@ -1,5 +1,7 @@
 # Manual del subsistema gráfico — Mad Mix Game (MSX1, VDP TMS9918 en SCREEN 2)
 
+*[Read this in English](manual_subsistema_grafico.en.md)*
+
 *Ingeniería inversa, análisis y documentación: Rafael Eduardo Martín Candial (raemca@hotmail.com)*
 
 > Fuente: `madmix1.asm` (motor de actores, API de VDP, buffer de

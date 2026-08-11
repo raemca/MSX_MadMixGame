@@ -1,5 +1,7 @@
 # Security Policy
 
+*[Leer esto en español](SECURITY.md)*
+
 ## Scope of this project
 
 `MSX_MadMixGame` is a reverse-engineering, documentation and

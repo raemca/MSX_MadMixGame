@@ -1,5 +1,7 @@
 # Mad Mix Game — program flow and function inventory
 
+*[Leer esto en español](FLUJO_PROGRAMA.md)*
+
 *Reverse engineering, analysis and documentation: Rafael Eduardo Martín Candial (raemca@hotmail.com)*
 
 This document complements `FINDINGS.md` (which is a **chronological

@@ -1,5 +1,7 @@
 # Manual del motor de movimiento/colisión e IA de items — Mad Mix Game (MSX1)
 
+*[Read this in English](manual_motor_colision_ia.en.md)*
+
 *Ingeniería inversa, análisis y documentación: Rafael Eduardo Martín Candial (raemca@hotmail.com)*
 
 > Fuente: `madmix_scr.asm`, región `$2CA0`-`$5904` aprox. (motor de

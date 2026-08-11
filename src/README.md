@@ -1,5 +1,7 @@
 ﻿# Mad Mix Game — proyecto de reconstrucción (MSX1)
 
+*[Read this in English](README.en.md)*
+
 *Ingeniería inversa, análisis y documentación: Rafael Eduardo Martín Candial (raemca@hotmail.com)*
 
 Reconstrucción por ingeniería inversa de **los 3 binarios** del

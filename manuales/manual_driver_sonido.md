@@ -1,5 +1,7 @@
 # Manual del driver de sonido — Mad Mix Game (MSX1, PSG AY-3-8910)
 
+*[Read this in English](manual_driver_sonido.en.md)*
+
 *Ingeniería inversa, análisis y documentación: Rafael Eduardo Martín Candial (raemca@hotmail.com)*
 
 > Fuente: `madmix1.asm`, región `$C4A0`-`$CF8D` (2912 bytes: código +

@@ -1,5 +1,7 @@
 # Código de Conducta del Pacto de Colaboradores (Contributor Covenant)
 
+*[Read this in English](CODE_OF_CONDUCT.en.md)*
+
 ## Nuestro Compromiso
 
 Como miembros, colaboradores y responsables del proyecto, nos comprometemos

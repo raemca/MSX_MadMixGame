@@ -1,5 +1,7 @@
 # Mad Mix Game — flujo del programa e inventario de funciones
 
+*[Read this in English](FLUJO_PROGRAMA.en.md)*
+
 *Ingeniería inversa, análisis y documentación: Rafael Eduardo Martín Candial (raemca@hotmail.com)*
 
 Este documento es el complemento de `FINDINGS.md` (que es un **diario

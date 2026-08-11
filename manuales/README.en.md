@@ -1,5 +1,7 @@
 # Manuals
 
+*[Leer esto en español](README.md)*
+
 *Reverse engineering, analysis and documentation: Rafael Eduardo Martín Candial (raemca@hotmail.com)*
 
 This folder is different from `FINDINGS.md` (a chronological diary of

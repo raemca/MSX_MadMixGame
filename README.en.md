@@ -1,5 +1,7 @@
 # MadMixGame — Reverse Engineering Project
 
+*[Leer esto en español](README.md)*
+
 *Reverse engineering, analysis and documentation: Rafael Eduardo Martín Candial (raemca@hotmail.com)*
  
 Summary

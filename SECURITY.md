@@ -1,5 +1,7 @@
 # Política de seguridad
 
+*[Read this in English](SECURITY.en.md)*
+
 ## Alcance de este proyecto
 
 `MSX_MadMixGame` es un proyecto de ingeniería inversa, documentación y

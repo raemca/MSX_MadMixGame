@@ -1,5 +1,7 @@
 # Legal notice and attribution
 
+*[Leer esto en español](AVISO-LEGAL.md)*
+
 *Reverse engineering, analysis and documentation: Rafael Eduardo Martín Candial (raemca@hotmail.com)*
 
 ## Who owns what
