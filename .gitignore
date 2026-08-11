@@ -8,6 +8,4 @@ __pycache__/
 # Volcados de RAM/VRAM y capturas de openMSX usados como referencia de trabajo (solo local)
 dump_openmsx/
 
-# Otros Archivos de documentación (no son código fuente)
-REFLEXION_COLABORACION_IA.md
-REFLEXION_COLABORACION_IA.en.md
+

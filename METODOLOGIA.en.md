@@ -1,5 +1,7 @@
 # Project methodology — how Mad Mix Game (reverse engineering) was made
 
+*[Leer esto en español](METODOLOGIA.md)*
+
 *Process documentation: Rafael Eduardo Martín Candial (raemca@hotmail.com), with Claude (Anthropic) as technical assistant*
 
 ## 0. What this document is and is NOT
@@ -21,6 +23,13 @@ what tools were built and why, and what mistakes were
 made and corrected along the way. That's the goal of this
 document — a different zoom level, that of the *method* rather than
 the *result*.
+
+Worth saying up front: the very method this document describes —
+reading Z80 assembly with real judgment, designing the architecture
+of a full compilation project, deciding whether a technical
+hypothesis holds up — requires a real technical profile: knowledge
+of software development, Z80 assembly, and the MSX's actual
+architecture (VDP, PSG, memory map, interrupts).
 
 *(See also `REFLEXION_COLABORACION_IA.md` for the separate analysis
 of how the collaboration between a person and an AI assistant

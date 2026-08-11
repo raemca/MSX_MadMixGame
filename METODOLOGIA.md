@@ -1,5 +1,7 @@
 # Metodología del proyecto — cómo se ha hecho Mad Mix Game (ingeniería inversa)
 
+*[Read this in English](METODOLOGIA.en.md)*
+
 *Documentación del proceso: Rafael Eduardo Martín Candial (raemca@hotmail.com), con Claude (Anthropic) como asistente técnico*
 
 ## 0. Qué es este documento y qué NO es
@@ -21,6 +23,14 @@ problema, qué herramientas se han construido y por qué, y qué errores
 se han cometido y corregido por el camino. Ese es el objetivo de este
 documento — un nivel de zoom distinto, el del *método* más que el del
 *resultado*.
+
+Vale la pena decirlo desde ahora: el propio método que describe este
+documento — leer ensamblador Z80 con criterio propio, diseñar la
+arquitectura de un proyecto de compilación completo, juzgar si una
+hipótesis técnica se sostiene — exige un perfil técnico real:
+conocimientos de desarrollo de software, de ensamblador Z80 y de la
+arquitectura concreta del MSX (VDP, PSG, mapa de memoria,
+interrupciones).
 
 *(Ver también `REFLEXION_COLABORACION_IA.md` para el análisis, aparte,
 de cómo ha funcionado en concreto la colaboración entre una persona y
