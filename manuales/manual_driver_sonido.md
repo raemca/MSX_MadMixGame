@@ -297,7 +297,7 @@ Los 14 índices conocidos, y a qué evento de juego corresponden
 | 1 | 0 | `GUION_EVT01_BOLA_CLAVADA_CE8B` (`$CE8B`) | liberar bola clavada, modo herramienta (`HNDLR_BOLITA_CLAVADA`) | "ruido de sacar bola" |
 | 2 | 0 | `GUION_EVT02_FLECHA_CF62` (`$CF62`) | pasar por loseta de flecha (`HNDLR_AUTOCOCO_*`) | "loseta de dirección única" |
 | 3 | 1 | `GUION_EVT03_MODO_ESPECIAL_CF70` (`$CF70`) | activar/salir modo especial | genérico "cambio de modo" |
-| 4 | 0 | `GUION_EVT04_DISPARO_AVION_CE72` (`$CE72`) | `REGISTRAR_PISTA_TANQUE_AVION` (pista tanque/avión) | "Disparo (modo avión)" — CONFIRMADO por el usuario (jugador original) |
+| 4 | 0 | `GUION_EVT04_DISPARO_AVION_CE72` (`$CE72`) | `REGISTRAR_PISTA_TANQUE_AVION` (pista tanque/avión) | "Disparo (modo avión)" — CONFIRMADO por el técnico (jugador original) |
 | 5 | 1 | `GUION_EVT05_MARIQUITA_REPONE_CF44` (`$CF44`) | reponer bolita comida (`HNDLR_MARICOCO`) | "reponer bola" |
 | 6 | 1 | `GUION_EVT06_PLANTA_CLAVADA_CEAC` (`$CEAC`) | plantar bola clavada (`HNDLR_REGPUNANTOSO`) | sin match directo |
 | 7 | 1 | `GUION_EVT07_PISTA_CE7E` (`$CE7E`) | aviso de pista (`AVISAR_PROXIMIDAD_PISTA`) + colas de efecto | ambiguo, dos usos |

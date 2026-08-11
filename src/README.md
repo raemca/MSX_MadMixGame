@@ -63,7 +63,7 @@ Ver `FINDINGS.md` para el detalle completo de esta unificación.
   (`0x9694-0xA50D`: `TABLA_PUNTEROS_FORMAS`, 3 tablas de animación,
   `TABLA_DELTA_POSICION`, y `TABLA_FORMAS` con las 15 formas + 1
   bloque huérfano sin referencia) transcritos, verificados byte a
-  byte (0 diferencias) y **confirmados visualmente por el usuario**
+  byte (0 diferencias) y **confirmados visualmente por el técnico**
   (letras T-O-P-O deslizándose, coloreado expandiéndose desde el
   centro, "Soft" rotando, punto de luz recorriéndola, estrella
   parpadeante) — ver `recursos/logotopo_formas.html`,
@@ -293,7 +293,7 @@ directo en el navegador:
 - **`logotopo_formas.html`** — renderizador de las 15 "formas"
   animadas de `LOGOTOPO.CM` (tiles 8x8 monocromos, columnas
   ajustables por tarjeta), cada una con su nombre real confirmado por
-  el usuario (letras T/O/P/O de "Topo", 7 fotogramas de "Soft"
+  el técnico (letras T/O/P/O de "Topo", 7 fotogramas de "Soft"
   rotando, 4 fotogramas de la estrella).
 - **`recurso_grafico.html`** — intentos de renderizado del bloque de
   768 bytes de `LEVELCYCLE_RESOURCE_TABLE` (`madmix_scr_body.asm`,
@@ -553,7 +553,7 @@ Y luego arrancar `copia.dsk` en openMSX como el disco original.
    ceros reales (control/espacio en blanco), y de `$21` a `$5B` los
    59 glifos reales; (d) **¡LOS SPRITES DE PERSONAJES YA ESTÁN
    IDENTIFICADOS Y TRANSCRITOS!** (`0x953B-0xB93B`, 9216 bytes, 64
-   sprites, 0 diferencias byte a byte) — el usuario (jugador
+   sprites, 0 diferencias byte a byte) — el técnico (jugador
    original) los identificó a simple vista viendo
    `recursos/ptrtable_sprites.html`: comecocos (vulnerable/
    invencible con fases de boca, avión, "obra"/saca-bolas,

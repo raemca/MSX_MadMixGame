@@ -224,7 +224,7 @@ misma posición (§8).
 
 ### 6.2 `HNDLR_MARICOCO` — la mariquita (`TABLA_ITEMS_MARICOCO`, hasta 2 activas, `$5487`)
 
-Sprites confirmados por el usuario (jugador original del juego):
+Sprites confirmados por el técnico (jugador original del juego):
 `SPR39_MARIQUITA_DER`/`SPR37_..._ABAJO`/`SPR38_..._ARRIBA`. Su efecto:
 **regenera bolitas ya comidas**. Cada frame, si su posición y la de la
 cámara están alineadas a loseta, comprueba la loseta bajo ella: si es

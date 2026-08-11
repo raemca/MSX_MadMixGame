@@ -64,7 +64,7 @@ unification.
   (`0x9694-0xA50D`: `TABLA_PUNTEROS_FORMAS`, 3 animation tables,
   `TABLA_DELTA_POSICION`, and `TABLA_FORMAS` with the 15 shapes + 1
   orphan block with no reference) transcribed, verified byte for
-  byte (0 differences) and **visually confirmed by the user**
+  byte (0 differences) and **visually confirmed by the developer**
   (T-O-P-O letters sliding in, color expanding out from the center,
   "Soft" rotating, a light dot running across it, a blinking star) —
   see `recursos/logotopo_formas.html`,
@@ -293,7 +293,7 @@ in the browser:
   `src/load_cas/logotopo_cm_body.asm` and `FINDINGS.md`.
 - **`logotopo_formas.html`** — renderer for the 15 animated "shapes"
   of `LOGOTOPO.CM` (monochrome 8x8 tiles, adjustable columns per
-  card), each with its real name confirmed by the user (T/O/P/O
+  card), each with its real name confirmed by the developer (T/O/P/O
   letters from "Topo", 7 frames of "Soft" rotating, 4 frames of the
   star).
 - **`recurso_grafico.html`** — rendering attempts for the 768-byte
@@ -554,7 +554,7 @@ And then boot `copia.dsk` in openMSX like the original disk.
    real zeros (control/blank space), and from `$21` to `$5B` the
    59 real glyphs; (d) **THE CHARACTER SPRITES ARE ALREADY
    IDENTIFIED AND TRANSCRIBED!** (`0x953B-0xB93B`, 9216 bytes, 64
-   sprites, 0 differences byte for byte) — the user (the original
+   sprites, 0 differences byte for byte) — the developer (the original
    player) identified them at a glance by looking at
    `recursos/ptrtable_sprites.html`: Pac-Man
    (vulnerable/invincible with mouth phases, plane, "obra"/

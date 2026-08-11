@@ -108,7 +108,7 @@
   <code>PTR_TABLA_SPRITES</code> (dentro de <code>MOTOR_ACTORES</code>, ya transcrita y verificada
   al 100%, con cada entrada escrita como <code>DW SPRxx_...</code> en vez de hex crudo) es una
   tabla de 64 punteros de 16 bits con paso fijo de 144 bytes, de
-  <code>$953B</code> a <code>$B8AB</code>. El usuario (jugador original del juego) identifico
+  <code>$953B</code> a <code>$B8AB</code>. El técnico (jugador original del juego) identifico
   las 64 entradas a simple vista sobre esta misma pagina: comecocos (vulnerable/invencible,
   avion, "obra"/saca-bolas, hipopotamo, tanque), fantasma, mariquita, "repugnantoso",
   la secuencia completa de muerte del comecocos y el marcador de puntos por fantasma comido.
@@ -118,7 +118,7 @@
   byte) y documentadas en <code>FINDINGS.md</code>.<br><br>
   <strong>Formato de píxel CORREGIDO (segunda pasada)</strong>: no son 48 filas de una sola
   imagen de 24×48 (esa lectura inicial daba una silueta reconocible pero con rayas
-  horizontales de fondo y aspecto alargado -- fue el propio usuario quien notó esto y
+  horizontales de fondo y aspecto alargado -- fue el propio técnico quien notó esto y
   preguntó si en realidad eran 24×24 con dos patrones, como en la versión de Spectrum).
   Comprobado byte a byte: cada entrada de 144 bytes son <strong>24 filas de 6 bytes</strong>
   (3 bytes de máscara + 3 bytes de patrón/tinta, 24 px de ancho cada plano), NO 48 filas de

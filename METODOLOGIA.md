@@ -94,10 +94,10 @@ Ejemplos concretos de esta disciplina aplicada en la práctica:
 - Los **64 sprites de personajes** se localizaron primero por una
   pista estructural (una tabla de 64 punteros con paso fijo de 144
   bytes cayendo dentro de un hueco sin descifrar), pero **no se dieron
-  por resueltos hasta que el propio usuario, jugador original del
+  por resueltos hasta que el propio técnico, jugador original del
   juego, los identificó a simple vista** sobre un render crudo sin
   ninguna hipótesis de formato previa — combinando evidencia
-  estructural (de la IA) con conocimiento vivido (del usuario).
+  estructural (de la IA) con conocimiento vivido (del técnico).
 - El **`.dsk`/`.cas` reconstruidos** no se consideran terminados
   porque "compilan sin errores" — se consideran terminados porque se
   generan desde cero (sin partir de una copia del original a
@@ -144,7 +144,7 @@ distingue muro de suelo** como se asumía — esa distinción vive en
 otro mecanismo (rango del índice gráfico crudo), y "tipo" codifica
 más bien comportamientos especiales superpuestos. Aquí también se
 documentó la mecánica de trampillas en L (3 estados, 12 losetas) a
-partir de la explicación del usuario de cómo se juega esa mecánica en
+partir de la explicación del técnico de cómo se juega esa mecánica en
 la práctica.
 
 ### Fase 3 — El "hueco grande": sprites, fuente de texto, textos nunca vistos
@@ -156,7 +156,7 @@ el bucle principal (449 bytes); luego aparecieron textos de partida
 nunca vistos hasta entonces (`"FASE 00"`, `"READY?"`, `"ESTAS
 FRITO"`) junto con una tabla de 64 punteros de paso fijo; esa tabla
 resultó ser la clave para localizar **los 64 sprites de personajes**
-(9216 bytes, identificados a simple vista por el usuario); y los 600
+(9216 bytes, identificados a simple vista por el técnico); y los 600
 bytes que quedaban resultaron ser la fuente de caracteres del juego,
 confirmada por fórmula real de dirección de glifo. Solo entonces todo
 el tramo `0x8400`-`0xD500` quedó a 0 diferencias.
@@ -184,7 +184,7 @@ con 15 comandos descifrados uno a uno. Sobre esa base se construyeron
 dos herramientas (`tools/mmsnd_tool.py`, descompilador/compilador
 verificado con *roundtrip* byte a byte; `tools/mmsnd_render.py`, un
 renderizador a WAV) que se fueron afinando en **rondas sucesivas de
-escucha real** por parte del usuario — cada ronda encontró un bug de
+escucha real** por parte del técnico — cada ronda encontró un bug de
 verdad en el renderizador (polaridad del mezclador invertida,
 detección de fin de bucle rota, mapeo de campos del instrumento
 equivocado), nunca "sonaba raro, lo dejamos así".

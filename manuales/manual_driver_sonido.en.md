@@ -296,7 +296,7 @@ The 14 known indices, and which game event they correspond to
 | 1 | 0 | `GUION_EVT01_BOLA_CLAVADA_CE8B` (`$CE8B`) | freeing a stuck ball, tool mode (`HNDLR_BOLITA_CLAVADA`) | "ball-releasing sound" |
 | 2 | 0 | `GUION_EVT02_FLECHA_CF62` (`$CF62`) | passing over an arrow tile (`HNDLR_AUTOCOCO_*`) | "one-way tile" |
 | 3 | 1 | `GUION_EVT03_MODO_ESPECIAL_CF70` (`$CF70`) | entering/leaving special mode | generic "mode change" |
-| 4 | 0 | `GUION_EVT04_DISPARO_AVION_CE72` (`$CE72`) | `REGISTRAR_PISTA_TANQUE_AVION` (tank/plane track) | "Shot (plane mode)" — CONFIRMED by the user (original player) |
+| 4 | 0 | `GUION_EVT04_DISPARO_AVION_CE72` (`$CE72`) | `REGISTRAR_PISTA_TANQUE_AVION` (tank/plane track) | "Shot (plane mode)" — CONFIRMED by the developer (original player) |
 | 5 | 1 | `GUION_EVT05_MARIQUITA_REPONE_CF44` (`$CF44`) | refilling an eaten ball (`HNDLR_MARICOCO`) | "refill ball" |
 | 6 | 1 | `GUION_EVT06_PLANTA_CLAVADA_CEAC` (`$CEAC`) | planting a stuck ball (`HNDLR_REGPUNANTOSO`) | no direct match |
 | 7 | 1 | `GUION_EVT07_PISTA_CE7E` (`$CE7E`) | track proximity warning (`AVISAR_PROXIMIDAD_PISTA`) + effect tails | ambiguous, two uses |

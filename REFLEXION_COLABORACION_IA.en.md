@@ -26,7 +26,7 @@ experience and knowledge of the MSX's architecture.
 
 The first thing to say is that this collaboration has **not rested on
 blind trust from either side**. Not "the AI said so, it must be
-true" nor "the user remembers the game, it must be true". It has
+true" nor "the developer remembers the game, it must be true". It has
 rested on a third, neutral element: **the real bytes of the
 original binary**, against which every claim was verified before
 being accepted.
@@ -35,16 +35,16 @@ This changes the nature of the collaboration in an important way.
 When the final arbiter is "recompile and compare", disagreements
 between person and AI stop being a contest of authority and become
 a solvable technical problem. A clear example, from this very
-session: the user edited directly on GitHub the name of the
+session: the developer edited directly on GitHub the name of the
 musician credited in the game's credits, believing he was fixing a
 typo (`"COMILONAS"` → `"GOMILONAS"`). When merging that branch,
-instead of simply accepting the user's change (it's his project, his
+instead of simply accepting the developer's change (it's his project, his
 edit, made in good faith) or simply dismissing it (he might be right
 — he actually played the game), the check was mechanical:
 look up the literal byte in the already-verified source code
 (`DB "COMILONAS"`, extracted directly from the ROM). The data won,
-not the person nor the AI. That was explained to the user with the
-evidence right there, and the user himself accepted it with no
+not the person nor the AI. That was explained to the developer with the
+evidence right there, and the developer himself accepted it with no
 friction — because it wasn't one opinion against another, it was a
 verifiable fact.
 
@@ -96,7 +96,7 @@ the reconstruction project itself.
   readings of the same bytes within minutes, instead of reasoning
   in the abstract about which one "sounds more plausible".
 
-Neither role replaces the other. The user's suspicion
+Neither role replaces the other. The developer's suspicion
 about the sprites would have gone nowhere without the immediate
 empirical check; and the empirical check would never have
 started without the suspicion, because the "official" render had
@@ -104,7 +104,7 @@ already been taken as settled for a while.
 
 ## The direction of the investigation: navigating, not just validating
 
-There's a part of the user's work that the two sections
+There's a part of the developer's work that the two sections
 above leave out, and which in volume is as large as any
 other: **deciding where to go next**. It wasn't always the AI that
 proposed the next step with a plan already in hand — often it was a
@@ -137,7 +137,7 @@ the head of level 13's body.
 That pattern of **deliberately parking a lead and coming back to
 it once there's more context**, instead of forcing an answer with
 what's known at that moment, is a research decision, not a
-technical finding — and it's a decision the user has taken above
+technical finding — and it's a decision the developer has taken above
 all, marking which threads were worth chasing right away and
 which were better left to mature.
 
@@ -153,12 +153,12 @@ until it fits.
 
 The most documented case is the sound driver. Once the
 renderer (`mmsnd_render.py`) was built, `FINDINGS.md` itself logs
-**successive rounds of real listening** by the user, each one
+**successive rounds of real listening** by the developer, each one
 finding something that sounded wrong and narrowing down which command
 or which instrument field was responsible — leading, for example, to
 finding that `SET_MIXER`'s polarity was inverted, or that
 a specific script's loop-end detection was broken and that's why a
-`.wav` "didn't sound complete". The user's ear wasn't just
+`.wav` "didn't sound complete". The developer's ear wasn't just
 confirming an already-closed result — it was **narrowing the
 search**: "this doesn't sound right in the second bar" pointed
 directly to which bytes to check next, in a way no purely
@@ -166,7 +166,7 @@ structural analysis of the bytecode could have suggested on its
 own. One specific case is even confirmed by name in the sound
 catalog itself: the effect tied to index 4 was identified by ear,
 live, as "shot (plane mode)" — a fact that lived nowhere in the
-code, only in the user's memory while listening to the rendered
+code, only in the developer's memory while listening to the rendered
 sound.
 
 The same loop repeats with images, with the eye instead of the
@@ -185,20 +185,20 @@ auditory perception — and it's the same loop that,
 months later, uncovered the sprite-format error (covered in
 detail in the next section).
 
-## The full case: when the AI gets it wrong and the user notices
+## The full case: when the AI gets it wrong and the developer notices
 
 It's worth reconstructing this case in full because it sums up the
 dynamic well. In an earlier session, the 64 character sprites were
 located and decoded as 144 bytes per entry, regrouped
 into 48 rows of 24 pixels wide — a format that produced
-**recognizable** sprites, which the user himself had confirmed
+**recognizable** sprites, which the developer himself had confirmed
 by identifying each one at a glance. With that validation in
 hand, the format was taken as "visually confirmed" and used as-is,
 with no further review, on several pages of the project (the
 sprite catalog, the visual poster/dossier) for quite a while.
 
 The problem is that "recognizable" is not the same as "correct".
-The user, looking at the already-published catalog, noticed
+The developer, looking at the already-published catalog, noticed
 something that didn't fit: a background with horizontal
 black-and-white stripes, and an "elongated" proportion that didn't
 match what he remembered of the original game — and he connected it
@@ -207,7 +207,7 @@ the same game the sprites are 24×24 with two patterns, not
 24×48 with a single one.
 
 Instead of defending the already-"confirmed" format (which also
-carried a prior validation from the user himself), the response was
+carried a prior validation from the developer himself), the response was
 to genuinely put it to the test: generating the three possible
 readings of the same 144 bytes separately — 48 rows in a row
 (the old reading), two 24-row blocks stacked, and rows interleaved
@@ -219,7 +219,7 @@ planes of the same size — the missing piece had been sitting
 described in another document (`manual_subsistema_grafico.md`) for
 weeks with nobody having connected the two threads.
 
-The lesson isn't "the AI got it wrong" nor "the user was right" — it's
+The lesson isn't "the AI got it wrong" nor "the developer was right" — it's
 that **a passed visual validation ("the character is recognizable")
 doesn't prove the data model is correct**, only that it's
 close enough for the human eye. It took two things
@@ -237,7 +237,7 @@ what deserves its own label and what stays internal— where
 **there is no byte that can arbitrate who is right**, because it isn't a
 question about the binary, it's a question about how the
 result reads best. There the dynamic shifts: sometimes the
-user's judgment carried more weight (how he prefers something to be
+developer's judgment carried more weight (how he prefers something to be
 called, what home-grown Spanish terminology to use instead of a
 literal translation from English), and sometimes an AI conclusion
 backed by real code-usage data carried more weight — not an
@@ -265,7 +265,7 @@ movement engine) the usual process wasn't to rename
 directly, but to first leave a "study, not applied" with the
 full proposal of Spanish names, and only turn it into
 real changes in a later round. That intermediate step is,
-literally, the space for the user to agree or ask for
+literally, the space for the developer to agree or ask for
 a different name before the change spreads across dozens of places
 in the code — a deliberate editorial decision, not a
 technical verification.
@@ -276,7 +276,7 @@ It would be dishonest to describe only what went well. Some things
 didn't:
 
 - **Repeated confusion with the Git commit workflow.** Twice in
-  the same session the user got stuck thinking "the commit isn't
+  the same session the developer got stuck thinking "the commit isn't
   working", when actually `git commit` with no message
   had opened an editor waiting for text — not a technical failure, but
   an interface (VS Code's more than git's own) that didn't
@@ -303,7 +303,7 @@ didn't:
   attention. The right call there wasn't "push through at all
   costs" nor "lower the quality to go faster", but stopping
   mid-task, being explicit about the real pace, and letting the
-  user decide how to continue instead of assuming it.
+  developer decide how to continue instead of assuming it.
 
 ## The real pace: hundreds of small steps, not big leaps
 
@@ -312,7 +312,7 @@ how unspectacular most of the work is, step by step.
 Of the roughly 370 milestones and rounds logged in `FINDINGS.md`, the
 vast majority are not discoveries — they're things like "replace a
 loose `CALL $86BB` with its real label", "rename 8 words of
-the user's own terminology in the code labels", "convert
+the developer's own terminology in the code labels", "convert
 a field from hex to decimal because it reads better". None of
 these steps is interesting on its own. What makes them valuable is
 the sustained consistency across hundreds of rounds with no
@@ -324,7 +324,7 @@ pays off far more than the occasional flash of inspiration.
 
 If there's an underlying conclusion, it's that this project hasn't
 worked just because of having "a very powerful AI" nor just because
-of having "a user with technical judgment" — both were needed, but
+of having "a developer with real judgment" — both were needed, but
 neither one was enough on its own. It has worked because of also
 having a method that didn't depend on either side always being
 right. Byte-for-byte
@@ -338,14 +338,14 @@ be found.
 
 But reducing it all to "verify against the bytes" would leave out
 half the real work. Before anything can be verified, someone has to
-decide *what* to look at —the user's role of direction and
+decide *what* to look at —the developer's role of direction and
 intuition, parking and picking threads back up—; often the
 verification itself is a shared perception loop, not a
 one-shot verdict —the ear narrowing down which sound bytes to check,
 the eye narrowing down which image bytes to try a different way—;
 and there's a whole category of decisions, naming and commenting,
 where no byte can arbitrate and the shared judgment call —sometimes
-the user's, sometimes the AI's backed by data on how the code is
+the developer's, sometimes the AI's backed by data on how the code is
 actually used— is all there is. The reflection worth taking away
 isn't just "always have an external arbiter to appeal to when
 one is available", but that such an arbiter doesn't replace the

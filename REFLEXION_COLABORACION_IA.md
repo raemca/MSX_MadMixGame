@@ -26,7 +26,7 @@ conocimiento de la arquitectura del MSX.
 
 Lo primero que hay que decir es que esta colaboración **no se ha
 sostenido sobre la confianza ciega en ninguna de las dos partes**. Ni
-"la IA lo ha dicho, será verdad" ni "el usuario recuerda el juego,
+"la IA lo ha dicho, será verdad" ni "el técnico recuerda el juego,
 será verdad". Se ha sostenido sobre un tercer elemento, neutral:
 **los bytes reales del binario original**, contra los que se
 verificaba cada afirmación antes de darla por buena.
@@ -35,16 +35,16 @@ Esto cambia la naturaleza de la colaboración de una forma importante.
 Cuando el árbitro final es "recompila y compara", las discrepancias
 entre persona e IA dejan de ser un pulso de autoridad y pasan a ser
 un problema técnico resoluble. Un ejemplo claro, de esta misma
-sesión: el usuario editó directamente en GitHub el nombre del músico
+sesión: el técnico editó directamente en GitHub el nombre del músico
 acreditado en los créditos del juego, creyendo corregir una errata
 (`"COMILONAS"` → `"GOMILONAS"`). Al fusionar esa rama, en vez de
-aceptar sin más el cambio del usuario (es su proyecto, su edición,
+aceptar sin más el cambio del técnico (es su proyecto, su edición,
 hecha con buena intención) ni descartarlo sin más (podría tener razón
-— el usuario jugó el juego de verdad), la comprobación fue mecánica:
+— el técnico jugó el juego de verdad), la comprobación fue mecánica:
 buscar el byte literal en el código fuente ya verificado
 (`DB "COMILONAS"`, extraído directamente de la ROM). El dato ganó, no
-la persona ni la IA. Eso se le explicó al usuario con la evidencia
-delante, y el propio usuario lo aceptó sin fricción — porque no era
+la persona ni la IA. Eso se le explicó al técnico con la evidencia
+delante, y el propio técnico lo aceptó sin fricción — porque no era
 una opinión contra otra, era un hecho verificable.
 
 ## Quién aporta qué
@@ -95,7 +95,7 @@ decidir la arquitectura del propio proyecto de reconstrucción.
   distintas de los mismos bytes en minutos, en vez de razonar en
   abstracto sobre cuál "suena más plausible".
 
-Ninguno de los dos papeles sustituye al otro. La sospecha del usuario
+Ninguno de los dos papeles sustituye al otro. La sospecha del técnico
 sobre los sprites no habría llegado a ninguna parte sin la
 comprobación empírica inmediata; y la comprobación empírica no habría
 empezado sin la sospecha, porque el renderizado "oficial" llevaba ya
@@ -103,7 +103,7 @@ tiempo dándose por bueno.
 
 ## La dirección de la investigación: navegar, no solo validar
 
-Hay una parte del trabajo del usuario que las dos secciones
+Hay una parte del trabajo del técnico que las dos secciones
 anteriores dejan fuera, y que en volumen es tan grande como cualquier
 otra: **decidir por dónde seguir**. No siempre el siguiente paso lo
 proponía la IA con un plan ya armado — muchas veces era una
@@ -136,7 +136,7 @@ nivel 13.
 Ese patrón de **aparcar una vía a propósito y volver a ella cuando
 hay más contexto**, en vez de forzar una respuesta con lo que se
 sabe en ese momento, es una decisión de investigación, no un hallazgo
-técnico — y es una decisión que ha tomado sobre todo el usuario,
+técnico — y es una decisión que ha tomado sobre todo el técnico,
 marcando qué hilos merecía la pena perseguir ya y cuáles convenía
 dejar madurar.
 
@@ -151,12 +151,12 @@ repite varias veces sobre el mismo tramo de datos hasta que encaja.
 
 El caso más documentado es el del driver de sonido. Construido el
 renderizador (`mmsnd_render.py`), el propio `FINDINGS.md` registra
-**rondas sucesivas de escucha real** por parte del usuario, cada una
+**rondas sucesivas de escucha real** por parte del técnico, cada una
 encontrando algo que sonaba mal y acotando qué comando o qué campo
 del instrumento era responsable — hasta encontrar, por ejemplo, que
 la polaridad de `SET_MIXER` estaba invertida, o que la detección de
 fin de bucle de un script concreto estaba rota y por eso un `.wav`
-"no sonaba completo". El oído del usuario no solo confirmaba un
+"no sonaba completo". El oído del técnico no solo confirmaba un
 resultado ya cerrado — **acotaba la búsqueda**: "esto no suena bien
 en el segundo compás" apuntaba directamente a qué bytes revisar a
 continuación, de una forma que ningún análisis puramente estructural
@@ -164,7 +164,7 @@ del bytecode podría haber sugerido por sí solo. Un caso concreto
 queda incluso confirmado por nombre en el propio catálogo de
 sonidos: el efecto asociado al índice 4 se identificó de oído, en
 vivo, como "disparo (modo avión)" — un dato que no estaba en ningún
-sitio del código, solo en la memoria del usuario al escuchar el
+sitio del código, solo en la memoria del técnico al escuchar el
 sonido renderizado.
 
 El mismo bucle se repite con las imágenes, con el ojo en vez del
@@ -183,20 +183,20 @@ percepción visual en vez de auditiva — y es el mismo bucle que,
 meses después, destapó el error del formato de los sprites (visto en
 detalle en la sección siguiente).
 
-## El caso completo: cuando la IA se equivoca y el usuario lo nota
+## El caso completo: cuando la IA se equivoca y el técnico lo nota
 
 Vale la pena reconstruir este caso entero porque resume bien la
 dinámica. En una sesión anterior, se localizaron los 64 sprites de
 personajes y se decodificaron como 144 bytes por entrada, reagrupados
 en 48 filas de 24 píxeles de ancho — un formato que producía sprites
-**reconocibles**, y que el propio usuario había confirmado
+**reconocibles**, y que el propio técnico había confirmado
 identificando cada uno a simple vista. Con esa validación por delante,
 el formato se dio por "confirmado visualmente" y se usó así, sin más
 revisión, en varias páginas del proyecto (el catálogo de sprites, el
 póster/dossier visual) durante bastante tiempo.
 
 El problema es que "reconocible" no es lo mismo que "correcto". El
-usuario, mirando el catálogo ya publicado, notó algo que no encajaba:
+técnico, mirando el catálogo ya publicado, notó algo que no encajaba:
 un fondo con rayas horizontales blancas y negras, y una proporción
 "alargada" que no cuadraba con lo que recordaba del juego original —
 y lo conectó con un dato externo, que en la versión de ZX Spectrum
@@ -204,7 +204,7 @@ del mismo juego los sprites son de 24×24 con dos patrones, no de
 24×48 con uno solo.
 
 En vez de defender el formato ya "confirmado" (que además llevaba una
-validación previa del propio usuario), la respuesta fue ponerlo a
+validación previa del propio técnico), la respuesta fue ponerlo a
 prueba de verdad: generar las tres interpretaciones posibles de los
 mismos 144 bytes por separado — 48 filas seguidas (la vieja lectura),
 dos bloques de 24 filas apilados, y filas entrelazadas par/impar — y
@@ -216,7 +216,7 @@ pieza que faltaba llevaba semanas descrita en otro documento
 (`manual_subsistema_grafico.md`) sin que nadie hubiera unido los dos
 hilos.
 
-La lección no es "la IA se equivocó" ni "el usuario tenía razón" —es
+La lección no es "la IA se equivocó" ni "el técnico tenía razón" —es
 que **una validación visual pasada ("se reconoce el personaje") no
 prueba que el modelo de datos sea correcto**, solo que es
 suficientemente parecido para el ojo humano. Hicieron falta dos cosas
@@ -234,7 +234,7 @@ qué merece una etiqueta propia y qué se queda como interna— donde
 **no existe un byte que arbitre quién tiene razón**, porque no es una
 pregunta sobre el binario, es una pregunta sobre cómo se lee mejor el
 resultado. Ahí la dinámica cambia: unas veces ha pesado más el
-criterio del usuario (cómo prefiere llamarse algo, qué terminología
+criterio del técnico (cómo prefiere llamarse algo, qué terminología
 propia usar en español en vez de una traducción literal del inglés),
 y otras veces ha pesado más una conclusión de la IA respaldada en
 datos de uso real del código — no una preferencia estética, sino
@@ -261,7 +261,7 @@ movimiento de items) el proceso habitual no era renombrar
 directamente, sino dejar primero un "estudio, sin aplicar" con la
 propuesta completa de nombres en español, y solo convertirlo en
 cambios reales en una ronda posterior. Ese paso intermedio es,
-literalmente, el espacio para que el usuario esté de acuerdo o pida
+literalmente, el espacio para que el técnico esté de acuerdo o pida
 otro nombre antes de que el cambio se extienda por decenas de sitios
 del código — una decisión editorial deliberada, no una verificación
 técnica.
@@ -271,7 +271,7 @@ técnica.
 Sería deshonesto describir solo lo que ha ido bien. Algunas cosas no:
 
 - **Confusión repetida con el flujo de commits de Git.** Dos veces en
-  la misma sesión el usuario se quedó bloqueado pensando que "el
+  la misma sesión el técnico se quedó bloqueado pensando que "el
   commit no funciona", cuando en realidad `git commit` sin mensaje
   había abierto un editor esperando texto — no un fallo técnico, sino
   una interfaz (la de VS Code more que la de git en sí) que no
@@ -297,7 +297,7 @@ Sería deshonesto describir solo lo que ha ido bien. Algunas cosas no:
   pero poco realista en una sola sesión sin degradar la atención. La
   decisión correcta ahí no fue "seguir a toda costa" ni "reducir la
   calidad para ir más rápido", sino pararse a media tarea, ser
-  explícito sobre el ritmo real, y dejar que el usuario decidiera
+  explícito sobre el ritmo real, y dejar que el técnico decidiera
   cómo seguir en vez de asumirlo.
 
 ## El ritmo real: cientos de pasos pequeños, no saltos grandes
@@ -307,7 +307,7 @@ lo poco espectacular que es, paso a paso, la mayor parte del trabajo.
 De los cerca de 370 hitos y rondas registrados en `FINDINGS.md`, la
 inmensa mayoría no son descubrimientos — son cosas como "sustituir un
 `CALL $86BB` suelto por su etiqueta real", "renombrar 8 palabras de
-terminología propia del usuario en las etiquetas de código", "pasar
+terminología propia del técnico en las etiquetas de código", "pasar
 un campo de hexadecimal a decimal porque se lee mejor". Ninguno de
 esos pasos es interesante por separado. Lo que los hace valiosos es
 la consistencia sostenida durante cientos de rondas sin que se cuele
@@ -318,8 +318,8 @@ mucho más que la inspiración puntual.
 ## Reflexión final
 
 Si hay una conclusión de fondo, es que este proyecto no ha funcionado
-solo por tener "una IA muy potente" ni solo por tener "un usuario con
-criterio técnico" — los dos hacían falta, pero ninguno de los dos
+solo por tener "una IA muy potente" ni solo por tener "un técnico con
+criterio propio" — los dos hacían falta, pero ninguno de los dos
 bastaba por sí solo. Ha funcionado por tener, además, un método que
 no dependía de que ninguna de las dos partes tuviera siempre razón.
 La verificación byte
@@ -333,13 +333,13 @@ porque hay una respuesta objetiva esperando a ser encontrada.
 Pero reducirlo todo a "verificar contra los bytes" dejaría fuera la
 mitad del trabajo real. Antes de poder verificar nada hace falta
 decidir *qué* mirar —el papel de dirección e intuición del
-usuario, aparcando y retomando hilos—; muchas veces la propia
+técnico, aparcando y retomando hilos—; muchas veces la propia
 verificación es un bucle de percepción compartido, no un veredicto
 de una sola vez —el oído acotando qué bytes de sonido revisar, el
 ojo acotando qué bytes de imagen probar de otra forma—; y hay una
 categoría entera de decisiones, nombrar y comentar, donde no hay
 ningún byte que pueda arbitrar y el criterio compartido —a veces del
-usuario, a veces de la IA con datos de uso del código detrás— es lo
+técnico, a veces de la IA con datos de uso del código detrás— es lo
 único que hay. La reflexión que vale la pena llevarse no es solo
 "tener siempre un árbitro externo al que apelar cuando existe uno
 disponible", sino que ese árbitro no sustituye la necesidad de

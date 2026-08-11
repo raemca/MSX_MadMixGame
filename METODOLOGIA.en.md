@@ -94,10 +94,10 @@ Concrete examples of this discipline applied in practice:
 - The **64 character sprites** were first located by a
   structural clue (a table of 64 pointers with a fixed 144-byte
   stride falling inside an undeciphered gap), but they were **not
-  considered resolved until the user, the game's original
+  considered resolved until the developer, the game's original
   player, identified them at a glance** on a raw render with no
   prior format hypothesis at all — combining structural
-  evidence (from the AI) with lived knowledge (from the user).
+  evidence (from the AI) with lived knowledge (from the developer).
 - The reconstructed **`.dsk`/`.cas`** are not considered finished
   because "they compile with no errors" — they're considered
   finished because they're generated from scratch (without starting
@@ -144,7 +144,7 @@ table **does not distinguish wall from floor** as had been assumed
 — that distinction lives in another mechanism (the raw graphic
 index's range), and "type" instead encodes special behaviors layered
 on top. This phase also documented the L-shaped trapdoor mechanic
-(3 states, 12 tiles) based on the user's explanation of how
+(3 states, 12 tiles) based on the developer's explanation of how
 that mechanic actually plays out.
 
 ### Phase 3 — The "big gap": sprites, text font, never-before-seen text
@@ -156,7 +156,7 @@ falls into the main loop (449 bytes); then previously never-seen
 in-game text appeared (`"FASE 00"`, `"READY?"`, `"ESTAS
 FRITO"`) alongside a table of 64 fixed-stride pointers; that table
 turned out to be the key to locating **the 64 character sprites**
-(9216 bytes, identified at a glance by the user); and the remaining
+(9216 bytes, identified at a glance by the developer); and the remaining
 600 bytes turned out to be the game's character font,
 confirmed by the real glyph-address formula. Only then did the whole
 `0x8400`-`0xD500` stretch reach 0 differences.
@@ -184,7 +184,7 @@ with 15 commands deciphered one by one. On that basis two tools were
 built (`tools/mmsnd_tool.py`, a disassembler/assembler
 verified with a byte-for-byte *roundtrip*; `tools/mmsnd_render.py`, a
 WAV renderer) that were fine-tuned over **successive rounds of
-real listening** by the user — each round found a real bug
+real listening** by the developer — each round found a real bug
 in the renderer (inverted mixer polarity,
 broken loop-end detection, a wrong instrument-field mapping),
 never "sounds off, we'll leave it".

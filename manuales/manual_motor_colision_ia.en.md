@@ -228,7 +228,7 @@ position (§8).
 
 ### 6.2 `HNDLR_MARICOCO` — the ladybug (`TABLA_ITEMS_MARICOCO`, up to 2 active, `$5487`)
 
-Sprites confirmed by the user (the game's original player):
+Sprites confirmed by the developer (the game's original player):
 `SPR39_MARIQUITA_DER`/`SPR37_..._ABAJO`/`SPR38_..._ARRIBA`. Its
 effect: **regenerates already-eaten balls**. Every frame, if its
 position and the camera's are tile-aligned, it checks the tile
