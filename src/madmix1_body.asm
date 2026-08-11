@@ -1230,10 +1230,12 @@ WAIT_VBLANK:
 ;     izquierda), SCROLL_ABAJO (RRD, nibble a la derecha) y
 ;     SCROLL_IZQUIERDA/SCROLL_DERECHA (lateral por LDI, ver mas abajo
 ;     -- comparten cola APLICAR_DESPLAZAMIENTO_LATERAL, se distinguen por el flag +1/-1
-;     que suman a REGISTRO_NIVEL_POSICION_COMECOCOS al final; IZQUIERDA/
-;     DERECHA es HIPOTESIS de confianza media-alta, no confirmada en
-;     vivo). Si ningun bit relevante esta activo, no hace falta
-;     redibujar nada (RET NC).
+;     que suman a REGISTRO_NIVEL_POSICION_COMECOCOS al final; CONFIRMADO
+;     EN VIVO con openMSX (breakpoints + watch de memoria en
+;     REGISTRO_NIVEL_POSICION_COMECOCOS mientras se jugaba en las 4
+;     direcciones, agosto 2026): arriba/abajo mueven L, izquierda/derecha
+;     mueven H, sin cruces -- ver FINDINGS.md). Si ningun bit relevante
+;     esta activo, no hace falta redibujar nada (RET NC).
 ;   - Las 3 usan MAPEAR_LOSETA_A_GRAFICO ($8BC9, variante de
 ;     MAPEAR_LOSETA_RELATIVA_A_ABSOLUTA que ademas guarda el resultado en $8433 y
 ;     ESCRIBE un bit de atributo en TABLA_TIPOS_LOSETA ($8EC7, la MISMA tabla
@@ -1284,7 +1286,7 @@ GESTIONAR_SCROLL:
     JP     C,SCROLL_DERECHA
     RRA
     RET    NC                     ; ningun bit activo: no hace falta scroll
-SCROLL_IZQUIERDA:                ; HIPOTESIS confianza media-alta: resta 1 a REGISTRO_NIVEL_POSICION_COMECOCOS al final (ver APLICAR_DESPLAZAMIENTO_LATERAL), sin confirmar en vivo
+SCROLL_IZQUIERDA:                ; CONFIRMADO EN VIVO: resta 1 a REGISTRO_NIVEL_POSICION_COMECOCOS.H al final (ver APLICAR_DESPLAZAMIENTO_LATERAL) -- verificado con openMSX jugando en las 4 direcciones, agosto 2026, ver FINDINGS.md
     LD     HL,$0400                        ; delta empaquetado (H=$04=+4 horizontal, L=0)
     LD     (PARAMETRO_DESPLAZAMIENTO_SCROLL),HL
     LD     HL,BUFFER_LOSETAS_TRABAJO       ; puntero base, se guarda para el bucle de filas
@@ -1302,7 +1304,7 @@ SCROLL_IZQUIERDA:                ; HIPOTESIS confianza media-alta: resta 1 a REG
     ADD    HL,BC
     ADD    HL,BC                          ; HL = BUFFER_LOSETAS_TRABAJO+4448 (fila 139)
     JR     APLICAR_DESPLAZAMIENTO_LATERAL
-SCROLL_DERECHA:                  ; HIPOTESIS confianza media-alta: suma 1 a REGISTRO_NIVEL_POSICION_COMECOCOS al final (ver APLICAR_DESPLAZAMIENTO_LATERAL), sin confirmar en vivo
+SCROLL_DERECHA:                  ; CONFIRMADO EN VIVO: suma 1 a REGISTRO_NIVEL_POSICION_COMECOCOS.H al final (ver APLICAR_DESPLAZAMIENTO_LATERAL) -- verificado con openMSX jugando en las 4 direcciones, agosto 2026, ver FINDINGS.md
     LD     HL,$FC00                        ; delta empaquetado (H=$FC=-4 horizontal, L=0)
     LD     (PARAMETRO_DESPLAZAMIENTO_SCROLL),HL
     LD     HL,BUFFER_LOSETAS_TRABAJO+4480  ; = $EF84: fila 140 del lienzo (4480/32=140)

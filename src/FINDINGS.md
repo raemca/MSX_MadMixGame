@@ -17665,3 +17665,75 @@ ficheros), comentario de cabecera en `src/madmix1_body.asm` antes de
 binario compilado -- es una corrección de cómo se INTERPRETA/muestra
 el mismo `.spr` ya transcrito al 100%, no de los bytes en sí.
 
+## CONFIRMADO EN VIVO (openMSX): el eje H/L de la cámara y las 4 rutinas de scroll NO estaban cruzadas -- la hipótesis de un desarrollador externo no se sostiene
+
+Un desarrollador externo revisando el proyecto planteó una duda
+razonable sobre `GESTIONAR_SCROLL`/`SCROLL_ARRIBA`/`SCROLL_ABAJO`/
+`SCROLL_IZQUIERDA`/`SCROLL_DERECHA` (`madmix1_body.asm`, ver también
+`manual_subsistema_grafico.md` §6): que el comentario `HL = posición
+de cámara (H=eje horizontal, L=eje vertical)` estuviera invertido, y
+que `SCROLL_IZQUIERDA` fuera en realidad `SCROLL_ARRIBA` (y viceversa).
+Antes de tocar nada se verificó **en vivo**, no solo leyendo el código.
+
+**Primera pasada (análisis estático, DESCARTADA después)**: mirando
+solo el código, `SCROLL_ARRIBA`/`SCROLL_ABAJO` encadenan 24 `RLD`/`RRD`
+dentro de cada una de las 144 filas del buffer (una técnica Z80
+clásica de desplazamiento subpíxel *horizontal*), mientras que
+`SCROLL_IZQUIERDA`/`SCROLL_DERECHA` copian filas completas con `LDI`
+a la fila de al lado (`APLICAR_DESPLAZAMIENTO_LATERAL`, paso de ±32 =
+una fila, técnica clásica de desplazamiento *vertical*). Ese
+razonamiento llevó a una conclusión previa de que sí, los nombres
+estaban cruzados -- coincidiendo con la sospecha del desarrollador.
+**Esa conclusión era incorrecta**: probablemente por una suposición
+equivocada sobre la orientación fila/columna real de
+`BUFFER_LOSETAS_TRABAJO` en memoria. Queda como aviso de método: un
+razonamiento mecánico plausible sobre el código, sin ejecutarlo,
+puede fallar igual que cualquier otra hipótesis -- por eso se pasó a
+verificación en vivo antes de corregir nada.
+
+**Verificación en vivo (la que cuenta)**: usando el protocolo de
+control externo de openMSX (`-script`, `debug breakpoint create
+-address ... -command {...}`, `debug read "memory" ...`), se
+instalaron breakpoints en la entrada de las 4 rutinas de scroll y
+justo después de que cada una guarda la posición de cámara actualizada
+(`0x8A56` para la cola de `SCROLL_IZQUIERDA`/`SCROLL_DERECHA`, `0x8B2D`
+para la de `SCROLL_ARRIBA`/`SCROLL_ABAJO`), registrando en cada caso
+los bytes reales de `REGISTRO_NIVEL_POSICION_COMECOCOS` (`$2C02`=L,
+`$2C03`=H). Con el `.dsk` reconstruido cargado en la máquina
+`Mitsubishi_ML-G3_ES` (tiene disquetera real, a diferencia de los
+`C-BIOS_MSX1_*` que no la traen), el usuario jugó moviéndose en las 4
+direcciones (teclas por defecto: Q=arriba, A=abajo, O=izquierda,
+P=derecha) durante ~2 minutos. Resultado, consistente sin excepción en
+cientos de eventos capturados:
+
+```
+SCROLL_ARRIBA    -> L sube    (H constante)
+SCROLL_ABAJO     -> L baja    (H constante)
+SCROLL_DERECHA   -> H sube    (L constante)
+SCROLL_IZQUIERDA -> H baja    (L constante)
+```
+
+Es decir: **cada rutina mueve exactamente el eje que indica su
+nombre**, y el comentario `H=eje horizontal, L=eje vertical` era
+correcto. No había ningún cruce. Corregidos los 3 comentarios que
+todavía marcaban esto como `HIPOTESIS ... sin confirmar en vivo`
+(`madmix1_body.asm`, cabecera de `GESTIONAR_SCROLL` y las etiquetas
+`SCROLL_IZQUIERDA`/`SCROLL_DERECHA`) a `CONFIRMADO EN VIVO`. No afecta
+a ningún byte de datos ni de binario compilado -- solo al comentario.
+
+**Nota técnica sobre la propia infraestructura de verificación**: el
+protocolo de control de openMSX requiere `-diska` con una máquina que
+tenga disquetera real (`Mitsubishi_ML-G3_ES` funcionó; los
+`C-BIOS_MSX1_*` no tienen FDC y fallan en silencio); `-control pipe`
+dejaba la máquina sin encender esperando a un cliente externo que
+nunca llegó (mejor lanzar sin ese flag para que arranque solo, con
+ventana visible); el comando de temporizador de openMSX es `after
+realtime <segundos>`, no milisegundos (un `after realtime 45000` real
+son 12 horas, no 45 segundos -- error real cometido y corregido
+durante esta misma verificación); y forzar el `PC` a mano con `reg PC`
+para saltar el menú es arriesgado (dejó la CPU en `HALT` con
+interrupciones deshabilitadas) -- más fiable dejar que el propio
+usuario navegue el menú real mientras los breakpoints, ya armados
+desde el arranque, capturan los datos sin intervenir en el flujo del
+juego.
+
