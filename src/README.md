@@ -295,12 +295,6 @@ directo en el navegador:
   ajustables por tarjeta), cada una con su nombre real confirmado por
   el técnico (letras T/O/P/O de "Topo", 7 fotogramas de "Soft"
   rotando, 4 fotogramas de la estrella).
-- **`recurso_grafico.html`** — intentos de renderizado del bloque de
-  768 bytes de `LEVELCYCLE_RESOURCE_TABLE` (`madmix_scr_body.asm`,
-  `$60FE`); **RESUELTO**: es el color real (rojo/blanco/gris) del
-  marco de caramelo — `TAIL_CREDITS_MAIN` lo traduce con
-  `TAIL_TILE_LOOKUP` y rellena la tabla de color de VRAM, verificado
-  exacto contra un volcado de VRAM real (ver `FINDINGS.md`).
 - **`ptrtable_sprites.html`** — las 64 entradas gráficas de
   `PTR_TABLE_91C3` (`madmix1_body.asm`, dentro del hueco grande
   `0x92E3-0xB940` todavía sin descifrar), renderizadas como mapa de
@@ -328,6 +322,11 @@ directo en el navegador:
   propio HTML para el detalle exacto de qué se descarta y por qué.
   Documento vivo, regenerar tras renombrados con
   `py tools/gen_flow_diagram.py`.
+- **`flujo_secuencial.html`** — variante paso a paso (no grafo) del
+  mismo flujo de ejecución que `flujo_detallado.html`, coloreada por
+  subsistema (arranque, motor, items, HUD, menú, sonido, gráficos,
+  decisión); útil para seguir la secuencia lineal sin la complejidad
+  visual de un grafo de nodos.
 - **`editor_niveles.html`** — editor visual de las rejillas de losetas
   de `data/niveles/` (13 cuerpos + 3 cabeceras, los 15 niveles reales):
   paleta de las 91 losetas reales (reutiliza el decodificador de
@@ -350,6 +349,14 @@ directo en el navegador:
   ver `manual_niveles.md` §4 y `FINDINGS.md`. No valida posiciones de
   ítems/enemigos (tablas de coordenadas aparte, fuera de esta primera
   pasada).
+- **`mmg_poster_dossier.html`** — póster/dossier visual de una sola
+  página con el resumen del proyecto (formato cartel), pensado para
+  mostrar el trabajo de un vistazo sin navegar el resto de visores.
+
+Versiones antiguas o descartadas de algunos de estos visores
+(renderizados que resultaron erróneos, o contenido que acabó
+integrado en otro documento) se conservan sin mantenimiento activo en
+`recursos/descartado/`, como referencia histórica.
 
 ## Compilar
 
@@ -632,7 +639,8 @@ Y luego arrancar `copia.dsk` en openMSX como el disco original.
    `src/data/niveles/`); de paso se descubrió un **15º nivel** en
    `0x48BC-0x4AFC` (`BODY_HIDDEN_48BC`), en aquel momento sin
    registro conocido en `LEVEL_TABLE` — **confirmado
-   visualmente** (ver `recursos/nivel_oculto.html`): las paredes
+   visualmente** (ver `recursos/niveles.html`, que ya incluye este
+   nivel 15): las paredes
    dibujan la silueta de un comecocos bordeada de losetas de
    dirección única. Encaja con que el juego "se supone" que tiene 15
    niveles pero nunca se localizaron los 15 jugando ni en fuentes

@@ -296,12 +296,6 @@ in the browser:
   card), each with its real name confirmed by the developer (T/O/P/O
   letters from "Topo", 7 frames of "Soft" rotating, 4 frames of the
   star).
-- **`recurso_grafico.html`** — rendering attempts for the 768-byte
-  block of `LEVELCYCLE_RESOURCE_TABLE` (`madmix_scr_body.asm`,
-  `$60FE`); **RESOLVED**: it is the real color (red/white/gray) of
-  the candy frame — `TAIL_CREDITS_MAIN` translates it with
-  `TAIL_TILE_LOOKUP` and fills the VRAM color table, verified exact
-  against a real VRAM dump (see `FINDINGS.md`).
 - **`ptrtable_sprites.html`** — the 64 graphic entries of
   `PTR_TABLE_91C3` (`madmix1_body.asm`, inside the large gap
   `0x92E3-0xB940` still undeciphered at the time), rendered as a raw
@@ -328,6 +322,11 @@ in the browser:
   `JP`/`JR`, never `CALL`) — see the note in the HTML itself for the
   exact detail of what is left out and why. Living document,
   regenerate after renames with `py tools/gen_flow_diagram.py`.
+- **`flujo_secuencial.html`** — step-by-step (non-graph) variant of
+  the same execution flow as `flujo_detallado.html`, colored by
+  subsystem (boot, engine, items, HUD, menu, sound, graphics,
+  decision); useful for following the linear sequence without a
+  node-graph's visual complexity.
 - **`editor_niveles.html`** — visual editor for the tile grids in
   `data/niveles/` (13 bodies + 3 headers, the 15 real levels):
   palette of the 91 real tiles (reuses the decoder from
@@ -349,6 +348,14 @@ in the browser:
   been dropped, see `manual_niveles.md` §4 and `FINDINGS.md`. It does
   not validate item/enemy positions (coordinate tables aside, out of
   scope for this first pass).
+- **`mmg_poster_dossier.html`** — single-page visual poster/dossier
+  summarizing the project (poster format), meant to show the work at
+  a glance without navigating the rest of the viewers.
+
+Old or discarded versions of some of these viewers (renders that
+turned out wrong, or content that ended up folded into another
+document) are kept without active maintenance in
+`recursos/descartado/`, as a historical reference.
 
 ## Building
 
@@ -633,7 +640,8 @@ And then boot `copia.dsk` in openMSX like the original disk.
    `src/data/niveles/`); along the way a **15th level** was
    discovered at `0x48BC-0x4AFC` (`BODY_HIDDEN_48BC`), at the time with
    no known register in `LEVEL_TABLE` — **visually
-   confirmed** (see `recursos/nivel_oculto.html`): the walls draw
+   confirmed** (see `recursos/niveles.html`, which already includes
+   this level 15): the walls draw
    the silhouette of a Pac-Man bordered with one-way tiles. It fits
    with the game "supposedly" having 15 levels, though all 15 were
    never located by playing or in external sources.
