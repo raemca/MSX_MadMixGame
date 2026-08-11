@@ -353,11 +353,6 @@ directo en el navegador:
   página con el resumen del proyecto (formato cartel), pensado para
   mostrar el trabajo de un vistazo sin navegar el resto de visores.
 
-Versiones antiguas o descartadas de algunos de estos visores
-(renderizados que resultaron erróneos, o contenido que acabó
-integrado en otro documento) se conservan sin mantenimiento activo en
-`recursos/descartado/`, como referencia histórica.
-
 ## Compilar
 
 ```

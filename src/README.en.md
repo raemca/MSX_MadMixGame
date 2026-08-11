@@ -352,11 +352,6 @@ in the browser:
   summarizing the project (poster format), meant to show the work at
   a glance without navigating the rest of the viewers.
 
-Old or discarded versions of some of these viewers (renders that
-turned out wrong, or content that ended up folded into another
-document) are kept without active maintenance in
-`recursos/descartado/`, as a historical reference.
-
 ## Building
 
 ```
