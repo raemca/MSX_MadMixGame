@@ -55,7 +55,7 @@ $57D8 ─── ACTIVAR_EFECTO_ITEM                    -- triggers special modes
 All of this lives in `madmix_scr.asm` (the "loading screen", which
 actually contains much more than graphics — see `README.md`), as
 opposed to the actor/render engine (`madmix1.asm`, see
-`FLUJO_PROGRAMA.md` §5.1) and the sound driver (`manual_driver_sonido.md`).
+`FLUJO_PROGRAMA.md` §5.1) and the sound driver (`manual_driver_sonido.en.md`).
 
 ## 3. The collision engine: `MOTOR_MOVIMIENTO_COLISION`
 
@@ -352,7 +352,7 @@ this manual:
 | `SELECTOR_SPRITE_COMECOCOS` | Pac-Man's animation frame (not scroll, see §3) |
 | `CACHE_COLUMNA_LOSETA`/`CACHE_TIPO_LOSETA` | cache of the last tile-type lookup |
 | `CONTADOR_BOLAS_COMIDAS` | balls eaten this level (read by `VERIFICAR_FIN_NIVEL`) |
-| `EVENTO_SONIDO_PENDIENTE` | index of the sound effect to trigger (see `manual_driver_sonido.md` §7) |
+| `EVENTO_SONIDO_PENDIENTE` | index of the sound effect to trigger (see `manual_driver_sonido.en.md` §7) |
 
 ## 10. To dig further
 

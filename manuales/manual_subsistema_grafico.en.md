@@ -110,7 +110,7 @@ below):
    `INVERTIR_ORDEN_BYTES_PATRON_ACTOR` (swaps bytes from both
    ends toward the center). This is the same mechanism ghosts/
    ladybug/"repugnantoso" use to reuse a single "right-facing"
-   sprite as "left-facing" (see `manual_motor_colision_ia.md` §6).
+   sprite as "left-facing" (see `manual_motor_colision_ia.en.md` §6).
 3. **Sub-pixel shifting + mask blending**: the MSX engine has
    no sprite shifting finer than 1 character pixel in
    hardware — here **0 to 7 bit** (sub-character) shifting is
@@ -178,7 +178,7 @@ updated and dumped to VRAM in full once per frame:
 
 ## 6. Software scroll (4px, no scroll hardware)
 
-Summary — see `FLUJO_PROGRAMA.md` §4 and `manual_motor_colision_ia.md`
+Summary — see `FLUJO_PROGRAMA.md` §4 and `manual_motor_colision_ia.en.md`
 for the full direction dispatcher. The graphics mechanism itself:
 
 `SCROLL_ARRIBA`/`SCROLL_ABAJO` shift the 144 rows of
@@ -222,7 +222,7 @@ twice over (§4), also serves as the actor clipping mask.
 **HUD flash zones**: `ZONA_COLOR_VRAM_DESTELLO_A`/`_B`
 (`$2A80`/`$2B80`, 16 bytes each) — colored by `ACTUALIZAR_VRAM_FRAME`
 every time `COLOR_ACTUAL` changes, for the HUD icon/color blink
-during special modes (see `manual_motor_colision_ia.md` §8).
+during special modes (see `manual_motor_colision_ia.en.md` §8).
 
 ## 8. Relevant VRAM addresses and constants
 
@@ -260,7 +260,7 @@ open points:
   reusing `TABLA_RLE_MARCO_CARAMELO` as masks).
 - `FLUJO_PROGRAMA.md` §5.1/§5.4 — a shorter summary, in the context
   of the game's full flow.
-- `manual_motor_colision_ia.md` — who decides WHAT to draw and WHEN
+- `manual_motor_colision_ia.en.md` — who decides WHAT to draw and WHEN
   (this manual only documents the HOW of getting it into VRAM).
 - `graficos.html`/`niveles.html` (recursos) — a visual catalog of
   already-identified tiles and sprites, useful as a reference while

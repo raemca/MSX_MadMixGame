@@ -22,7 +22,7 @@ editor: each level is, literally, a grid of bytes
 (one byte = one tile) plus a fixed 20-byte register with a handful
 of parameters (starting position, how many enemies, ball
 target...). There are no layers, no entities with their own position
-outside the item tables already documented in `manual_motor_colision_ia.md`
+outside the item tables already documented in `manual_motor_colision_ia.en.md`
 — enemies always "appear" at the same reference point in the
 level, never at their own per-level coordinates.
 
@@ -60,7 +60,7 @@ first level loads).
 | 4-5 | `REGISTRO_NIVEL_PIE_PTR` | duplicate of the previous field — the header is ALSO copied below the body, as a "footer" |
 | 6 | `REGISTRO_NIVEL_FILAS` | number of rows in the body (varies per level, 15-23) |
 | 7 | `REGISTRO_NIVEL_VIDA_EXTRA_FLAG` | HUD notice flag ("NEXT... EXTRA") |
-| 8 | `REGISTRO_NIVEL_CONTADOR_PELMAZOIDES` | number of active ghosts this level (max. 8, see `manual_motor_colision_ia.md` §6.1) |
+| 8 | `REGISTRO_NIVEL_CONTADOR_PELMAZOIDES` | number of active ghosts this level (max. 8, see `manual_motor_colision_ia.en.md` §6.1) |
 | 9 | `REGISTRO_NIVEL_CONTADOR_MARICOCOS` | number of active ladybugs (max. 2, §6.2) |
 | 10 | `REGISTRO_NIVEL_CONTADOR_REPUGNANTOSOS` | number of active "repugnantosos" (max. 8, §6.3) |
 | 11 | `REGISTRO_NIVEL_DURACION_PARPADEO` | duration in frames of the special ball/track blink |
@@ -159,7 +159,7 @@ detail.
 
 Places the 3 active item tables (`TABLA_ITEMS_PELMAZOIDE`,
 `TABLA_ITEMS_MARICOCO`, `TABLA_ITEMS_REGPUNANTOSO` — see
-`manual_motor_colision_ia.md` §6) at the reference point
+`manual_motor_colision_ia.en.md` §6) at the reference point
 (`REGISTRO_NIVEL_FILA_COLUMNA`), clearing their mode/phase fields —
 they all "respawn" at the same exit spot. It also clears the
 warning/flash queue (`TABLA_RANURAS_AVISO`) and resets
@@ -201,7 +201,7 @@ it doesn't match, the level is still in progress. If it matches:
 
 **What counts as a "ball"**: not just normal balls — forced-direction
 arrows ALSO increment `CONTADOR_BOLAS_COMIDAS` when stepped on (see
-`manual_motor_colision_ia.md` §4), so a level's real target mixes
+`manual_motor_colision_ia.en.md` §4), so a level's real target mixes
 both tile types.
 
 ## 7. The menu's "DEMO" mode: `GESTIONAR_CICLO_NIVELES`
@@ -216,7 +216,7 @@ plays a **demo script** — a sequence of pairs
 `[duration in frames, simulated direction]` ending with direction
 `$FF`, which replaces the real keyboard/joystick reading in
 `MOTOR_MOVIMIENTO_COLISION` while the cycler is active (see
-`manual_motor_colision_ia.md` §3, step 1).
+`manual_motor_colision_ia.en.md` §3, step 1).
 
 The scripts live in `data/demos/*.dem` (binary, byte-pair
 format, with no dedicated editing tool in this project —
@@ -251,7 +251,7 @@ if they don't match, the level is unfinishable (it would compile with
 no error, but the level could never be completed by playing it).
 
 > ⚠️ **Real editing limit** (same pattern as sound, see
-> `manual_driver_sonido.md` §9): each `.bin` compiles with `INCBIN` at
+> `manual_driver_sonido.en.md` §9): each `.bin` compiles with `INCBIN` at
 > a FIXED address. You can change the VALUE of any tile with no
 > problem. **Do NOT add or remove rows or columns**: the size is
 > FIXED — if it changes, everything after it in `madmix_scr.asm`/
@@ -280,7 +280,7 @@ disassembly. Open items:
 - `FINDINGS.md` — every level-related section, the 20-byte
   register field by field, and the level-13 bug, in chronological
   order.
-- `manual_motor_colision_ia.md` — what the enemies/items do once
+- `manual_motor_colision_ia.en.md` — what the enemies/items do once
   the level is already loaded (this manual only documents how the
   level is built and loaded, not the game logic inside it).
 - `niveles.html`/`editor_niveles.html` (recursos) — visualization of
