@@ -1,6 +1,6 @@
 # Código de Conducta del Pacto de Colaboradores (Contributor Covenant)
 
-*[Read this in English](CODE_OF_CONDUCT.en.md)*
+*[Read this in English](CODE_OF_CONDUCT-EN.md)*
 
 ## Nuestro Compromiso
 
