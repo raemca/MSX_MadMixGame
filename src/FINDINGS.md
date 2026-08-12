@@ -1,5 +1,7 @@
 # Mad Mix Game (Topo Soft, 1987/88) — hallazgos de ingeniería inversa
 
+*[Read this in English](FINDINGS.en.md)*
+
 *Ingeniería inversa, análisis y documentación: Rafael Eduardo Martín Candial (raemca@hotmail.com)*
 
 Contexto para retomar el trabajo. Origen: análisis estático de
