@@ -17739,3 +17739,146 @@ usuario navegue el menú real mientras los breakpoints, ya armados
 desde el arranque, capturan los datos sin intervenir en el flujo del
 juego.
 
+
+## RECTIFICACIÓN (agosto 2026): el eje H/L SÍ estaba cruzado -- la entrada anterior ("CONFIRMADO EN VIVO... NO estaban cruzadas") era incorrecta. Agradecimiento a Marcos Jouron Berzosa
+
+La entrada inmediatamente anterior de este mismo fichero declaraba
+zanjado el debate sobre `GESTIONAR_SCROLL`/`SCROLL_ARRIBA`/
+`SCROLL_ABAJO`/`SCROLL_IZQUIERDA`/`SCROLL_DERECHA`. Era incorrecta.
+**Marcos Jouron Berzosa** -- que está haciendo su propio trabajo de
+ingeniería inversa sobre este MSX y sobre Spectrum, portando ambos a
+MSX2 y a Spectrum Next -- revisó esa conclusión, no se conformó con
+ella, y volvió a plantear la duda original con buen criterio: la
+verificación anterior nunca había comprobado el resultado visual real,
+solo qué *byte* cambiaba cada rutina. Gracias a su insistencia se
+volvió a investigar desde cero, esta vez con evidencia fotográfica
+directa. Este documento le debe la corrección.
+
+**Por qué la verificación anterior se equivocó**: comprobó, correcta y
+honestamente, que `SCROLL_ARRIBA`/`SCROLL_ABAJO` mueven `L` y
+`SCROLL_IZQUIERDA`/`SCROLL_DERECHA` mueven `H` (eso nunca estuvo en
+duda, es un hecho de código). Pero de ahí saltó a "por tanto el
+comentario `H=eje horizontal, L=eje vertical` es correcto" **sin
+comprobarlo nunca contra un píxel real en pantalla** -- solo contra la
+etiqueta que la propia rutina ya tenía. Es decir: verificó que el
+código hacía lo que sus propias etiquetas decían que hacía, no que
+esas etiquetas fueran las correctas para empezar. Un razonamiento
+circular con apariencia de verificación rigurosa (breakpoints, watch
+de memoria, apuntes de bytes reales) que, precisamente por parecer tan
+sólido, no se cuestionó más.
+
+**Reverificación (la que sí prueba algo)**: se repitió la sesión en
+vivo con openMSX (`Mitsubishi_ML-G3_ES`, `.dsk` reconstruido), pero
+esta vez con dos fuentes de evidencia independientes en vez de una:
+
+1. **Breakpoints** en las 4 rutinas de scroll (`debug breakpoint
+   create -address <addr> -command {...}`), registrando en un log en
+   cada disparo qué rutina fue, el contador de disparos, y los bytes
+   reales de `REGISTRO_NIVEL_POSICION_COMECOCOS` (`$2C02`=L,
+   `$2C03`=H) -- exactamente lo que ya medía la verificación anterior.
+2. **240 capturas de pantalla reales** (`screenshot -raw`, una cada
+   0.5s durante los 2 minutos de partida), tomadas automáticamente en
+   paralelo sin intervenir en el juego -- la pieza que faltaba antes.
+
+Con las capturas en la mano, correlación de píxeles: sin `Pillow`
+disponible en el entorno, se escribió un decodificador de PNG en Python
+puro (`zlib` + parseo manual de chunks IHDR/IDAT + des-filtrado de
+scanlines) y un comparador de patrones (SSD -- suma de diferencias al
+cuadrado -- de un recorte de 200x140px del área jugable, buscando el
+mejor desplazamiento `(dx,dy)` dentro de una ventana de búsqueda,
+frame contra frame) para medir objetivamente cuánto y en qué dirección
+se desplazaba el contenido real de pantalla en tramos "limpios" (un
+solo tipo de `SCROLL_*` disparándose, según el log de breakpoints).
+Se validó cada rutina con 2-4 pares de fotogramas independientes,
+todos con reducciones de error del 60-75% frente al desplazamiento
+nulo y magnitud consistente con los "4px por llamada" que ya decía el
+código fuente:
+
+```
+rutina (nombre de ENTONCES) | registro | desplazamiento real en pantalla
+SCROLL_ARRIBA    (L, RLD, +1) -> HORIZONTAL, ~20-24px (un sentido)
+SCROLL_ABAJO     (L, RRD, -1) -> HORIZONTAL, ~16-20px (sentido opuesto)
+SCROLL_IZQUIERDA (H, LDI, -1) -> VERTICAL,   ~20-24px (un sentido)
+SCROLL_DERECHA   (H, LDI, +1) -> VERTICAL,   ~24px    (sentido opuesto)
+```
+
+Es decir: **las rutinas que tocan `L` desplazan la pantalla en
+HORIZONTAL, y las que tocan `H` la desplazan en VERTICAL** -- justo al
+revés de lo que decía el comentario `H=eje horizontal, L=eje vertical`
+y de lo que la entrada anterior declaró "confirmado". El cruce que
+planteaba Marcos era real.
+
+**Resolviendo el sentido exacto (cuál es "arriba" de verdad)**: la
+separación de ejes (horizontal vs. vertical) es un hecho de píxeles,
+sin ambigüedad de convención. El *sentido* dentro de cada eje sí
+depende de una convención -- la estándar en scroll de cámara de
+videojuegos (no la de "scroll" de documento/mapa, que en muchos
+sistemas es la contraria) es que el fondo se desplaza en el sentido
+**opuesto** al movimiento del personaje al que sigue la cámara.
+Aplicando esa convención a las 4 rutinas: `SCROLL_ARRIBA` (mueve el
+contenido a la IZQUIERDA) es en realidad la rutina de mover a la
+DERECHA; `SCROLL_ABAJO` (contenido a la DERECHA) es en realidad
+IZQUIERDA; `SCROLL_IZQUIERDA` (contenido hacia ABAJO) es en realidad
+ARRIBA; `SCROLL_DERECHA` (contenido hacia ARRIBA) es en realidad
+ABAJO. Esta reasignación coincide EXACTAMENTE con el ejemplo concreto
+que había puesto Marcos meses atrás ("tu `SCROLL_IZQUIERDA` debería
+ser en realidad `SCROLL_ARRIBA`") -- una coincidencia adicional, ajena
+al propio análisis de píxeles, que refuerza la confianza en el
+resultado.
+
+**Corregido en el código fuente** (`madmix1_body.asm`, sin tocar ni un
+byte del binario compilado -- recompilado y verificado con
+`git status`/`git diff`: `main.lst` cambia por los comentarios nuevos,
+pero `MADMIX1.BIN`, `madmix_reconstruido.dsk` y `madmix_reconstruido.cas`
+salen bit a bit idénticos, como cabe esperar de renombrar etiquetas y
+reescribir comentarios sin tocar una sola instrucción):
+
+```
+nombre ANTES      -> nombre AHORA (mismo código, misma direccion)
+SCROLL_ARRIBA     -> SCROLL_DERECHA
+SCROLL_ABAJO      -> SCROLL_IZQUIERDA
+SCROLL_IZQUIERDA  -> SCROLL_ARRIBA
+SCROLL_DERECHA    -> SCROLL_ABAJO
+```
+
+Renombradas las 4 etiquetas (y sus locales `.BUCLE_FILA_*`/
+`.BUCLE_NIBBLE_*`), corregido el comentario de `GESTIONAR_SCROLL`
+(`HL = posicion de camara`, ahora dice `L=eje horizontal en pantalla,
+H=eje vertical en pantalla`), los comentarios de cabecera de las 4
+rutinas (ya no dicen "hacia arriba"/"hacia abajo" en la rutina
+equivocada), las referencias cruzadas entre rutinas hermanas ("SCROLL_X
+usa tal valor"), y la mención en `PARAMETRO_DESPLAZAMIENTO_SCROLL`
+(`madmix_scr_body.asm`). Cabecera de cada rutina y de `GESTIONAR_SCROLL`
+incluyen ahora el agradecimiento a Marcos Jouron Berzosa.
+
+### De paso, un segundo fallo independiente encontrado y corregido: `TABLA_TECLAS_MSX` tenía las 5 acciones desplazadas un puesto
+
+Al reconstruir la cadena de razonamiento de la verificación anterior
+(que asumía "teclas por defecto: Q=arriba, A=abajo, O=izquierda,
+P=derecha" para interpretar qué tecla pulsaba el usuario), se decodificó
+`TABLA_TECLAS_MSX` (`madmix1_body.asm`) cruzando cada par fila/máscara
+con `TABLA_CODIGOS_TECLA` (`madmix_scr_body.asm`, el mapa de 72
+posiciones de escaneo a identidad de tecla). Resultado: la tecla real
+de cada offset es ESPACIO(0)/Q(2)/A(4)/O(6)/P(8) -- pero las
+**etiquetas de acción** que llevaba la tabla decían arriba(0)/
+abajo(2)/izquierda(4)/derecha(6)/disparo(8), un desplazamiento de un
+puesto completo. Rafael confirmó en vivo, de memoria propia del juego,
+que los controles reales son Q=arriba, A=abajo, O=izquierda,
+P=derecha, ESPACIO=disparo -- exactamente lo que predice deshacer ese
+desplazamiento. Es un fallo de etiquetado de nuestra documentación del
+desensamblado (no del juego de 1987, que en todo momento funcionó
+correctamente con esos controles), y no tiene relación de causa con el
+cruce de `SCROLL_*` -- son dos hallazgos independientes que salieron a
+la luz en la misma sesión. Corregidos los comentarios de
+`TABLA_TECLAS_MSX` y su cabecera, y la mención en el comentario de
+`LEER_TECLADO`.
+
+**Verificado**: recompilado sin errores (`py tools/build_all.py`,
+0 errores, mismos 2 warnings preexistentes de siempre) y regenerados
+`.dsk`/`.cas` (`py tools/gen_disk_and_cas.py`) -- `git status` confirma
+que ningún artefacto binario compilado cambió, solo `main.lst`
+(comentarios) y los 2 ficheros `.asm` fuente. Pendiente: aplicar la
+misma corrección a `src/FINDINGS.en.md` y a
+`manuales/manual_subsistema_grafico.md` (§6, que todavía describe el
+mapeo de ejes antiguo) en una sesión futura.
+

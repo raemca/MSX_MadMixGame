@@ -1225,18 +1225,28 @@ WAIT_VBLANK:
 ;  REDIBUJAR_LOSETA_BUFFER_VRAM que ya estaba confirmado justo despues de este
 ;  bloque.
 ;   - GESTIONAR_SCROLL lee la posicion de camara ($2C02) y decide
-;     entre 3 rutinas via una cadena de RRA/JP C sobre los bits
-;     bajos de fila/columna: SCROLL_ARRIBA (RLD, nibble a la
-;     izquierda), SCROLL_ABAJO (RRD, nibble a la derecha) y
-;     SCROLL_IZQUIERDA/SCROLL_DERECHA (lateral por LDI, ver mas abajo
-;     -- comparten cola APLICAR_DESPLAZAMIENTO_LATERAL, se distinguen por el flag +1/-1
-;     que suman a REGISTRO_NIVEL_POSICION_COMECOCOS al final; CONFIRMADO
-;     EN VIVO con openMSX (breakpoints + watch de memoria en
-;     REGISTRO_NIVEL_POSICION_COMECOCOS mientras se jugaba en las 4
-;     direcciones, agosto 2026): arriba/abajo mueven L, izquierda/derecha
-;     mueven H, sin cruces -- ver FINDINGS.md). Si ningun bit relevante
-;     esta activo, no hace falta redibujar nada (RET NC).
-;   - Las 3 usan MAPEAR_LOSETA_A_GRAFICO ($8BC9, variante de
+;     entre 4 rutinas via una cadena de RRA/JP C sobre los bits
+;     bajos de fila/columna: SCROLL_DERECHA/SCROLL_ABAJO (RLD/RRD,
+;     nibble a la izquierda/derecha respectivamente, tocan L) y
+;     SCROLL_ARRIBA/SCROLL_IZQUIERDA (lateral por LDI, ver mas abajo,
+;     tocan H) -- comparten cola APLICAR_DESPLAZAMIENTO_LATERAL, se distinguen por el flag +1/-1
+;     que suman a REGISTRO_NIVEL_POSICION_COMECOCOS al final.
+;     CORREGIDO (agradecimiento a Marcos Jouron Berzosa, que planteo la
+;     duda con buen criterio a partir de su propio trabajo de
+;     ingenieria inversa sobre MSX/Spectrum): una primera verificacion
+;     "en vivo" en agosto 2026 solo comprobo QUE BYTE cambia cada
+;     rutina (L o H, vía breakpoints + watch de memoria), y asumio sin
+;     comprobarlo que ese byte se correspondia con el eje de pantalla
+;     que sugiere su nombre. Esa asuncion era erronea. Una segunda
+;     verificacion, tambien en agosto 2026 (breakpoints + 240 capturas
+;     de pantalla reales de openMSX + correlacion de pixeles entre
+;     fotogramas, ver FINDINGS.md), confirmo que las rutinas que tocan
+;     L desplazan la pantalla en HORIZONTAL y las que tocan H la
+;     desplazan en VERTICAL -- el cruce que Marcos habia intuido era
+;     real. Los 4 nombres de mas abajo ya reflejan la correccion. Si
+;     ningun bit relevante esta activo, no hace falta redibujar nada
+;     (RET NC).
+;   - Las 4 usan MAPEAR_LOSETA_A_GRAFICO ($8BC9, variante de
 ;     MAPEAR_LOSETA_RELATIVA_A_ABSOLUTA que ademas guarda el resultado en $8433 y
 ;     ESCRIBE un bit de atributo en TABLA_TIPOS_LOSETA ($8EC7, la MISMA tabla
 ;     que consulta CONSULTAR_TIPO_LOSETA -- confirmado, sin relacion
@@ -1263,39 +1273,39 @@ WAIT_VBLANK:
 ;     de lo descrito.
 ; ==============================================================
 GESTIONAR_SCROLL:
-    LD     HL,(REGISTRO_NIVEL_POSICION_COMECOCOS) ; HL = posicion de camara (H=eje horizontal, L=eje vertical)
+    LD     HL,(REGISTRO_NIVEL_POSICION_COMECOCOS) ; HL = posicion de camara (CORREGIDO: L=eje horizontal en pantalla, H=eje vertical en pantalla -- al reves de lo que decia antes este comentario, ver cabecera de arriba)
     LD     C,A                    ; guarda el parametro de entrada (valor recibido por GESTIONAR_SCROLL)
     LD     A,L
-    AND    $03                    ; prueba los 2 bits bajos de L (sub-pixel vertical)
+    AND    $03                    ; prueba los 2 bits bajos de L (sub-pixel horizontal en pantalla)
     JR     Z,.COMPROBAR_EJE_Y
     LD     A,C
     AND    $03                    ; enmascara C a sus 2 bits bajos
     LD     C,A
 .COMPROBAR_EJE_Y:
     LD     A,H
-    AND    $03                    ; prueba los 2 bits bajos de H (sub-pixel horizontal)
+    AND    $03                    ; prueba los 2 bits bajos de H (sub-pixel vertical en pantalla)
     LD     A,C
     JR     Z,.DECIDIR_DIRECCION_SCROLL
     AND    $0C                    ; enmascara C a sus bits 2-3
 .DECIDIR_DIRECCION_SCROLL:
     RRA
-    JP     C,SCROLL_ARRIBA
+    JP     C,SCROLL_DERECHA
+    RRA
+    JP     C,SCROLL_IZQUIERDA
     RRA
     JP     C,SCROLL_ABAJO
     RRA
-    JP     C,SCROLL_DERECHA
-    RRA
     RET    NC                     ; ningun bit activo: no hace falta scroll
-SCROLL_IZQUIERDA:                ; CONFIRMADO EN VIVO: resta 1 a REGISTRO_NIVEL_POSICION_COMECOCOS.H al final (ver APLICAR_DESPLAZAMIENTO_LATERAL) -- verificado con openMSX jugando en las 4 direcciones, agosto 2026, ver FINDINGS.md
-    LD     HL,$0400                        ; delta empaquetado (H=$04=+4 horizontal, L=0)
+SCROLL_ARRIBA:                ; CORREGIDO (antes mal etiquetada "SCROLL_IZQUIERDA" -- ver cabecera de GESTIONAR_SCROLL, agradecimiento a Marcos Jouron Berzosa): resta 1 a REGISTRO_NIVEL_POSICION_COMECOCOS.H al final (ver APLICAR_DESPLAZAMIENTO_LATERAL) -- reverificado con capturas de pantalla + breakpoints en openMSX que esta rutina desplaza el contenido visible en VERTICAL, agosto 2026, ver FINDINGS.md
+    LD     HL,$0400                        ; delta empaquetado (byte alto=$04=+4)
     LD     (PARAMETRO_DESPLAZAMIENTO_SCROLL),HL
     LD     HL,BUFFER_LOSETAS_TRABAJO       ; puntero base, se guarda para el bucle de filas
     PUSH   HL
     EXX                                    ; cambia al banco alternativo para preparar C, consumido mas tarde en APLICAR_DESPLAZAMIENTO_LATERAL
-    LD     C,$00                           ; constante de ajuste (ADD A,C en APLICAR_DESPLAZAMIENTO_LATERAL); SCROLL_DERECHA usa $23
+    LD     C,$00                           ; constante de ajuste (ADD A,C en APLICAR_DESPLAZAMIENTO_LATERAL); SCROLL_ABAJO usa $23
     EXX                                    ; vuelve al banco principal
-    LD     A,$FF                           ; flag de direccion (-1, se suma a REGISTRO_NIVEL_POSICION_COMECOCOS.H; SCROLL_DERECHA usa $01/+1)
-    LD     BC,-32                          ; paso entre filas del lienzo, en sentido inverso (SCROLL_DERECHA usa +32)
+    LD     A,$FF                           ; flag de direccion (-1, se suma a REGISTRO_NIVEL_POSICION_COMECOCOS.H; SCROLL_ABAJO usa $01/+1)
+    LD     BC,-32                          ; paso entre filas del lienzo, en sentido inverso (SCROLL_ABAJO usa +32)
     LD     DE,BUFFER_LOSETAS_TRABAJO+4576  ; = $EFE4: fila 143 del lienzo (4576/32=143, la ultima fila)
     LD     L,E
     LD     H,D
@@ -1304,15 +1314,15 @@ SCROLL_IZQUIERDA:                ; CONFIRMADO EN VIVO: resta 1 a REGISTRO_NIVEL_
     ADD    HL,BC
     ADD    HL,BC                          ; HL = BUFFER_LOSETAS_TRABAJO+4448 (fila 139)
     JR     APLICAR_DESPLAZAMIENTO_LATERAL
-SCROLL_DERECHA:                  ; CONFIRMADO EN VIVO: suma 1 a REGISTRO_NIVEL_POSICION_COMECOCOS.H al final (ver APLICAR_DESPLAZAMIENTO_LATERAL) -- verificado con openMSX jugando en las 4 direcciones, agosto 2026, ver FINDINGS.md
-    LD     HL,$FC00                        ; delta empaquetado (H=$FC=-4 horizontal, L=0)
+SCROLL_ABAJO:                  ; CORREGIDO (antes mal etiquetada "SCROLL_DERECHA" -- ver cabecera de GESTIONAR_SCROLL, agradecimiento a Marcos Jouron Berzosa): suma 1 a REGISTRO_NIVEL_POSICION_COMECOCOS.H al final (ver APLICAR_DESPLAZAMIENTO_LATERAL) -- reverificado con capturas de pantalla + breakpoints en openMSX que esta rutina desplaza el contenido visible en VERTICAL, agosto 2026, ver FINDINGS.md
+    LD     HL,$FC00                        ; delta empaquetado (byte alto=$FC=-4)
     LD     (PARAMETRO_DESPLAZAMIENTO_SCROLL),HL
     LD     HL,BUFFER_LOSETAS_TRABAJO+4480  ; = $EF84: fila 140 del lienzo (4480/32=140)
     PUSH   HL                              ; guarda el puntero para el bucle de filas
     EXX                                    ; cambia al banco alternativo para preparar C, consumido mas tarde en APLICAR_DESPLAZAMIENTO_LATERAL
-    LD     C,$23                           ; constante de ajuste (ADD A,C en APLICAR_DESPLAZAMIENTO_LATERAL); SCROLL_IZQUIERDA usa $00
+    LD     C,$23                           ; constante de ajuste (ADD A,C en APLICAR_DESPLAZAMIENTO_LATERAL); SCROLL_ARRIBA usa $00
     EXX                                    ; vuelve al banco principal
-    LD     A,$01                           ; flag de direccion (+1, se suma a REGISTRO_NIVEL_POSICION_COMECOCOS.H; SCROLL_IZQUIERDA usa $FF/-1)
+    LD     A,$01                           ; flag de direccion (+1, se suma a REGISTRO_NIVEL_POSICION_COMECOCOS.H; SCROLL_ARRIBA usa $FF/-1)
     LD     BC,32                           ; paso entre filas del lienzo (ancho de fila de BUFFER_LOSETAS_TRABAJO)
     LD     DE,BUFFER_LOSETAS_TRABAJO
     LD     L,E
@@ -1414,24 +1424,24 @@ DIBUJAR_FILA_LOSETAS_BUFFER_VRAM:
     JR     NZ,.BUCLE_LOSETAS_FILA
     LD     DE,(PARAMETRO_DESPLAZAMIENTO_SCROLL)
     RET
-SCROLL_ABAJO:                    ; desplaza el lienzo BUFFER_LOSETAS_TRABAJO 4px hacia abajo (144 filas x 24 RRD encadenados por fila) y actualiza PARAMETRO_DESPLAZAMIENTO_SCROLL/REGISTRO_NIVEL_POSICION_COMECOCOS
-    LD     HL,$0004                        ; delta empaquetado (H=0 horizontal, L=$04=+4 vertical)
+SCROLL_IZQUIERDA:                    ; CORREGIDO (antes mal etiquetada "SCROLL_ABAJO" -- ver cabecera de GESTIONAR_SCROLL, agradecimiento a Marcos Jouron Berzosa): desplaza el lienzo BUFFER_LOSETAS_TRABAJO 4px en HORIZONTAL (144 filas x 24 RRD encadenados por fila) y actualiza PARAMETRO_DESPLAZAMIENTO_SCROLL/REGISTRO_NIVEL_POSICION_COMECOCOS
+    LD     HL,$0004                        ; delta empaquetado (byte alto=0, byte bajo=$04=+4)
     LD     (PARAMETRO_DESPLAZAMIENTO_SCROLL),HL
     EXX                                    ; cambia al banco alternativo para preparar C/D, consumidos mas tarde en SCROLL_LOSETA_BUFFER_VRAM
     LD     C,$00                           ; constante de fase (ADD A,C en SCROLL_LOSETA_BUFFER_VRAM)
     LD     D,$F0                           ; constante de fase (XOR D en SCROLL_LOSETA_BUFFER_VRAM, decide COPIAR_LOSETA_FASE_A vs COPIAR_LOSETA_FASE_B)
     EXX                                    ; vuelve al banco principal
-    LD     A,$FF                           ; flag de direccion (-1, se suma a REGISTRO_NIVEL_POSICION_COMECOCOS.L en SCROLL_LOSETA_BUFFER_VRAM; SCROLL_ARRIBA usa $01/+1)
-    LD     HL,BUFFER_LOSETAS_TRABAJO       ; inicio de la fila jugable, SCROLL_ABAJO recorre cada fila hacia adelante (INC L)
+    LD     A,$FF                           ; flag de direccion (-1, se suma a REGISTRO_NIVEL_POSICION_COMECOCOS.L en SCROLL_LOSETA_BUFFER_VRAM; SCROLL_DERECHA usa $01/+1)
+    LD     HL,BUFFER_LOSETAS_TRABAJO       ; inicio de la fila jugable, SCROLL_IZQUIERDA recorre cada fila hacia adelante (INC L)
     PUSH   HL                              ; guarda el puntero de inicio de fila para el bucle de filas
     PUSH   AF                              ; guarda el flag de direccion para usarlo mas tarde en SCROLL_LOSETA_BUFFER_VRAM
     LD     DE,32                  ; paso entre filas del lienzo (ancho de fila de BUFFER_LOSETAS_TRABAJO)
     LD     C,144                  ; contador del bucle externo: 144 filas del lienzo
-.BUCLE_FILA_SCROLL_ABAJO:        ; recorre las 144 filas del lienzo (DEC C/JR NZ); por fila: guarda el puntero, resetea A (nibble de acarreo) y llama al bucle de nibbles
+.BUCLE_FILA_SCROLL_IZQUIERDA:        ; recorre las 144 filas del lienzo (DEC C/JR NZ); por fila: guarda el puntero, resetea A (nibble de acarreo) y llama al bucle de nibbles
     PUSH   HL                     ; guarda el puntero de inicio de esta fila
     XOR    A                      ; A=0: nibble de acarreo inicial para esta fila
     LD     B,2                    ; contador del bucle interno: 2 vueltas x 12 pares RRD/INC L = 24 RRD por fila
-.BUCLE_NIBBLE_SCROLL_ABAJO:      ; 24 RRD encadenados (INC L entre cada uno), A como nibble de acarreo entre bytes -- propaga el scroll fino de 4px a lo largo de la fila
+.BUCLE_NIBBLE_SCROLL_IZQUIERDA:      ; 24 RRD encadenados (INC L entre cada uno), A como nibble de acarreo entre bytes -- propaga el scroll fino de 4px a lo largo de la fila
     RRD
     INC    L
     RRD
@@ -1456,30 +1466,30 @@ SCROLL_ABAJO:                    ; desplaza el lienzo BUFFER_LOSETAS_TRABAJO 4px
     INC    L
     RRD
     INC    L
-    DJNZ   .BUCLE_NIBBLE_SCROLL_ABAJO
+    DJNZ   .BUCLE_NIBBLE_SCROLL_IZQUIERDA
     POP    HL
     ADD    HL,DE
     DEC    C
-    JR     NZ,.BUCLE_FILA_SCROLL_ABAJO
+    JR     NZ,.BUCLE_FILA_SCROLL_IZQUIERDA
     JR     SCROLL_LOSETA_BUFFER_VRAM
-SCROLL_ARRIBA:                   ; desplaza el lienzo BUFFER_LOSETAS_TRABAJO 4px hacia arriba (144 filas x 24 RLD encadenados por fila) y actualiza PARAMETRO_DESPLAZAMIENTO_SCROLL/REGISTRO_NIVEL_POSICION_COMECOCOS
-    LD     HL,$00FC                        ; delta empaquetado (H=0 horizontal, L=$FC=-4 vertical)
+SCROLL_DERECHA:                   ; CORREGIDO (antes mal etiquetada "SCROLL_ARRIBA" -- ver cabecera de GESTIONAR_SCROLL, agradecimiento a Marcos Jouron Berzosa): desplaza el lienzo BUFFER_LOSETAS_TRABAJO 4px en HORIZONTAL (144 filas x 24 RLD encadenados por fila) y actualiza PARAMETRO_DESPLAZAMIENTO_SCROLL/REGISTRO_NIVEL_POSICION_COMECOCOS
+    LD     HL,$00FC                        ; delta empaquetado (byte alto=0, byte bajo=$FC=-4)
     LD     (PARAMETRO_DESPLAZAMIENTO_SCROLL),HL
     EXX                                    ; cambia al banco alternativo para preparar C/D, consumidos mas tarde en SCROLL_LOSETA_BUFFER_VRAM
     LD     C,$2F                           ; constante de fase (ADD A,C en SCROLL_LOSETA_BUFFER_VRAM)
     LD     D,$0F                           ; constante de fase (XOR D en SCROLL_LOSETA_BUFFER_VRAM, decide COPIAR_LOSETA_FASE_A vs COPIAR_LOSETA_FASE_B)
     EXX                                    ; vuelve al banco principal
-    LD     A,$01                           ; flag de direccion (+1, se suma a REGISTRO_NIVEL_POSICION_COMECOCOS.L en SCROLL_LOSETA_BUFFER_VRAM; SCROLL_ABAJO usa $FF/-1)
-    LD     HL,BUFFER_LOSETAS_TRABAJO+23    ; = $DE1B: fin de la fila jugable (24 bytes), SCROLL_ARRIBA recorre cada fila hacia atras (DEC L)
+    LD     A,$01                           ; flag de direccion (+1, se suma a REGISTRO_NIVEL_POSICION_COMECOCOS.L en SCROLL_LOSETA_BUFFER_VRAM; SCROLL_IZQUIERDA usa $FF/-1)
+    LD     HL,BUFFER_LOSETAS_TRABAJO+23    ; = $DE1B: fin de la fila jugable (24 bytes), SCROLL_DERECHA recorre cada fila hacia atras (DEC L)
     PUSH   HL
     PUSH   AF
     LD     DE,32                  ; paso entre filas del lienzo (ancho de fila de BUFFER_LOSETAS_TRABAJO)
     LD     C,144                  ; contador del bucle externo: 144 filas del lienzo
-.BUCLE_FILA_SCROLL_ARRIBA:       ; recorre las 144 filas del lienzo (DEC C/JP NZ); por fila: guarda el puntero, resetea A (nibble de acarreo) y llama al bucle de nibbles
+.BUCLE_FILA_SCROLL_DERECHA:       ; recorre las 144 filas del lienzo (DEC C/JP NZ); por fila: guarda el puntero, resetea A (nibble de acarreo) y llama al bucle de nibbles
     PUSH   HL                     ; guarda el puntero de inicio de esta fila
     XOR    A                      ; A=0: nibble de acarreo inicial para esta fila
     LD     B,2                    ; contador del bucle interno: 2 vueltas x 12 pares RLD/DEC L = 24 RLD por fila
-.BUCLE_NIBBLE_SCROLL_ARRIBA:     ; 24 RLD encadenados (DEC L entre cada uno, sentido contrario a SCROLL_ABAJO), A como nibble de acarreo -- propaga el scroll fino de 4px a lo largo de la fila
+.BUCLE_NIBBLE_SCROLL_DERECHA:     ; 24 RLD encadenados (DEC L entre cada uno, sentido contrario a SCROLL_IZQUIERDA), A como nibble de acarreo -- propaga el scroll fino de 4px a lo largo de la fila
     RLD
     DEC    L
     RLD
@@ -1504,16 +1514,16 @@ SCROLL_ARRIBA:                   ; desplaza el lienzo BUFFER_LOSETAS_TRABAJO 4px
     DEC    L
     RLD
     DEC    L
-    DJNZ   .BUCLE_NIBBLE_SCROLL_ARRIBA
+    DJNZ   .BUCLE_NIBBLE_SCROLL_DERECHA
     POP    HL
     ADD    HL,DE
     DEC    C
-    JP     NZ,.BUCLE_FILA_SCROLL_ARRIBA
+    JP     NZ,.BUCLE_FILA_SCROLL_DERECHA
 SCROLL_LOSETA_BUFFER_VRAM:
-    EXX                            ; cambia al banco alternativo, donde SCROLL_ARRIBA/SCROLL_ABAJO dejaron las constantes de fase C/D
+    EXX                            ; cambia al banco alternativo, donde SCROLL_DERECHA/SCROLL_IZQUIERDA dejaron las constantes de fase C/D
     LD     HL,(REGISTRO_NIVEL_POSICION_COMECOCOS)  ; HL = posicion de camara actual
     POP    AF                      ; recupera el flag de direccion (+1/-1) guardado antes del bucle de filas
-    ADD    A,L                     ; aplica el delta de direccion al eje vertical (L)
+    ADD    A,L                     ; aplica el delta de direccion al eje L (horizontal en pantalla)
     LD     L,A
     RES    0,H                     ; limpia el bit 0 de H (proposito exacto sin confirmar)
     LD     (REGISTRO_NIVEL_POSICION_COMECOCOS),HL  ; guarda la posicion de camara ya actualizada
@@ -1528,7 +1538,7 @@ SCROLL_LOSETA_BUFFER_VRAM:
     LD     IY,.CONTINUAR_BUCLE_LOSETAS        ; punto de retorno para COPIAR_LOSETA_FASE_A/B (JP (IY) al terminar)
     LD     A,D                    ; guarda D (byte alto de la posicion de camara ya actualizada) para pasarlo al banco principal
     EXX                           ; vuelve al banco principal de registros
-    POP    DE                     ; recupera el puntero guardado por SCROLL_ARRIBA/SCROLL_ABAJO antes del bucle de filas
+    POP    DE                     ; recupera el puntero guardado por SCROLL_DERECHA/SCROLL_IZQUIERDA antes del bucle de filas
     LD     C,A                    ; C = valor guardado de D (banco alternativo)
     LD     B,9                    ; contador del bucle externo: 9 losetas
 .BUCLE_LOSETAS:
@@ -2250,7 +2260,9 @@ DIBUJAR_TEXTO_INVERTIDO_VRAM_LOOP:
 ; Segun (MODO_ENTRADA) despacha a:
 ;  - LEER_TECLADO (si MODO_ENTRADA=0): escanea la matriz de
 ;    teclado estandar (5 pares puerto/mascara de TABLA_TECLAS_MSX:
-;    arriba/abajo/izquierda/derecha/disparo) mas 1 prueba extra de
+;    disparo/arriba/abajo/izquierda/derecha -- CORREGIDO: el orden de
+;    accion por offset estaba desplazado un puesto, ver comentario de
+;    TABLA_TECLAS_MSX mas abajo y FINDINGS.md) mas 1 prueba extra de
 ;    puerto (COMPROBAR_PAUSA, mismo mecanismo -- CONFIRMADO: las 6
 ;    acciones redefinibles del menu son "PAUSA/FUEGO/ARRIBA/ABAJO/
 ;    IZQUIERDA/DERECHA", asi que esta 6a prueba compartida es la
@@ -2326,20 +2338,29 @@ COMPROBAR_TECLA_MSX:                            ; IX+0=numero de fila/puerto, IX
     RET
 
 ; 0x8E88-0x8E93 (12 bytes): NO es codigo -- tabla de datos real
-; (5 pares puerto/mascara para el bucle de LEER_TECLADO -- arriba/
-; abajo/izquierda/derecha/disparo -- + 1 par para la tecla de PAUSA de
+; (5 pares puerto/mascara para el bucle de LEER_TECLADO -- disparo/
+; arriba/abajo/izquierda/derecha -- + 1 par para la tecla de PAUSA de
 ; COMPROBAR_PAUSA, todos leidos via COMPROBAR_TECLA_MSX con IX
 ; indexado). El desensamblado lineal se desincroniza aqui igual
 ; que en el bloque BESTIA/DEMO de mas arriba -- confirmado
 ; realineando el desensamblado a partir de 0x8E94 (siguiente
 ; instruccion real), que ya NO coincide con lo que parecia salir
 ; de seguir leyendo en linea recta.
+; CORREGIDO (agosto 2026, agradecimiento a Marcos Jouron Berzosa, que
+; puso en duda el eje H/L de la camara y llevo a revisar tambien esta
+; tabla): la asignacion accion<->offset estaba desplazada un puesto.
+; Decodificando fila/mascara contra TABLA_CODIGOS_TECLA
+; (madmix_scr_body.asm) la tecla real de cada offset es ESPACIO(0)/
+; Q(2)/A(4)/O(6)/P(8) -- y el propio Rafael confirmo en vivo que los
+; controles reales del juego son Q=arriba, A=abajo, O=izquierda,
+; P=derecha, ESPACIO=disparo. Eso fija la accion real de cada offset
+; (antes decia arriba/abajo/izquierda/derecha/disparo en ese orden).
 TABLA_TECLAS_MSX:
-    DB $F8,$01                 ; offset 0: arriba
-    DB $F4,$40                 ; offset 2: abajo
-    DB $F2,$40                 ; offset 4: izquierda
-    DB $F4,$10                 ; offset 6: derecha
-    DB $F4,$20                 ; offset 8: disparo
+    DB $F8,$01                 ; offset 0: disparo (tecla ESPACIO)
+    DB $F4,$40                 ; offset 2: arriba (tecla Q)
+    DB $F2,$40                 ; offset 4: abajo (tecla A)
+    DB $F4,$10                 ; offset 6: izquierda (tecla O)
+    DB $F4,$20                 ; offset 8: derecha (tecla P)
     DB $F3,$20                 ; offset 10: pausa (COMPROBAR_PAUSA)
 LEER_JOYSTICK:
     LD     A,$07

@@ -344,7 +344,7 @@ SEMILLA_ALEATORIA:
 COLOR_ACTUAL:
     DB $78                     ; $2C24: color/atributo HUD activo (restaurado desde COLOR_GUARDADO al salir de un modo especial)
 PARAMETRO_DESPLAZAMIENTO_SCROLL:
-    DW $0000                   ; $2C25-26: parametro de SCROLL_IZQUIERDA/SCROLL_DERECHA (madmix1_body.asm) -- significado preciso sin confirmar, valores vistos $0400/$FC00
+    DW $0000                   ; $2C25-26: parametro de SCROLL_ARRIBA/SCROLL_ABAJO (madmix1_body.asm; CORREGIDO -- estas 2 rutinas eran las etiquetadas SCROLL_IZQUIERDA/SCROLL_DERECHA antes de la correccion de agosto 2026, ver FINDINGS.md) -- significado preciso sin confirmar, valores vistos $0400/$FC00
 VIDAS_RESTANTES:
     DB 3                       ; $2C27: vidas restantes (INICIO lo pone a 3)
     DS 1, $00                  ; $2C28: sin identificar (verificado: cero referencias en ambos ficheros)
