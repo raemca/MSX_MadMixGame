@@ -16650,3 +16650,137 @@ menu is risky (it left the CPU in `HALT` with interrupts disabled) --
 more reliable to let the developer themself navigate the real menu
 while the breakpoints, already armed since boot, capture the data
 without interfering with the game's flow.
+
+
+## RETRACTION (August 2026): the H/L axis WAS crossed after all -- the previous entry ("LIVE-CONFIRMED... NOT crossed") was wrong. Thanks to Marcos Jouron Berzosa
+
+The entry immediately above declared the debate over
+`GESTIONAR_SCROLL`/`SCROLL_ARRIBA`/`SCROLL_ABAJO`/`SCROLL_IZQUIERDA`/
+`SCROLL_DERECHA` settled. It was wrong. **Marcos Jouron Berzosa** --
+who is doing his own reverse-engineering work on this MSX and on the
+Spectrum, porting both to MSX2 and Spectrum Next -- reviewed that
+conclusion, wasn't satisfied with it, and raised the original doubt
+again with good judgment: the earlier verification had never actually
+checked the real visual outcome, only which *byte* each routine
+changed. Thanks to his insistence the question was investigated from
+scratch again, this time with direct photographic evidence. This
+document owes him the correction.
+
+**Why the earlier verification got it wrong**: it correctly and
+honestly confirmed that `SCROLL_ARRIBA`/`SCROLL_ABAJO` move `L` and
+`SCROLL_IZQUIERDA`/`SCROLL_DERECHA` move `H` (that was never in doubt,
+it's a fact of the code). But from there it jumped to "therefore the
+comment `H=horizontal axis, L=vertical axis` is correct" **without
+ever checking it against a real on-screen pixel** -- only against the
+label the routine already carried. In other words: it verified that
+the code did what its own labels said it did, not that those labels
+were right to begin with. Circular reasoning dressed up as rigorous
+verification (breakpoints, memory watches, real byte logs) that,
+precisely because it looked so solid, wasn't questioned further.
+
+**Re-verification (the one that actually proves something)**: the
+live openMSX session was repeated (`Mitsubishi_ML-G3_ES`, reconstructed
+`.dsk`), but this time with two independent sources of evidence
+instead of one:
+
+1. **Breakpoints** on the 4 scroll routines (`debug breakpoint create
+   -address <addr> -command {...}`), logging on every hit which
+   routine fired, a running hit count, and the real bytes of
+   `REGISTRO_NIVEL_POSICION_COMECOCOS` (`$2C02`=L, `$2C03`=H) -- exactly
+   what the earlier verification already measured.
+2. **240 real screenshots** (`screenshot -raw`, one every 0.5s across
+   the 2-minute play session), taken automatically in parallel without
+   interfering with the game -- the missing piece.
+
+With the screenshots in hand, pixel correlation: with no `Pillow`
+available in the environment, a pure-Python PNG decoder was written
+(`zlib` + manual IHDR/IDAT chunk parsing + scanline unfiltering) plus a
+pattern matcher (SSD -- sum of squared differences -- over a 200x140px
+crop of the playable area, searching for the best `(dx,dy)` offset
+within a search window, frame against frame) to objectively measure how
+much, and in which direction, the real on-screen content shifted during
+"clean" stretches (a single kind of `SCROLL_*` firing, per the
+breakpoint log). Each routine was validated with 2-4 independent frame
+pairs, all showing a 60-75% error reduction versus zero-shift and a
+magnitude consistent with the "4px per call" the source already said:
+
+```
+routine (name at the time) | register | real on-screen shift
+SCROLL_ARRIBA    (L, RLD, +1) -> HORIZONTAL, ~20-24px (one direction)
+SCROLL_ABAJO     (L, RRD, -1) -> HORIZONTAL, ~16-20px (opposite direction)
+SCROLL_IZQUIERDA (H, LDI, -1) -> VERTICAL,   ~20-24px (one direction)
+SCROLL_DERECHA   (H, LDI, +1) -> VERTICAL,   ~24px    (opposite direction)
+```
+
+In other words: **the routines that touch `L` shift the screen
+HORIZONTALLY, and the ones that touch `H` shift it VERTICALLY** -- the
+exact opposite of what the `H=horizontal axis, L=vertical axis`
+comment said, and of what the previous entry declared "confirmed". The
+swap Marcos had suspected was real.
+
+**Resolving the exact sign (which one is really "up")**: the axis
+split (horizontal vs. vertical) is a pixel-level fact, with no
+convention ambiguity. The *sign* within each axis does depend on a
+convention -- the standard one for video-game camera scroll (not the
+document/map-scrolling one, which many systems flip) is that the
+background moves **opposite** to the direction the followed character
+is moving. Applying that convention to the 4 routines: `SCROLL_ARRIBA`
+(shifts content LEFT) is really the move-RIGHT routine; `SCROLL_ABAJO`
+(content RIGHT) is really LEFT; `SCROLL_IZQUIERDA` (content DOWN) is
+really UP; `SCROLL_DERECHA` (content UP) is really DOWN. This
+reassignment matches EXACTLY the concrete example Marcos had given
+months earlier ("your `SCROLL_IZQUIERDA` should really be
+`SCROLL_ARRIBA`") -- an additional coincidence, independent of the
+pixel analysis itself, that reinforces confidence in the result.
+
+**Fixed in source** (`madmix1_body.asm`, without touching a single byte
+of the compiled binary -- rebuilt and verified with `git status`/`git
+diff`: `main.lst` changes because of the new comments, but
+`MADMIX1.BIN`, `madmix_reconstruido.dsk` and `madmix_reconstruido.cas`
+come out bit-for-bit identical, as expected from renaming labels and
+rewriting comments without touching a single instruction):
+
+```
+name BEFORE       -> name NOW (same code, same address)
+SCROLL_ARRIBA     -> SCROLL_DERECHA
+SCROLL_ABAJO      -> SCROLL_IZQUIERDA
+SCROLL_IZQUIERDA  -> SCROLL_ARRIBA
+SCROLL_DERECHA    -> SCROLL_ABAJO
+```
+
+Renamed the 4 labels (and their local `.BUCLE_FILA_*`/
+`.BUCLE_NIBBLE_*` sub-labels), fixed `GESTIONAR_SCROLL`'s comment (`HL =
+camera position`, now says `L=horizontal axis on screen, H=vertical
+axis on screen`), the 4 routines' header comments (no longer say "up"/
+"down" on the wrong routine), the cross-references between sibling
+routines ("SCROLL_X uses such value"), and the mention in
+`PARAMETRO_DESPLAZAMIENTO_SCROLL` (`madmix_scr_body.asm`). Each
+routine's header and `GESTIONAR_SCROLL`'s now include the acknowledgment
+to Marcos Jouron Berzosa.
+
+### Along the way, a second, independent bug found and fixed: `TABLA_TECLAS_MSX` had its 5 actions shifted by one slot
+
+While reconstructing the reasoning chain of the earlier verification
+(which assumed "default keys: Q=up, A=down, O=left, P=right" to
+interpret which key the developer was pressing), `TABLA_TECLAS_MSX`
+(`madmix1_body.asm`) was decoded by cross-referencing each row/mask
+pair against `TABLA_CODIGOS_TECLA` (`madmix_scr_body.asm`, the 72-entry
+scan-position-to-key-identity map). Result: the real key at each offset
+is SPACE(0)/Q(2)/A(4)/O(6)/P(8) -- but the table's **action labels**
+said up(0)/down(2)/left(4)/right(6)/fire(8), a full one-slot shift. The
+developer confirmed live, from their own memory of the game, that the
+real controls are Q=up, A=down, O=left, P=right, SPACE=fire -- exactly
+what undoing that shift predicts. This is a labeling bug in our own
+disassembly documentation (not in the 1987 game, which always worked
+correctly with those controls), and is unrelated in cause to the
+`SCROLL_*` swap -- two independent findings that surfaced in the same
+session. Fixed the comments on `TABLA_TECLAS_MSX` and its header, and
+the mention in `LEER_TECLADO`'s comment.
+
+**Verified**: rebuilt with no errors (`py tools/build_all.py`, 0
+errors, same 2 pre-existing warnings as always) and regenerated
+`.dsk`/`.cas` (`py tools/gen_disk_and_cas.py`) -- `git status` confirms
+no compiled binary artifact changed, only `main.lst` (comments) and the
+2 source `.asm` files. Pending: apply the same correction to
+`manuales/manual_subsistema_grafico.md` (§6, which still describes the
+old axis mapping) in a future session.
