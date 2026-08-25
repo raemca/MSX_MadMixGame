@@ -181,15 +181,23 @@ updated and dumped to VRAM in full once per frame:
 Summary — see `FLUJO_PROGRAMA.md` §4 and `manual_motor_colision_ia.en.md`
 for the full direction dispatcher. The graphics mechanism itself:
 
-`SCROLL_ARRIBA`/`SCROLL_ABAJO` shift the 144 rows of
-`BUFFER_LOSETAS_TRABAJO` 4 vertical pixels by chaining **24 `RLD`/`RRD`
+`SCROLL_DERECHA`/`SCROLL_IZQUIERDA` shift the 144 rows of
+`BUFFER_LOSETAS_TRABAJO` 4 horizontal pixels by chaining **24 `RLD`/`RRD`
 per row** (the Z80 nibble-rotation instruction through
 `(HL)` and A's low nibble) — a classic 8-bit trick to
 shift half-byte content without explicit bit-by-bit
-shifting. `SCROLL_IZQUIERDA`/`SCROLL_DERECHA` (`APLICAR_DESPLAZAMIENTO_LATERAL`)
-do the horizontal equivalent. All 4 routines end in
-`SCROLL_LOSETA_BUFFER_VRAM`, which chooses between 2 copy "phases"
-(`COPIAR_LOSETA_FASE_A`/`_B`) depending on the resulting byte
+shifting. `SCROLL_ARRIBA`/`SCROLL_ABAJO` (`APLICAR_DESPLAZAMIENTO_LATERAL`)
+do the vertical equivalent. **FIXED (August 2026, thanks to Marcos
+Jouron Berzosa)**: the names assigned to these 4 routines used to be
+swapped — a code comment assumed `H=horizontal axis, L=vertical axis`
+without ever checking it against a real on-screen pixel. Verified with
+openMSX screenshots + pixel correlation that it's actually the other
+way around: the routines that touch `L` (the `RLD`/`RRD` trick above)
+shift the screen horizontally, and the ones that touch `H`
+(`APLICAR_DESPLAZAMIENTO_LATERAL`) shift it vertically; see
+`FINDINGS.en.md` for the full re-verification detail. All 4 routines
+end in `SCROLL_LOSETA_BUFFER_VRAM`, which chooses between 2 copy
+"phases" (`COPIAR_LOSETA_FASE_A`/`_B`) depending on the resulting byte
 alignment. The result stays in `BUFFER_LOSETAS_TRABAJO` — the real
 dump to VRAM is done by `ACTUALIZAR_VRAM_FRAME` (§5), not by the
 scroll itself.

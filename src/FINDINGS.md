@@ -17878,7 +17878,7 @@ la luz en la misma sesión. Corregidos los comentarios de
 `.dsk`/`.cas` (`py tools/gen_disk_and_cas.py`) -- `git status` confirma
 que ningún artefacto binario compilado cambió, solo `main.lst`
 (comentarios) y los 2 ficheros `.asm` fuente. Traducida esta misma
-entrada a `src/FINDINGS.en.md`. Pendiente: aplicar la misma corrección
-a `manuales/manual_subsistema_grafico.md` (§6, que todavía describe el
-mapeo de ejes antiguo) en una sesión futura.
+entrada a `src/FINDINGS.en.md`, y corregido el §6 de
+`manuales/manual_subsistema_grafico.md`/`.en.md`, que describía el
+mapeo de ejes antiguo.
 

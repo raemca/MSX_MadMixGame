@@ -179,13 +179,22 @@ va actualizando y se vuelca a VRAM completo una vez por frame:
 Resumen — ver `FLUJO_PROGRAMA.md` §4 y `manual_motor_colision_ia.md`
 para el despachador completo de dirección. El mecanismo gráfico en sí:
 
-`SCROLL_ARRIBA`/`SCROLL_ABAJO` desplazan las 144 filas de
-`BUFFER_LOSETAS_TRABAJO` 4 píxeles verticales encadenando **24 `RLD`/`RRD`
+`SCROLL_DERECHA`/`SCROLL_IZQUIERDA` desplazan las 144 filas de
+`BUFFER_LOSETAS_TRABAJO` 4 píxeles horizontales encadenando **24 `RLD`/`RRD`
 por fila** (la instrucción Z80 de rotación de nibble a través de
 `(HL)` y el nibble bajo de `A`) — un truco clásico de 8 bits para
 desplazar contenido medio-byte sin desplazamiento de bit a bit
-explícito. `SCROLL_IZQUIERDA`/`SCROLL_DERECHA` (`APLICAR_DESPLAZAMIENTO_LATERAL`)
-hacen el equivalente horizontal. Las 4 rutinas terminan en
+explícito. `SCROLL_ARRIBA`/`SCROLL_ABAJO` (`APLICAR_DESPLAZAMIENTO_LATERAL`)
+hacen el equivalente vertical. **CORREGIDO (agosto 2026, agradecimiento
+a Marcos Jouron Berzosa)**: la asignación de nombres a estas 4 rutinas
+estaba cruzada — un comentario en el código asumía `H=eje horizontal,
+L=eje vertical` sin comprobarlo nunca contra un píxel real en pantalla.
+Verificado con capturas de pantalla + correlación de píxeles en
+openMSX que en realidad es al revés: las rutinas que tocan `L` (las
+del truco `RLD`/`RRD` de arriba) mueven la pantalla en horizontal, y
+las que tocan `H` (`APLICAR_DESPLAZAMIENTO_LATERAL`) la mueven en
+vertical; ver `FINDINGS.md` para el detalle completo de la
+reverificación. Las 4 rutinas terminan en
 `SCROLL_LOSETA_BUFFER_VRAM`, que decide entre 2 "fases" de copia
 (`COPIAR_LOSETA_FASE_A`/`_B`) según la alineación de byte resultante.
 El resultado queda en `BUFFER_LOSETAS_TRABAJO` — el volcado real a

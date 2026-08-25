@@ -16781,6 +16781,6 @@ the mention in `LEER_TECLADO`'s comment.
 errors, same 2 pre-existing warnings as always) and regenerated
 `.dsk`/`.cas` (`py tools/gen_disk_and_cas.py`) -- `git status` confirms
 no compiled binary artifact changed, only `main.lst` (comments) and the
-2 source `.asm` files. Pending: apply the same correction to
-`manuales/manual_subsistema_grafico.md` (§6, which still describes the
-old axis mapping) in a future session.
+2 source `.asm` files. Fixed §6 of
+`manuales/manual_subsistema_grafico.md`/`.en.md` too, which described
+the old axis mapping.
