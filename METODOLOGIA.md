@@ -106,7 +106,7 @@ Ejemplos concretos de esta disciplina aplicada en la práctica:
   deliberadamente corregido del nivel 13, y un puñado de bytes ajenos
   ya documentados) — nunca una lista abierta de "cosas raras sin
   explicar".
-- Esta misma sesión, al corregir el formato real de los sprites (ver
+- El 10 de agosto de 2026, al corregir el formato real de los sprites (ver
   Fase 3 más abajo, y el caso completo en `REFLEXION_COLABORACION_IA.md`),
   la verificación fue empírica antes que teórica: se
   probaron tres hipótesis de reagrupado de los mismos bytes
@@ -201,7 +201,7 @@ bolitas comidas, plantar bolas nuevas).
 ### Fase 7 — Los niveles, y el caso del "nivel oculto" que no lo era
 
 Localización de los 15 niveles jugables (cuerpos + cabeceras
-compartidas) y de un 15º nivel que en un primer momento parecía
+compartidas), incluido un 15º nivel que en un primer momento parecía
 **contenido real pero sin ningún registro que lo referenciara** — una
 sesión posterior encontró que sí tenía registro real en la tabla de
 niveles (mal etiquetado como "20 bytes sin identificar") y que se
@@ -274,24 +274,22 @@ y cómo se detectaron:
 
 - **El "nivel oculto"**: documentado primero como contenido real pero
   sin conexión al resto del juego; corregido al encontrar su registro
-  real en la tabla de niveles. Vuelto a corregir en esta misma sesión
-  (agosto de 2026), porque la documentación seguía usando la etiqueta
+  real en la tabla de niveles. Vuelto a corregir el 10 de agosto de
+  2026, porque la documentación seguía usando la etiqueta
   "oculto" en varios sitios como si fuera el estado vigente en vez de
   una fase ya superada.
 - **El formato de los 64 sprites de personajes**: se documentó
   primero como una única imagen de 24×48 píxeles por entrada, lectura
   que producía sprites reconocibles pero con rayas horizontales de
-  fondo. Corregido en esta sesión al comprobar empíricamente que son
+  fondo. Corregido el 10 de agosto de 2026 al comprobar empíricamente que son
   en realidad 24×24 con dos planos entrelazados fila a fila
   (máscara + patrón) — ver el caso completo en
   `REFLEXION_COLABORACION_IA.md`.
-- **El crédito musical del juego**: una edición hecha directamente en
-  GitHub "corrigió" el nombre real del músico (extraído literalmente
-  de la ROM, `"COMILONAS"`) a `"GOMILONAS"`, creyendo que era una
-  errata. Al fusionar esa rama con el resto del repositorio, la
-  verificación cruzada contra el propio código fuente (`DB
-  "COMILONAS"` en `madmix_scr_body.asm`) detectó la contradicción y
-  se mantuvo el dato verificado, no la "corrección".
+- **El crédito musical del juego**: una edición en GitHub cambió
+  `"COMILONAS"` por `"GOMILONAS"` creyendo corregir una errata; la
+  verificación contra el código fuente (`DB "COMILONAS"` en
+  `madmix_scr_body.asm`) mantuvo el dato original — ver el caso en
+  `REFLEXION_COLABORACION_IA.md`.
 - **La tabla `TILE_TYPES`**: la hipótesis inicial de que codificaba
   muro/suelo se descartó explícitamente al encontrar que las 45
   losetas de muro comparten tipo con el suelo llano — el propio

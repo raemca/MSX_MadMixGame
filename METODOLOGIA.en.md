@@ -106,7 +106,7 @@ Concrete examples of this discipline applied in practice:
   explained** list of differences (the deliberately fixed
   level-13 bug, and a handful of already-documented unrelated bytes)
   — never an open list of "weird unexplained stuff".
-- In this very session, while correcting the real sprite format (see
+- On 10 August 2026, while correcting the real sprite format (see
   Phase 3 below, and the full case in `REFLEXION_COLABORACION_IA.md`),
   the verification was empirical before it was
   theoretical: three regrouping hypotheses for the same bytes were
@@ -201,7 +201,7 @@ eaten balls, planting new ones).
 ### Phase 7 — The levels, and the case of the "hidden level" that wasn't
 
 Locating the 15 playable levels (bodies + shared
-headers) and a 15th level that at first looked like
+headers), including a 15th level that at first looked like
 **real content with no register pointing to it at all** — a
 later session found that it did have a real register in the
 level table (mislabeled as "20 bytes unidentified") and that it's
@@ -273,24 +273,22 @@ and how they were caught:
 
 - **The "hidden level"**: first documented as real content but
   with no connection to the rest of the game; corrected on finding
-  its real register in the level table. Corrected again in this
-  same session (August 2026), because the documentation kept
+  its real register in the level table. Corrected again on
+  10 August 2026, because the documentation kept
   using the "hidden" label in several places as if it were the
   current state instead of an already-superseded phase.
 - **The format of the 64 character sprites**: first documented
   as a single 24×48-pixel image per entry, a reading that
   produced recognizable sprites but with horizontal background
-  stripes. Corrected in this session by empirically checking that they
+  stripes. Corrected on 10 August 2026 by empirically checking that they
   are actually 24×24 with two planes interleaved row by row
   (mask + pattern) — see the full case in
   `REFLEXION_COLABORACION_IA.md`.
-- **The game's music credit**: an edit made directly on
-  GitHub "fixed" the real musician's name (extracted literally
-  from the ROM, `"COMILONAS"`) to `"GOMILONAS"`, believing it was
-  a typo. When merging that branch, cross-checking against the
-  source code itself (`DB "COMILONAS"` in `madmix_scr_body.asm`)
-  caught the contradiction, and the verified data was kept, not
-  the "correction".
+- **The game's music credit**: an edit on GitHub changed
+  `"COMILONAS"` to `"GOMILONAS"`, believing it was fixing a typo;
+  checking against the source code (`DB "COMILONAS"` in
+  `madmix_scr_body.asm`) kept the original data — see the case in
+  `REFLEXION_COLABORACION_IA.md`.
 - **The `TILE_TYPES` table**: the initial hypothesis that it
   encoded wall/floor was explicitly ruled out on finding that all 45
   wall tiles share a type with plain floor — the document

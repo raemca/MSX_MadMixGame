@@ -34,8 +34,8 @@ verificaba cada afirmación antes de darla por buena.
 Esto cambia la naturaleza de la colaboración de una forma importante.
 Cuando el árbitro final es "recompila y compara", las discrepancias
 entre persona e IA dejan de ser un pulso de autoridad y pasan a ser
-un problema técnico resoluble. Un ejemplo claro, de esta misma
-sesión: el técnico editó directamente en GitHub el nombre del músico
+un problema técnico resoluble. Un ejemplo claro, del 10 de agosto
+de 2026: el técnico editó directamente en GitHub el nombre del músico
 acreditado en los créditos del juego, creyendo corregir una errata
 (`"COMILONAS"` → `"GOMILONAS"`). Al fusionar esa rama, en vez de
 aceptar sin más el cambio del técnico (es su proyecto, su edición,
@@ -68,8 +68,8 @@ bytes puede reconstruir por sí solo:**
   animación de muerte del comecocos — "58→59→60→61→40→41→42→43→44",
   que NO es el orden de los índices en la tabla y que nadie habría
   adivinado mirando solo bytes).
-- La sospecha inicial que desencadenó la corrección más importante de
-  esta sesión (§siguiente): "esto tiene rayas raras, ¿no serán datos
+- La sospecha inicial que desencadenó la corrección más importante del
+  10 de agosto de 2026 (§siguiente): "esto tiene rayas raras, ¿no serán datos
   de dos patrones mezclados, como en la versión de Spectrum?" — una
   intuición basada en conocer *otra* versión del mismo juego, algo
   completamente fuera del alcance de analizar un solo binario MSX.
@@ -181,7 +181,7 @@ proceso de "generar una imagen candidata, mirarla, decidir si tiene
 pinta de ser lo correcto o hay que probar otra interpretación" es
 igual de mecánico que el bucle de escucha del sonido, solo que con
 percepción visual en vez de auditiva — y es el mismo bucle que,
-meses después, destapó el error del formato de los sprites (visto en
+semanas después, destapó el error del formato de los sprites (visto en
 detalle en la sección siguiente).
 
 ## El caso completo: cuando la IA se equivoca y el técnico lo nota
@@ -275,7 +275,7 @@ Sería deshonesto describir solo lo que ha ido bien. Algunas cosas no:
   la misma sesión el técnico se quedó bloqueado pensando que "el
   commit no funciona", cuando en realidad `git commit` sin mensaje
   había abierto un editor esperando texto — no un fallo técnico, sino
-  una interfaz (la de VS Code more que la de git en sí) que no
+  una interfaz (la de VS Code más que la de git en sí) que no
   comunicaba bien lo que estaba pasando. Diagnosticarlo fue rápido,
   pero que ocurriera dos veces sugiere que la explicación la primera
   vez no dejó un modelo mental claro de por qué pasaba, solo
@@ -299,7 +299,9 @@ Sería deshonesto describir solo lo que ha ido bien. Algunas cosas no:
   decisión correcta ahí no fue "seguir a toda costa" ni "reducir la
   calidad para ir más rápido", sino pararse a media tarea, ser
   explícito sobre el ritmo real, y dejar que el técnico decidiera
-  cómo seguir en vez de asumirlo.
+  cómo seguir en vez de asumirlo. La traducción completa de
+  `FINDINGS.md` se terminó dos días después, el 12 de agosto de 2026,
+  en sesiones aparte.
 
 ## El ritmo real: cientos de pasos pequeños, no saltos grandes
 
@@ -332,19 +334,23 @@ decidir. En un proyecto de ingeniería inversa eso es casi obligado,
 porque hay una respuesta objetiva esperando a ser encontrada.
 
 Pero reducirlo todo a "verificar contra los bytes" dejaría fuera la
-mitad del trabajo real. Antes de poder verificar nada hace falta
-decidir *qué* mirar —el papel de dirección e intuición del
-técnico, aparcando y retomando hilos—; muchas veces la propia
-verificación es un bucle de percepción compartido, no un veredicto
-de una sola vez —el oído acotando qué bytes de sonido revisar, el
-ojo acotando qué bytes de imagen probar de otra forma—; y hay una
-categoría entera de decisiones, nombrar y comentar, donde no hay
-ningún byte que pueda arbitrar y el criterio compartido —a veces del
-técnico, a veces de la IA con datos de uso del código detrás— es lo
-único que hay. La reflexión que vale la pena llevarse no es solo
-"tener siempre un árbitro externo al que apelar cuando existe uno
-disponible", sino que ese árbitro no sustituye la necesidad de
-decidir juntos por dónde mirar, cómo llamar a lo que se encuentra, y
-cuándo dejar una vía a medias para retomarla después con más
-contexto — eso último no lo resuelve ningún dato, es criterio
-compartido, construido sesión a sesión.
+mitad del trabajo real, por tres motivos:
+
+- Antes de poder verificar nada hace falta decidir *qué* mirar: el
+  papel de dirección e intuición del técnico, aparcando y retomando
+  hilos.
+- Muchas veces la propia verificación es un bucle de percepción
+  compartido, no un veredicto de una sola vez: el oído acotando qué
+  bytes de sonido revisar, el ojo acotando qué bytes de imagen probar
+  de otra forma.
+- Hay una categoría entera de decisiones, nombrar y comentar, donde
+  ningún byte puede arbitrar, y el criterio compartido (a veces del
+  técnico, a veces de la IA con datos de uso del código detrás) es lo
+  único que hay.
+
+La reflexión que vale la pena llevarse, entonces, no es solo "tener
+siempre un árbitro externo al que apelar cuando existe uno". Es que
+ese árbitro no sustituye la necesidad de decidir juntos por dónde
+mirar, cómo llamar a lo que se encuentra y cuándo dejar una vía a
+medias para retomarla después con más contexto. Eso no lo resuelve
+ningún dato: es criterio compartido, construido sesión a sesión.
