@@ -22,6 +22,31 @@ reconstruction project, evaluating whether a technical hypothesis
 holds up — is reachable without real software development
 experience and knowledge of the MSX's architecture.
 
+## In the first person
+
+*This section is written directly by the author. The rest of the
+document refers to him in the third person, as "the developer".*
+
+I started using AI in a generic chat, with no plan at all, just to
+see what was inside the tape and the disk. I wanted to know what the
+game was like on the inside: a curiosity I'd had pending since I was
+a child.
+
+What surprised me most, in a good way, is that from the very first
+moment the AI kept building tools for itself to be able to do the
+work; the first one, if I remember correctly, to extract the contents
+of the tape and the disk.
+
+I can't point to anything that was especially hard to learn, because
+I didn't have a goal on the horizon either: it has all been learning
+on the go, improvising. Since it's a computing project, and being a
+programmer myself, I've been discovering pieces, fitting them
+together and turning their use into procedure, in an orderly way.
+
+When facing a new project I don't do anything different. What changes
+is that I no longer start from scratch: I begin from a more solid
+base, adapt it to the new project and keep adding what it needs.
+
 ## The underlying pattern: verify, don't trust
 
 The first thing to say is that this collaboration has **not rested on
@@ -34,8 +59,8 @@ being accepted.
 This changes the nature of the collaboration in an important way.
 When the final arbiter is "recompile and compare", disagreements
 between person and AI stop being a contest of authority and become
-a solvable technical problem. A clear example, from this very
-session: the developer edited directly on GitHub the name of the
+a solvable technical problem. A clear example, from 10 August
+2026: the developer edited directly on GitHub the name of the
 musician credited in the game's credits, believing he was fixing a
 typo (`"COMILONAS"` → `"GOMILONAS"`). When merging that branch,
 instead of simply accepting the developer's change (it's his project, his
@@ -68,8 +93,8 @@ reconstruct on its own:**
   Pac-Man's death animation sequence — "58→59→60→61→40→41→42→43→44",
   which is NOT the order of the indices in the table and which
   nobody would have guessed by looking only at bytes).
-- The initial hunch that triggered this session's most important
-  correction (§below): "this has odd stripes, could this be data
+- The initial hunch that triggered the most important correction
+  of 10 August 2026 (§below): "this has odd stripes, could this be data
   from two patterns mixed together, like in the Spectrum version?" — an
   intuition based on knowing *another* version of the same game, something
   completely outside the scope of analyzing a single MSX binary.
@@ -182,7 +207,7 @@ of "generate a candidate image, look at it, decide whether it looks
 right or another interpretation needs testing" is just as mechanical
 as the sound-listening loop, just with visual instead of
 auditory perception — and it's the same loop that,
-months later, uncovered the sprite-format error (covered in
+weeks later, uncovered the sprite-format error (covered in
 detail in the next section).
 
 ## The full case: when the AI gets it wrong and the developer notices
@@ -279,7 +304,7 @@ didn't:
   the same session the developer got stuck thinking "the commit isn't
   working", when actually `git commit` with no message
   had opened an editor waiting for text — not a technical failure, but
-  an interface (VS Code's more than git's own) that didn't
+  an interface (VS Code's rather than git's own) that didn't
   communicate well what was happening. Diagnosing it was quick,
   but that it happened twice suggests the first explanation
   didn't leave a clear mental model of why it happens, it only
@@ -303,7 +328,9 @@ didn't:
   attention. The right call there wasn't "push through at all
   costs" nor "lower the quality to go faster", but stopping
   mid-task, being explicit about the real pace, and letting the
-  developer decide how to continue instead of assuming it.
+  developer decide how to continue instead of assuming it. The full
+  translation of `FINDINGS.md` was finished two days later, on
+  12 August 2026, in separate sessions.
 
 ## The real pace: hundreds of small steps, not big leaps
 
@@ -337,19 +364,23 @@ almost mandatory, because there's an objective answer waiting to
 be found.
 
 But reducing it all to "verify against the bytes" would leave out
-half the real work. Before anything can be verified, someone has to
-decide *what* to look at —the developer's role of direction and
-intuition, parking and picking threads back up—; often the
-verification itself is a shared perception loop, not a
-one-shot verdict —the ear narrowing down which sound bytes to check,
-the eye narrowing down which image bytes to try a different way—;
-and there's a whole category of decisions, naming and commenting,
-where no byte can arbitrate and the shared judgment call —sometimes
-the developer's, sometimes the AI's backed by data on how the code is
-actually used— is all there is. The reflection worth taking away
-isn't just "always have an external arbiter to appeal to when
-one is available", but that such an arbiter doesn't replace the
-need to decide together where to look, what to call what's
-found, and when to leave a lead half-followed to pick it back up
-later with more context — that last part isn't settled by any
-data, it's shared judgment, built session by session.
+half the real work, for three reasons:
+
+- Before anything can be verified, someone has to decide *what* to
+  look at: the developer's role of direction and intuition, parking
+  and picking threads back up.
+- Often the verification itself is a shared perception loop, not a
+  one-shot verdict: the ear narrowing down which sound bytes to
+  check, the eye narrowing down which image bytes to try a different
+  way.
+- There's a whole category of decisions, naming and commenting,
+  where no byte can arbitrate, and the shared judgment call
+  (sometimes the developer's, sometimes the AI's backed by data on
+  how the code is actually used) is all there is.
+
+So the reflection worth taking away isn't just "always have an
+external arbiter to appeal to when one is available". It's that such
+an arbiter doesn't replace the need to decide together where to
+look, what to call what's found, and when to leave a lead
+half-followed to pick it back up later with more context. No data
+settles that: it's shared judgment, built session by session.

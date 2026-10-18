@@ -66,6 +66,35 @@ momento; el propio `FINDINGS.md` contiene referencias a fechas de
 mediados de julio, así que el trabajo real llevaba ya semanas en
 marcha antes de tener control de versiones.
 
+### Del análisis estático al análisis en vivo
+
+Durante las primeras sesiones todo el trabajo fue estático:
+desensamblar con Z80Dasm y leer bytes a mano. Ese enfoque llegó muy
+lejos (el arranque, la API del VDP, el mapa de memoria inicial), pero
+se atascó con los niveles: durante varias sesiones se buscaron los 15
+niveles en `MADMIX1.BIN` sin encontrarlos, y `FINDINGS.md` acabó
+registrando la recomendación explícita de cambiar de método — *"el
+camino más rápido desde aquí es EN VIVO, no estático"*.
+
+El cambio fue pasar al depurador de openMSX. Un solo watchpoint de
+escritura sobre el buffer de la loseta actual
+(`debug set_watchpoint write_mem {0xfc60 0xfe5f}`) y arrancar el
+nivel 1 bastó para que el primer *break* señalara el cargador de
+niveles real, y con él que los niveles no estaban en `MADMIX1.BIN`
+sino en `MADMIX.SCR` — el propio diario lo describe como *"el
+hallazgo más importante de varias sesiones"*. A partir de ahí se
+añadieron los volcados de RAM y VRAM en vivo
+(`save_debuggable memory`/`save_debuggable VRAM`, guardados en
+`dump_openmsx/`), que sirvieron después como referencia para
+verificar, por ejemplo, el color real del marco de caramelo (Fase 4).
+
+El reparto en esta parte también es claro: la IA proponía qué
+watchpoint o qué volcado haría falta y por qué, y el técnico lo
+ejecutaba en el emulador y traía el resultado. El análisis estático
+no se abandonó — siguió siendo la herramienta principal —, pero desde
+entonces, cuando una pregunta llevaba demasiado tiempo sin salir de
+los bytes, la opción de mirarlo en vivo estaba siempre sobre la mesa.
+
 ## 2. El principio rector: verificación byte a byte como contrato de confianza
 
 Si hay una sola idea que explica cómo se ha construido todo este
@@ -106,7 +135,7 @@ Ejemplos concretos de esta disciplina aplicada en la práctica:
   deliberadamente corregido del nivel 13, y un puñado de bytes ajenos
   ya documentados) — nunca una lista abierta de "cosas raras sin
   explicar".
-- Esta misma sesión, al corregir el formato real de los sprites (ver
+- El 10 de agosto de 2026, al corregir el formato real de los sprites (ver
   Fase 3 más abajo, y el caso completo en `REFLEXION_COLABORACION_IA.md`),
   la verificación fue empírica antes que teórica: se
   probaron tres hipótesis de reagrupado de los mismos bytes
@@ -201,7 +230,7 @@ bolitas comidas, plantar bolas nuevas).
 ### Fase 7 — Los niveles, y el caso del "nivel oculto" que no lo era
 
 Localización de los 15 niveles jugables (cuerpos + cabeceras
-compartidas) y de un 15º nivel que en un primer momento parecía
+compartidas), incluido un 15º nivel que en un primer momento parecía
 **contenido real pero sin ningún registro que lo referenciara** — una
 sesión posterior encontró que sí tenía registro real en la tabla de
 niveles (mal etiquetado como "20 bytes sin identificar") y que se
@@ -237,6 +266,23 @@ cada vez que cambiaba algo. Ningún cambio de este tipo se dio por
 bueno sin recompilar y comprobar que el binario seguía siendo
 idéntico.
 
+Cada ronda seguía el mismo ciclo, que se repite casi literal en las
+entradas de `FINDINGS.md`:
+
+1. **Encargo concreto** del técnico: reanalizar una tabla, renombrar
+   una familia de etiquetas, sustituir unos `CALL` en hex.
+2. **Análisis** del código que usa ese dato o esa rutina, cruzando
+   todos sus consumidores antes de cambiar nada.
+3. **Cambio** en el código fuente (o, en tandas grandes, primero una
+   propuesta "sin aplicar" para que el técnico la revisara).
+4. **Recompilación y comparación** contra los binarios originales: el
+   resultado tiene que caer exactamente en la línea base de
+   diferencias ya conocidas y explicadas, ni una más.
+5. **Regeneración** de los entregables (`.dsk`, `.cas`, inventario de
+   etiquetas, visores HTML).
+6. **Registro** en `FINDINGS.md`: qué se hizo, qué se corrigió de
+   rondas anteriores y el resultado de la verificación.
+
 ### Fase 10 — Documentación de referencia y publicación
 
 Con el código ya completo y estable, se escribieron los manuales de
@@ -266,6 +312,16 @@ volver a codificar reproduce el binario original exacto):
 | `gen_inventory.py` | Genera el inventario buscable de todas las etiquetas del proyecto |
 | `gen_flow_diagram.py` | Genera el grafo de llamadas reales entre funciones |
 
+Y las herramientas externas de las que depende el proyecto:
+
+| Herramienta | Versión | Para qué se ha usado |
+|---|---|---|
+| Z80Dasm (*Portable Z80 disassembler*, Marcel de Kogel) | 1996-1997 (sin número de versión) | Desensamblado de los binarios originales (`-begin`/`-offset` para cada tramo) |
+| sjasmplus | 1.23.0 | Ensamblado de todo el proyecto (`main.asm`) |
+| openMSX | 21.0 | Ejecución del juego, depurador (watchpoints, consola Tcl) y volcados de RAM/VRAM en vivo |
+| Python | 3.13.14 | Todos los scripts de `tools/` |
+| Claude (Anthropic) | claude.ai y Claude Code | Asistente técnico durante todo el proyecto |
+
 ## 5. Errores cometidos y cómo se corrigieron
 
 Ser honesto sobre esto es parte del método, no una excepción a él.
@@ -274,24 +330,22 @@ y cómo se detectaron:
 
 - **El "nivel oculto"**: documentado primero como contenido real pero
   sin conexión al resto del juego; corregido al encontrar su registro
-  real en la tabla de niveles. Vuelto a corregir en esta misma sesión
-  (agosto de 2026), porque la documentación seguía usando la etiqueta
+  real en la tabla de niveles. Vuelto a corregir el 10 de agosto de
+  2026, porque la documentación seguía usando la etiqueta
   "oculto" en varios sitios como si fuera el estado vigente en vez de
   una fase ya superada.
 - **El formato de los 64 sprites de personajes**: se documentó
   primero como una única imagen de 24×48 píxeles por entrada, lectura
   que producía sprites reconocibles pero con rayas horizontales de
-  fondo. Corregido en esta sesión al comprobar empíricamente que son
+  fondo. Corregido el 10 de agosto de 2026 al comprobar empíricamente que son
   en realidad 24×24 con dos planos entrelazados fila a fila
   (máscara + patrón) — ver el caso completo en
   `REFLEXION_COLABORACION_IA.md`.
-- **El crédito musical del juego**: una edición hecha directamente en
-  GitHub "corrigió" el nombre real del músico (extraído literalmente
-  de la ROM, `"COMILONAS"`) a `"GOMILONAS"`, creyendo que era una
-  errata. Al fusionar esa rama con el resto del repositorio, la
-  verificación cruzada contra el propio código fuente (`DB
-  "COMILONAS"` en `madmix_scr_body.asm`) detectó la contradicción y
-  se mantuvo el dato verificado, no la "corrección".
+- **El crédito musical del juego**: una edición en GitHub cambió
+  `"COMILONAS"` por `"GOMILONAS"` creyendo corregir una errata; la
+  verificación contra el código fuente (`DB "COMILONAS"` en
+  `madmix_scr_body.asm`) mantuvo el dato original — ver el caso en
+  `REFLEXION_COLABORACION_IA.md`.
 - **La tabla `TILE_TYPES`**: la hipótesis inicial de que codificaba
   muro/suelo se descartó explícitamente al encontrar que las 45
   losetas de muro comparten tipo con el suelo llano — el propio
@@ -313,3 +367,41 @@ y cómo se detectaron:
   100% de cada byte explicado en su propósito, solo el 100% de los
   bytes reproducidos exactos, con lo que no se entiende del todo
   marcado explícitamente como pendiente en vez de disimulado.
+
+## 7. Lecciones trasladables a otros proyectos
+
+Lo que, a la vista de todo lo anterior, aplicaría desde el primer día
+en otro juego, de esta o de otra máquina de 8 bits:
+
+1. **Fijar un árbitro objetivo antes de empezar.** Aquí, recompilar y
+   comparar byte a byte. Y mantener una línea base de diferencias
+   conocidas y explicadas, para que cualquier diferencia nueva salte
+   a la vista.
+2. **Usar control de versiones desde el principio.** En este proyecto
+   Git llegó semanas después de empezar; cada ronda debería haber sido
+   un commit desde la primera.
+3. **Llevar un diario que sirva de puente entre sesiones.** Un fichero
+   como `FINDINGS.md`, que registre también los callejones sin salida
+   y las correcciones, no solo los aciertos.
+4. **Construir herramientas en vez de analizar a mano.** Cada formato
+   de datos descifrado merece un script de decodificación y
+   recodificación con *roundtrip* verificado.
+5. **Combinar análisis estático y en vivo.** Cuando el desensamblado
+   se atasca, un watchpoint en el emulador puede resolver en minutos
+   lo que llevaba sesiones sin salir.
+6. **Tratar toda hipótesis como provisional.** Marcarla como tal,
+   aparcarla a propósito si no hay datos suficientes y volver a ella
+   con más contexto.
+7. **No confundir "reconocible" con "correcto".** Que un sprite se
+   identifique o un sonido se parezca no prueba que el formato de
+   datos sea el bueno.
+8. **Meter la percepción humana en el bucle.** Renderizar a imagen o a
+   sonido para que alguien que conoce el juego pueda mirar y escuchar
+   es una forma de acotar bytes, no solo de dar el visto bueno al
+   final.
+9. **Proponer antes de aplicar los cambios masivos.** Un renombrado
+   que se extiende por decenas de sitios se revisa mejor como
+   propuesta que como cambio ya hecho.
+10. **Avanzar en rondas pequeñas, verificadas una a una.** La mayor
+    parte del trabajo es poco espectacular, y su valor está en que
+    ninguna ronda deje un error sin detectar.

@@ -65,6 +65,34 @@ point; `FINDINGS.md` itself contains references to dates from
 mid-July, so the real work had already been going on for weeks
 before there was version control.
 
+### From static analysis to live analysis
+
+During the first sessions all the work was static: disassembling
+with Z80Dasm and reading bytes by hand. That approach went a long way
+(the boot sequence, the VDP API, the initial memory map), but it got
+stuck on the levels: for several sessions the 15 levels were searched
+for in `MADMIX1.BIN` without success, and `FINDINGS.md` ended up
+recording an explicit recommendation to change method — *"the
+fastest path from here is LIVE, not static"*.
+
+The change was moving to the openMSX debugger. A single write
+watchpoint on the current-tile buffer
+(`debug set_watchpoint write_mem {0xfc60 0xfe5f}`) and starting level
+1 was enough for the first break to point at the real level loader,
+and with it the fact that the levels were not in `MADMIX1.BIN` but in
+`MADMIX.SCR` — the diary itself calls it *"the most important finding
+in several sessions"*. From then on, live RAM and VRAM dumps were
+added (`save_debuggable memory`/`save_debuggable VRAM`, stored in
+`dump_openmsx/`), which later served as a reference to verify, for
+example, the real colour of the candy frame (Phase 4).
+
+The division of roles is clear here too: the AI proposed which
+watchpoint or dump was needed and why, and the developer ran it in
+the emulator and brought back the result. Static analysis was not
+abandoned — it remained the main tool — but from then on, whenever a
+question had gone too long without coming out of the bytes, looking
+at it live was always an option.
+
 ## 2. The guiding principle: byte-for-byte verification as a trust contract
 
 If there's a single idea that explains how this whole
@@ -106,7 +134,7 @@ Concrete examples of this discipline applied in practice:
   explained** list of differences (the deliberately fixed
   level-13 bug, and a handful of already-documented unrelated bytes)
   — never an open list of "weird unexplained stuff".
-- In this very session, while correcting the real sprite format (see
+- On 10 August 2026, while correcting the real sprite format (see
   Phase 3 below, and the full case in `REFLEXION_COLABORACION_IA.md`),
   the verification was empirical before it was
   theoretical: three regrouping hypotheses for the same bytes were
@@ -201,7 +229,7 @@ eaten balls, planting new ones).
 ### Phase 7 — The levels, and the case of the "hidden level" that wasn't
 
 Locating the 15 playable levels (bodies + shared
-headers) and a 15th level that at first looked like
+headers), including a 15th level that at first looked like
 **real content with no register pointing to it at all** — a
 later session found that it did have a real register in the
 level table (mislabeled as "20 bytes unidentified") and that it's
@@ -236,6 +264,23 @@ every time something changed. No change of this kind was
 accepted without recompiling and checking that the binary
 was still identical.
 
+Every round followed the same cycle, which repeats almost word for
+word in the `FINDINGS.md` entries:
+
+1. **A specific request** from the developer: re-analyse a table,
+   rename a family of labels, replace some hex `CALL`s.
+2. **Analysis** of the code that uses that data or routine,
+   cross-checking all its consumers before changing anything.
+3. **The change** in the source code (or, for large batches, first a
+   proposal "not applied" for the developer to review).
+4. **Recompiling and comparing** against the original binaries: the
+   result must land exactly on the baseline of already known and
+   explained differences, not one more.
+5. **Regenerating** the deliverables (`.dsk`, `.cas`, label inventory,
+   HTML viewers).
+6. **Logging** in `FINDINGS.md`: what was done, what was corrected
+   from earlier rounds, and the result of the verification.
+
 ### Phase 10 — Reference documentation and publication
 
 With the code already complete and stable, the manuals in
@@ -265,6 +310,16 @@ re-encoding reproduces the exact original binary):
 | `gen_inventory.py` | Generates the searchable inventory of every label in the project |
 | `gen_flow_diagram.py` | Generates the graph of real calls between functions |
 
+And the external tools the project depends on:
+
+| Tool | Version | What it was used for |
+|---|---|---|
+| Z80Dasm (*Portable Z80 disassembler*, Marcel de Kogel) | 1996-1997 (no version number) | Disassembling the original binaries (`-begin`/`-offset` for each stretch) |
+| sjasmplus | 1.23.0 | Assembling the whole project (`main.asm`) |
+| openMSX | 21.0 | Running the game, debugger (watchpoints, Tcl console) and live RAM/VRAM dumps |
+| Python | 3.13.14 | All the scripts in `tools/` |
+| Claude (Anthropic) | claude.ai and Claude Code | Technical assistant throughout the project |
+
 ## 5. Mistakes made and how they were corrected
 
 Being honest about this is part of the method, not an exception to
@@ -273,24 +328,22 @@ and how they were caught:
 
 - **The "hidden level"**: first documented as real content but
   with no connection to the rest of the game; corrected on finding
-  its real register in the level table. Corrected again in this
-  same session (August 2026), because the documentation kept
+  its real register in the level table. Corrected again on
+  10 August 2026, because the documentation kept
   using the "hidden" label in several places as if it were the
   current state instead of an already-superseded phase.
 - **The format of the 64 character sprites**: first documented
   as a single 24×48-pixel image per entry, a reading that
   produced recognizable sprites but with horizontal background
-  stripes. Corrected in this session by empirically checking that they
+  stripes. Corrected on 10 August 2026 by empirically checking that they
   are actually 24×24 with two planes interleaved row by row
   (mask + pattern) — see the full case in
   `REFLEXION_COLABORACION_IA.md`.
-- **The game's music credit**: an edit made directly on
-  GitHub "fixed" the real musician's name (extracted literally
-  from the ROM, `"COMILONAS"`) to `"GOMILONAS"`, believing it was
-  a typo. When merging that branch, cross-checking against the
-  source code itself (`DB "COMILONAS"` in `madmix_scr_body.asm`)
-  caught the contradiction, and the verified data was kept, not
-  the "correction".
+- **The game's music credit**: an edit on GitHub changed
+  `"COMILONAS"` to `"GOMILONAS"`, believing it was fixing a typo;
+  checking against the source code (`DB "COMILONAS"` in
+  `madmix_scr_body.asm`) kept the original data — see the case in
+  `REFLEXION_COLABORACION_IA.md`.
 - **The `TILE_TYPES` table**: the initial hypothesis that it
   encoded wall/floor was explicitly ruled out on finding that all 45
   wall tiles share a type with plain floor — the document
@@ -312,3 +365,38 @@ and how they were caught:
   100% of every byte's purpose explained, only 100% of the
   bytes reproduced exactly, with whatever isn't fully understood
   explicitly marked as pending rather than glossed over.
+
+## 7. Lessons that carry over to other projects
+
+What, in light of all the above, I would apply from day one on
+another game, for this or any other 8-bit machine:
+
+1. **Set an objective arbiter before starting.** Here, recompiling
+   and comparing byte for byte. And keep a baseline of known and
+   explained differences, so that any new difference stands out.
+2. **Use version control from the start.** In this project Git
+   arrived weeks after the work began; every round should have been a
+   commit from the very first.
+3. **Keep a diary that bridges sessions.** A file like `FINDINGS.md`
+   that also records dead ends and corrections, not just successes.
+4. **Build tools instead of analysing by hand.** Every decoded data
+   format deserves a decode/re-encode script with a verified
+   *roundtrip*.
+5. **Combine static and live analysis.** When the disassembly gets
+   stuck, a watchpoint in the emulator can solve in minutes what had
+   gone unsolved for sessions.
+6. **Treat every hypothesis as provisional.** Mark it as such, park it
+   on purpose if there isn't enough data, and come back to it with
+   more context.
+7. **Don't confuse "recognizable" with "correct".** A sprite being
+   identifiable or a sound being close doesn't prove the data format
+   is right.
+8. **Put human perception in the loop.** Rendering to image or sound
+   so that someone who knows the game can look and listen is a way of
+   narrowing down bytes, not just of giving the final approval.
+9. **Propose before applying sweeping changes.** A rename that spreads
+   across dozens of places is easier to review as a proposal than as
+   a change already made.
+10. **Advance in small rounds, each one verified.** Most of the work
+    is unspectacular, and its value lies in no round leaving an error
+    undetected.
