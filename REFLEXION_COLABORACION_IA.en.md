@@ -22,6 +22,31 @@ reconstruction project, evaluating whether a technical hypothesis
 holds up — is reachable without real software development
 experience and knowledge of the MSX's architecture.
 
+## In the first person
+
+*This section is written directly by the author. The rest of the
+document refers to him in the third person, as "the developer".*
+
+I started using AI in a generic chat, with no plan at all, just to
+see what was inside the tape and the disk. I wanted to know what the
+game was like on the inside: a curiosity I'd had pending since I was
+a child.
+
+What surprised me most, in a good way, is that from the very first
+moment the AI kept building tools for itself to be able to do the
+work; the first one, if I remember correctly, to extract the contents
+of the tape and the disk.
+
+I can't point to anything that was especially hard to learn, because
+I didn't have a goal on the horizon either: it has all been learning
+on the go, improvising. Since it's a computing project, and being a
+programmer myself, I've been discovering pieces, fitting them
+together and turning their use into procedure, in an orderly way.
+
+When facing a new project I don't do anything different. What changes
+is that I no longer start from scratch: I begin from a more solid
+base, adapt it to the new project and keep adding what it needs.
+
 ## The underlying pattern: verify, don't trust
 
 The first thing to say is that this collaboration has **not rested on
