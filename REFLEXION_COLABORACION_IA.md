@@ -22,6 +22,30 @@ reconstrucción, evaluar si una hipótesis técnica se sostiene — es
 alcanzable sin experiencia real de desarrollo de software y
 conocimiento de la arquitectura del MSX.
 
+## En primera persona
+
+*Esta sección la escribe directamente el autor. El resto del
+documento habla de él en tercera persona, como «el técnico».*
+
+Empecé a usar la IA en un chat genérico, sin ningún plan, solo para
+ver qué había dentro de la cinta y el disco. Quería saber cómo era el
+juego por dentro: una curiosidad que tenía pendiente desde pequeño.
+
+Lo que más me sorprendió, para bien, es que desde el primer momento
+la IA se fue construyendo herramientas para poder hacer el trabajo;
+la primera, si no recuerdo mal, para extraer el contenido de la cinta
+y el disco.
+
+No puedo señalar nada que me costara especialmente aprender, porque
+tampoco tenía una meta en el horizonte: todo ha sido aprendizaje
+sobre la marcha, improvisando. Al ser un proyecto informático, y
+siendo yo programador, he ido descubriendo piezas, encajándolas y
+convirtiendo su uso en procedimiento, de forma ordenada.
+
+Ante un proyecto nuevo no hago nada distinto. Lo que cambia es que ya
+no empiezo de cero: parto de una base más sólida, la adapto al nuevo
+proyecto y le voy añadiendo lo que necesita.
+
 ## El patrón de fondo: verificar, no confiar
 
 Lo primero que hay que decir es que esta colaboración **no se ha
